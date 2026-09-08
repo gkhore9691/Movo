@@ -1,0 +1,58 @@
+import { Service } from '../types';
+
+export const services: Service[] = [
+  {
+    id: 'svc-1',
+    name: 'Ceramic Coating',
+    description: 'Long-lasting ceramic protection for your vehicle\'s paint with hydrophobic properties and UV resistance.',
+    basePrice: 15000,
+    maxPrice: 35000,
+    duration: '2-3 days',
+    category: 'Protection',
+  },
+  {
+    id: 'svc-2',
+    name: 'PPF — Paint Protection Film',
+    description: 'Premium paint protection film that shields against scratches, chips, and environmental damage.',
+    basePrice: 40000,
+    maxPrice: 120000,
+    duration: '3-5 days',
+    category: 'Protection',
+  },
+  {
+    id: 'svc-3',
+    name: 'Paint Correction',
+    description: 'Multi-stage paint correction to remove swirls, scratches, and oxidation for a flawless finish.',
+    basePrice: 8000,
+    maxPrice: 18000,
+    duration: '1-2 days',
+    category: 'Correction',
+  },
+  {
+    id: 'svc-4',
+    name: 'Interior Detailing',
+    description: 'Deep cleaning and conditioning of all interior surfaces including seats, dashboard, and carpets.',
+    basePrice: 5000,
+    maxPrice: 12000,
+    duration: '4-6 hours',
+    category: 'Detailing',
+  },
+  {
+    id: 'svc-5',
+    name: 'Full Detailing',
+    description: 'Complete interior and exterior detailing with paint decontamination, polishing, and interior deep clean.',
+    basePrice: 10000,
+    maxPrice: 25000,
+    duration: '1-2 days',
+    category: 'Detailing',
+  },
+  {
+    id: 'svc-6',
+    name: 'Maintenance Wash',
+    description: 'Gentle maintenance wash for coated vehicles with pH-neutral shampoo and quick detailer.',
+    basePrice: 1500,
+    maxPrice: 3500,
+    duration: '1-2 hours',
+    category: 'Maintenance',
+  },
+];
