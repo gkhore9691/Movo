@@ -122,7 +122,7 @@ export default function Pulse() {
     >
       {/* Greeting — just text */}
       <div>
-        <h1 className="text-2xl font-semibold text-neutral-900">{getGreeting()}, Vikram</h1>
+        <h1 className="text-2xl font-semibold text-neutral-900">{getGreeting()}, Shivesh</h1>
         <p className="text-sm text-neutral-500 mt-1">
           Your studio has {carsInStudio.length} cars in progress and {followUpsDue} follow-ups due.
         </p>

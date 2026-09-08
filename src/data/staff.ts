@@ -3,10 +3,10 @@ import { Staff } from '../types';
 export const staff: Staff[] = [
   {
     id: 'staff-1',
-    name: 'Vikram Singh',
+    name: 'Shivesh Patel',
     role: 'owner',
     phone: '+919876500001',
-    email: 'vikram@detailingstreet.in',
+    email: 'shivesh@detailingstreet.in',
     avatar: '',
     activeJobs: 0,
     completedJobs: 312,

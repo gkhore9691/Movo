@@ -38,7 +38,7 @@ export default function TopBar({ title, onMenuClick, onSearchClick }: TopBarProp
 
         <div className="ml-1 flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-200 text-[10px] font-medium text-neutral-600">
-            VS
+            SP
           </div>
         </div>
       </div>
