@@ -34,6 +34,9 @@ export class Conversation {
   @Column({ type: 'int', default: 0 })
   unreadCount: number;
 
+  @Column({ type: 'varchar', nullable: true })
+  waJid: string | null;
+
   @OneToMany('Message', 'conversation', { cascade: true })
   messages: any[];
 

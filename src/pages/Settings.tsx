@@ -1,11 +1,12 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { Building2, Clock, Palette, Bell, Bot, Users, Pencil, Plus, RefreshCw, ExternalLink, Check, AlertCircle } from 'lucide-react'
+import { Building2, Clock, Palette, Bell, Bot, Users, Pencil, Plus, RefreshCw, ExternalLink, Check, AlertCircle, MessageSquare } from 'lucide-react'
 import { useApp } from '@/contexts/AppContext'
-import { Card, CardHeader, Button, Badge, Toggle, Avatar, Modal } from '@/components/ui'
+import { Card, CardHeader, Button, Badge, Toggle, Avatar, Modal, QRCode } from '@/components/ui'
 import { formatCurrency, formatPhone } from '@/utils/format'
 import { api } from '@/api/client'
+import { apiWaConnect, apiWaStatus, apiWaDisconnect } from '@/api/endpoints'
 
 const roleLabels: Record<string, string> = {
   owner: 'Owner',
@@ -277,6 +278,11 @@ export default function Settings() {
             </div>
           </div>
         </Card>
+      </motion.div>
+
+      {/* WhatsApp Connection */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.27 }}>
+        <WhatsAppCard />
       </motion.div>
 
       {/* Detailing Street Integration — only show for DS tenants */}
@@ -684,6 +690,93 @@ function EditServiceModal({
         </div>
       </div>
     </Modal>
+  )
+}
+
+function WhatsAppCard() {
+  const [status, setStatus] = useState<{ connected: boolean; qr?: string | null; phoneNumber?: string }>({ connected: false })
+  const [connecting, setConnecting] = useState(false)
+  const [polling, setPolling] = useState(false)
+
+  // Check status on mount
+  useEffect(() => {
+    apiWaStatus().then(setStatus).catch(() => {})
+  }, [])
+
+  // Poll while connecting
+  useEffect(() => {
+    if (!polling) return
+    const interval = setInterval(async () => {
+      try {
+        const s = await apiWaStatus()
+        setStatus(s)
+        if (s.connected) {
+          setPolling(false)
+          setConnecting(false)
+        }
+      } catch {}
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [polling])
+
+  async function handleConnect() {
+    setConnecting(true)
+    try {
+      const result = await apiWaConnect()
+      setStatus({ connected: false, qr: result.qr })
+      setPolling(true)
+    } catch {
+      setConnecting(false)
+    }
+  }
+
+  async function handleDisconnect() {
+    await apiWaDisconnect()
+    setStatus({ connected: false })
+  }
+
+  return (
+    <Card>
+      <CardHeader title="WhatsApp Connection" />
+      <div className="space-y-4">
+        {/* Status indicator */}
+        <div className="flex items-center gap-3">
+          <div className={`w-2.5 h-2.5 rounded-full ${status.connected ? 'bg-emerald-400' : 'bg-white/20'}`} />
+          <span className="text-sm text-white/70">
+            {status.connected ? `Connected — ${status.phoneNumber || 'WhatsApp'}` : 'Not connected'}
+          </span>
+        </div>
+
+        {/* QR Code display */}
+        {connecting && status.qr && !status.connected && (
+          <div className="flex flex-col items-center gap-3 py-4">
+            <QRCode value={status.qr} size={200} />
+            <p className="text-xs text-white/40">Scan with WhatsApp on your phone</p>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex items-center gap-3">
+          {!status.connected && !connecting && (
+            <Button onClick={handleConnect} icon={<MessageSquare className="w-4 h-4" />}>
+              Connect WhatsApp
+            </Button>
+          )}
+          {connecting && !status.qr && (
+            <Button disabled>
+              <RefreshCw className="w-4 h-4 animate-spin mr-2" /> Generating QR...
+            </Button>
+          )}
+          {status.connected && (
+            <Button variant="danger" onClick={handleDisconnect}>Disconnect</Button>
+          )}
+        </div>
+
+        <p className="text-xs text-white/30">
+          When connected, incoming WhatsApp messages appear in AI Receptionist. AI auto-replies use your service catalog.
+        </p>
+      </div>
+    </Card>
   )
 }
 

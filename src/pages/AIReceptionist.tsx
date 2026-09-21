@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Bot, User, Send, ArrowLeft, Phone, Car, ChevronRight,
-  MessageSquare, Search, CheckCheck, Check, Plus, Archive, X,
+  MessageSquare, Search, CheckCheck, Check, Plus, Archive, X, Wifi, WifiOff,
 } from 'lucide-react'
 import { useApp } from '@/contexts/AppContext'
 import { Avatar, Badge, Button, Modal, EmptyState } from '@/components/ui'
 import { formatRelativeDate, formatPhone } from '@/utils/format'
 import { format, parseISO, isToday, isYesterday } from 'date-fns'
-import type { Message, Service } from '@/types'
+import type { Message } from '@/types'
+import { useWebSocket } from '@/hooks/useWebSocket'
+import { apiWaSend, apiWaStatus } from '@/api/endpoints'
 
 // ---------------------------------------------------------------------------
 // Contextual quick-reply suggestions
@@ -21,75 +23,6 @@ const QUICK_REPLIES = [
   'PPF packages',
   'Check availability',
 ]
-
-// ---------------------------------------------------------------------------
-// AI response generator -- keyword-based, uses real service catalogue data
-// ---------------------------------------------------------------------------
-function generateAIResponse(message: string, services: Service[], studioName?: string): string {
-  const studio = studioName || 'our studio';
-  const lower = message.toLowerCase()
-
-  // Pricing queries
-  if (
-    lower.includes('price') || lower.includes('cost') || lower.includes('rate') ||
-    lower.includes('kitna') || lower.includes('charge') || lower.includes('quote') ||
-    lower.includes('pricing')
-  ) {
-    const svcList = services
-      .map(s => `• ${s.name}: ₹${s.basePrice.toLocaleString()} – ₹${s.maxPrice.toLocaleString()}`)
-      .join('\n')
-    return `Here are our current prices:\n\n${svcList}\n\nFinal pricing depends on the vehicle size and condition. Would you like to schedule a visit for an exact quote?`
-  }
-
-  // Ceramic coating specific
-  if (lower.includes('ceramic')) {
-    const ceramic = services.find(s => s.name.toLowerCase().includes('ceramic'))
-    if (ceramic)
-      return `Our Ceramic Coating packages start from ₹${ceramic.basePrice.toLocaleString()} and go up to ₹${ceramic.maxPrice.toLocaleString()} depending on the coating layers and vehicle size.\n\nThe process takes ${ceramic.duration}. Would you like to book a slot?`
-  }
-
-  // PPF specific
-  if (lower.includes('ppf') || lower.includes('paint protection')) {
-    const ppf = services.find(s => s.name.toLowerCase().includes('ppf'))
-    if (ppf)
-      return `Our PPF (Paint Protection Film) packages range from ₹${ppf.basePrice.toLocaleString()} for partial coverage to ₹${ppf.maxPrice.toLocaleString()} for full body.\n\nWe use premium XPEL and SunTek films. The process takes ${ppf.duration}. Shall I check availability?`
-  }
-
-  // Detailing / cleaning specific
-  if (lower.includes('detail') || lower.includes('clean') || lower.includes('wash') || lower.includes('interior')) {
-    const detailing = services.find(
-      s => s.name.toLowerCase().includes('detailing') || s.name.toLowerCase().includes('wash'),
-    )
-    if (detailing)
-      return `Our ${detailing.name} service starts at ₹${detailing.basePrice.toLocaleString()}. Duration: ${detailing.duration}.\n\nWould you like to book an appointment?`
-  }
-
-  // Booking / appointment queries
-  if (
-    lower.includes('book') || lower.includes('appointment') || lower.includes('slot') ||
-    lower.includes('available') || lower.includes('schedule') || lower.includes('availability')
-  ) {
-    return `I'd be happy to help you schedule an appointment! We're generally available Monday to Saturday, 9 AM to 6 PM.\n\nCould you share:\n1. Your vehicle make & model\n2. The service you're interested in\n3. Your preferred date`
-  }
-
-  // Greeting
-  if (lower.includes('hi') || lower.includes('hello') || lower.includes('hey') || lower.includes('namaste')) {
-    return `Namaste! Welcome to ${studio}. How can I help you today?\n\nI can assist with:\n• Service pricing & details\n• Booking appointments\n• Service recommendations for your vehicle`
-  }
-
-  // Thank you
-  if (lower.includes('thank') || lower.includes('thanks') || lower.includes('shukriya') || lower.includes('dhanyavaad')) {
-    return `You're welcome! Feel free to reach out anytime. We're here to help!`
-  }
-
-  // Time / duration queries
-  if (lower.includes('how long') || lower.includes('time') || lower.includes('duration') || lower.includes('kitna time')) {
-    return `Service durations vary:\n\n${services.map(s => `• ${s.name}: ${s.duration}`).join('\n')}\n\nWhich service are you interested in?`
-  }
-
-  // Default
-  return `Thank you for reaching out! I can help you with:\n\n• Service pricing & packages\n• Booking appointments\n• Service recommendations\n\nWhat would you like to know?`
-}
 
 // ---------------------------------------------------------------------------
 // Date header helper -- groups messages by date
@@ -201,6 +134,7 @@ export default function AIReceptionist() {
   const {
     conversations, customers, services, toggleAiHandling, addMessage,
     addConversation, archiveConversation, getCustomer, getVehiclesForCustomer, currentTenant,
+    setConversations,
   } = useApp()
   const navigate = useNavigate()
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -211,7 +145,31 @@ export default function AIReceptionist() {
   const [showNewModal, setShowNewModal] = useState(false)
   const [newConvoCustomerId, setNewConvoCustomerId] = useState('')
   const [newConvoSearch, setNewConvoSearch] = useState('')
+  const [waConnected, setWaConnected] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Check WhatsApp status on mount
+  useEffect(() => {
+    apiWaStatus().then(s => setWaConnected(s.connected)).catch(() => {})
+  }, [])
+
+  // WebSocket for real-time message updates
+  useWebSocket({
+    onNewMessage: ({ conversationId, message }) => {
+      setConversations((prev: any[]) => prev.map((c: any) => {
+        if (c.id !== conversationId) return c
+        return {
+          ...c,
+          messages: [...c.messages, message],
+          lastMessage: message.content,
+          unreadCount: message.sender === 'customer' ? c.unreadCount + 1 : c.unreadCount,
+        }
+      }))
+    },
+    onWaStatus: (data) => {
+      setWaConnected(data.connected)
+    },
+  })
 
   const selected = conversations.find(c => c.id === selectedId)
 
@@ -270,6 +228,8 @@ export default function AIReceptionist() {
     const content = text || inputValue.trim()
     if (!content || !selected) return
 
+    const customer = getCustomer(selected.customerId)
+
     // Staff always sends as 'human'
     const newMsg: Message = {
       id: `msg-local-${Date.now()}`,
@@ -282,21 +242,16 @@ export default function AIReceptionist() {
     addMessage(selected.id, newMsg)
     setInputValue('')
 
-    // If AI handling is on, generate an AI response for the customer (short delay)
-    if (selected.aiHandling) {
-      setTyping(true)
-      setTimeout(() => {
-        const aiReply: Message = {
-          id: `msg-ai-${Date.now()}`,
-          content: generateAIResponse(content, services, currentTenant?.name),
-          sender: 'ai',
-          timestamp: new Date().toISOString(),
-          read: true,
-        }
-        addMessage(selected.id, aiReply)
-        setTyping(false)
-      }, 300)
+    // Also send via WhatsApp if connected and customer has a phone number
+    if (customer?.phone) {
+      apiWaSend(customer.phone, content).catch(() => {
+        // Silently fail — message is still saved in the conversation
+      })
     }
+
+    // AI handling is now done server-side via Claude API.
+    // Incoming WA message -> backend Claude reply -> sent via WA -> pushed via WebSocket.
+    // No client-side AI response generation needed.
   }
 
   async function handleCreateConversation() {
@@ -393,8 +348,11 @@ export default function AIReceptionist() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-white truncate">
+                      <span className="text-sm font-medium text-white truncate flex items-center gap-1.5">
                         {customer.name}
+                        {conv.waJid && (
+                          <MessageSquare size={11} className="text-emerald-400 shrink-0" />
+                        )}
                       </span>
                       <span className="text-[10px] text-white/30 shrink-0 ml-2">
                         {lastMsg ? formatRelativeDate(lastMsg.timestamp) : ''}
@@ -448,7 +406,7 @@ export default function AIReceptionist() {
         >
           <div className="flex items-center gap-2">
             {selected.aiHandling ? <Bot size={14} /> : <User size={14} />}
-            <span>{selected.aiHandling ? 'AI is handling this conversation' : 'You are handling this conversation manually'}</span>
+            <span>{selected.aiHandling ? 'AI will respond automatically via WhatsApp' : 'You are handling this conversation manually'}</span>
           </div>
           <button
             onClick={() => toggleAiHandling(selected.id)}
@@ -655,6 +613,14 @@ export default function AIReceptionist() {
 
   return (
     <>
+      {/* WhatsApp connection banner */}
+      {!waConnected && (
+        <div className="mb-3 flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-xs text-white/50">
+          <WifiOff size={14} className="shrink-0 text-white/30" />
+          <span>Connect WhatsApp in <button onClick={() => navigate('/settings')} className="text-[#818cf8] underline hover:no-underline">Settings</button> to receive real messages</span>
+        </div>
+      )}
+
       <div className="h-[calc(100vh-4rem)] flex bg-white/[0.02] rounded-xl border border-white/[0.06] overflow-hidden">
         {/* Conversation list -- hidden on mobile when chat is open */}
         <div className={`w-80 border-r border-white/[0.06] shrink-0 ${mobileShowChat ? 'hidden lg:flex lg:flex-col' : 'flex flex-col w-full lg:w-80'}`}>

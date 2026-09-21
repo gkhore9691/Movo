@@ -50,6 +50,12 @@ export class Tenant {
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
+  @Column({ type: 'varchar', nullable: true })
+  waPhoneNumber: string | null;
+
+  @Column({ type: 'boolean', default: false })
+  waConnected: boolean;
+
   @Column({ type: 'jsonb', default: '{}' })
   settings: Record<string, any>;
 

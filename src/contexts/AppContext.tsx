@@ -52,6 +52,7 @@ interface AppContextType {
   addMessage: (conversationId: string, message: Message) => void;
   addConversation: (customerId: string) => Promise<Conversation>;
   archiveConversation: (conversationId: string) => Promise<void>;
+  setConversations: React.Dispatch<React.SetStateAction<Conversation[]>>;
 
   // Notification mutations
   markNotificationRead: (notificationId: string) => void;
@@ -752,6 +753,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addMessage,
     addConversation,
     archiveConversation,
+    setConversations,
     markNotificationRead,
     markAllNotificationsRead,
     updateAutomationEnabled,

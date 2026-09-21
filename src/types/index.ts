@@ -202,6 +202,7 @@ export interface Conversation {
   aiHandling: boolean;
   lastMessage: string;
   unreadCount: number;
+  waJid?: string;
 }
 
 export interface Notification {

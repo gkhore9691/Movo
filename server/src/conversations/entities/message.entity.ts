@@ -33,4 +33,16 @@ export class Message {
 
   @Column({ type: 'boolean', default: false })
   read: boolean;
+
+  @Column({ type: 'varchar', nullable: true })
+  waMessageId: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  mediaUrl: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  mediaType: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  deliveryStatus: string | null;
 }

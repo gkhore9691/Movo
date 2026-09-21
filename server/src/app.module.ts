@@ -25,6 +25,7 @@ import { SeedModule } from './seed/seed.module.js';
 import { TenantsModule } from './tenants/tenants.module.js';
 import { AdminModule } from './admin/admin.module.js';
 import { DsBridgeModule } from './ds-bridge/ds-bridge.module.js';
+import { WhatsAppModule } from './whatsapp/whatsapp.module.js';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { DsBridgeModule } from './ds-bridge/ds-bridge.module.js';
     TenantsModule,
     AdminModule,
     DsBridgeModule,
+    WhatsAppModule,
   ],
   providers: [
     {

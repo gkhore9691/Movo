@@ -182,6 +182,7 @@ function normalizeConversation(raw: any): Conversation {
     aiHandling: raw.aiHandling,
     lastMessage: raw.lastMessage || '',
     unreadCount: raw.unreadCount,
+    waJid: raw.waJid || undefined,
   };
 }
 
@@ -538,6 +539,24 @@ export async function apiCreateReview(data: any): Promise<Review> {
 
 export async function apiUpdateTenantSettings(tenantId: string, data: any): Promise<any> {
   return api.patch(`/tenants/${tenantId}`, data);
+}
+
+// --- WhatsApp ---
+
+export async function apiWaConnect(): Promise<{ qr?: string; connected: boolean }> {
+  return api.post('/whatsapp/connect', {});
+}
+
+export async function apiWaStatus(): Promise<{ connected: boolean; qr?: string | null; phoneNumber?: string }> {
+  return api.get('/whatsapp/status');
+}
+
+export async function apiWaDisconnect(): Promise<void> {
+  await api.post('/whatsapp/disconnect', {});
+}
+
+export async function apiWaSend(phone: string, message: string): Promise<void> {
+  await api.post('/whatsapp/send', { phone, message });
 }
 
 // --- Auth ---
