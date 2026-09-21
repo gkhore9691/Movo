@@ -144,7 +144,7 @@ export default function RevenueRadar() {
   const categories = [
     { key: 'hot' as const, label: 'Hot', total: hotTotal, dotColor: 'bg-rose-400' },
     { key: 'warm' as const, label: 'Warm', total: warmTotal, dotColor: 'bg-amber-400' },
-    { key: 'dormant' as const, label: 'Dormant', total: dormantTotal, dotColor: 'bg-neutral-300' },
+    { key: 'dormant' as const, label: 'Dormant', total: dormantTotal, dotColor: 'bg-white/20' },
   ]
 
   const handleLetMovoHandle = (opp?: OpportunityItem) => {
@@ -156,16 +156,16 @@ export default function RevenueRadar() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-lg font-semibold text-neutral-900">Revenue Radar</h2>
-        <p className="text-sm text-neutral-500 mt-0.5">Track and recover potential revenue from unresolved opportunities</p>
+        <h2 className="text-lg font-semibold text-white">Revenue Radar</h2>
+        <p className="text-sm text-white/40 mt-0.5">Track and recover potential revenue from unresolved opportunities</p>
       </div>
 
       {/* Total Revenue Card */}
-      <div className="bg-white border border-neutral-200 rounded-xl p-8 text-center">
-        <p className="text-4xl font-bold text-neutral-900 tracking-tight tabular-nums">
+      <div className="border border-white/[0.06] rounded-xl p-8 text-center">
+        <p className="text-4xl font-bold text-white tracking-tight tabular-nums">
           {formatCurrency(animatedTotal)}
         </p>
-        <p className="text-sm text-neutral-500 mt-1.5">in potential revenue</p>
+        <p className="text-sm text-white/40 mt-1.5">in potential revenue</p>
       </div>
 
       {/* Category Breakdown */}
@@ -177,16 +177,16 @@ export default function RevenueRadar() {
             <button
               key={cat.key}
               onClick={() => setExpandedCategory(isActive ? null : cat.key)}
-              className={`text-left bg-white border rounded-xl p-5 transition-colors cursor-pointer ${
-                isActive ? 'border-neutral-400' : 'border-neutral-200 hover:border-neutral-300'
+              className={`text-left border rounded-xl p-5 transition-colors cursor-pointer ${
+                isActive ? 'border-white/[0.12]' : 'border-white/[0.06] hover:border-white/[0.08]'
               }`}
             >
               <div className="flex items-center gap-2 mb-2">
                 <span className={`w-2 h-2 rounded-full ${cat.dotColor}`} />
-                <span className="text-sm font-medium text-neutral-700">{cat.label}</span>
-                <span className="text-xs text-neutral-400 ml-auto">{count}</span>
+                <span className="text-sm font-medium text-white/70">{cat.label}</span>
+                <span className="text-xs text-white/30 ml-auto">{count}</span>
               </div>
-              <p className="text-xl font-semibold text-neutral-900">{formatCurrency(cat.total)}</p>
+              <p className="text-xl font-semibold text-white">{formatCurrency(cat.total)}</p>
             </button>
           )
         })}
@@ -213,22 +213,22 @@ export default function RevenueRadar() {
             if (items.length === 0) return null
             const isExpanded = expandedCategory === cat.key
             return (
-              <div key={cat.key} className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
+              <div key={cat.key} className="border border-white/[0.06] rounded-xl overflow-hidden">
                 <button
                   onClick={() => setExpandedCategory(isExpanded ? null : cat.key)}
-                  className="flex items-center justify-between w-full px-5 py-3.5 text-left hover:bg-neutral-50 transition-colors cursor-pointer"
+                  className="flex items-center justify-between w-full px-5 py-3.5 text-left hover:bg-white/[0.04] transition-colors cursor-pointer"
                 >
                   <div className="flex items-center gap-2.5">
                     <span className={`w-2 h-2 rounded-full ${cat.dotColor}`} />
-                    <span className="text-sm font-medium text-neutral-900">{cat.label}</span>
-                    <span className="text-xs text-neutral-400">{items.length}</span>
+                    <span className="text-sm font-medium text-white">{cat.label}</span>
+                    <span className="text-xs text-white/30">{items.length}</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium text-neutral-700">{formatCurrency(cat.total)}</span>
+                    <span className="text-sm font-medium text-white/70">{formatCurrency(cat.total)}</span>
                     {isExpanded ? (
-                      <ChevronUp className="w-4 h-4 text-neutral-400" />
+                      <ChevronUp className="w-4 h-4 text-white/30" />
                     ) : (
-                      <ChevronDown className="w-4 h-4 text-neutral-400" />
+                      <ChevronDown className="w-4 h-4 text-white/30" />
                     )}
                   </div>
                 </button>
@@ -242,30 +242,30 @@ export default function RevenueRadar() {
                       transition={{ duration: 0.15 }}
                       className="overflow-hidden"
                     >
-                      <div className="border-t border-neutral-100">
+                      <div className="border-t border-white/[0.04]">
                         {items.map((opp, i) => (
                           <div
                             key={opp.id}
-                            className={`flex items-center gap-4 px-5 py-3 hover:bg-neutral-50 transition-colors ${
-                              i < items.length - 1 ? 'border-b border-neutral-100' : ''
+                            className={`flex items-center gap-4 px-5 py-3 hover:bg-white/[0.04] transition-colors ${
+                              i < items.length - 1 ? 'border-b border-white/[0.04]' : ''
                             }`}
                           >
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-neutral-900">{opp.customerName}</p>
-                              <p className="text-xs text-neutral-500 mt-0.5 truncate">
+                              <p className="text-sm font-medium text-white">{opp.customerName}</p>
+                              <p className="text-xs text-white/40 mt-0.5 truncate">
                                 {opp.vehicleInfo && `${opp.vehicleInfo} · `}{opp.serviceInfo}
                               </p>
                             </div>
                             <div className="text-right shrink-0">
-                              <p className="text-sm font-medium text-neutral-900 tabular-nums">
+                              <p className="text-sm font-medium text-white tabular-nums">
                                 {opp.amount > 0 ? formatCurrency(opp.amount) : '—'}
                               </p>
-                              <p className="text-xs text-neutral-400">{formatRelativeDate(opp.lastContact)}</p>
+                              <p className="text-xs text-white/30">{formatRelativeDate(opp.lastContact)}</p>
                             </div>
                             <StatusBadge status={opp.status} />
                             <div className="flex items-center gap-0.5 shrink-0">
                               <button
-                                className="p-1.5 rounded-md text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-colors"
+                                className="p-1.5 rounded-md text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-colors"
                                 title="Call"
                                 onClick={() => {
                                   if (opp.phone) window.open(`tel:${opp.phone}`)
@@ -274,7 +274,7 @@ export default function RevenueRadar() {
                                 <Phone className="w-3.5 h-3.5" />
                               </button>
                               <button
-                                className="p-1.5 rounded-md text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-colors"
+                                className="p-1.5 rounded-md text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-colors"
                                 title="Message"
                                 onClick={() => {
                                   if (opp.phone) {
@@ -286,7 +286,7 @@ export default function RevenueRadar() {
                                 <MessageSquare className="w-3.5 h-3.5" />
                               </button>
                               <button
-                                className="p-1.5 rounded-md text-neutral-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                                className="p-1.5 rounded-md text-white/30 hover:text-[#818cf8] hover:bg-[#6366f1]/10 transition-colors"
                                 title="Let Movo handle"
                                 onClick={() => handleLetMovoHandle(opp)}
                               >
@@ -305,30 +305,30 @@ export default function RevenueRadar() {
         </div>
 
         {/* Trend Chart */}
-        <div className="bg-white border border-neutral-200 rounded-xl p-5">
-          <h3 className="text-sm font-medium text-neutral-900 mb-1">Trend</h3>
-          <p className="text-xs text-neutral-400 mb-5">Last 7 days</p>
+        <div className="border border-white/[0.06] rounded-xl p-5">
+          <h3 className="text-sm font-medium text-white mb-1">Trend</h3>
+          <p className="text-xs text-white/30 mb-5">Last 7 days</p>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={trendData}>
                 <defs>
                   <linearGradient id="fillActual" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#4f46e5" stopOpacity={0.12} />
-                    <stop offset="100%" stopColor="#4f46e5" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#818cf8" stopOpacity={0.12} />
+                    <stop offset="100%" stopColor="#818cf8" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="fillPotential" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#c7d2fe" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="#c7d2fe" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#818cf8" stopOpacity={0.08} />
+                    <stop offset="100%" stopColor="#818cf8" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis
                   dataKey="day"
-                  tick={{ fontSize: 11, fill: '#a3a3a3' }}
+                  tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.3)' }}
                   stroke="transparent"
                   tickLine={false}
                 />
                 <YAxis
-                  tick={{ fontSize: 11, fill: '#a3a3a3' }}
+                  tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.3)' }}
                   stroke="transparent"
                   tickLine={false}
                   tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
@@ -337,24 +337,26 @@ export default function RevenueRadar() {
                 <Tooltip
                   formatter={(value: unknown) => formatCurrency(Number(value))}
                   contentStyle={{
-                    borderRadius: '8px',
-                    border: '1px solid #e5e5e5',
+                    background: '#282c3a',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: 8,
+                    color: 'white',
                     fontSize: '12px',
                     padding: '6px 10px',
                     boxShadow: 'none',
                   }}
                 />
-                <Area type="monotone" dataKey="potential" stroke="#c7d2fe" fill="url(#fillPotential)" strokeWidth={1.5} name="Potential" />
-                <Area type="monotone" dataKey="actual" stroke="#4f46e5" fill="url(#fillActual)" strokeWidth={1.5} name="Actual" />
+                <Area type="monotone" dataKey="potential" stroke="rgba(255,255,255,0.2)" fill="url(#fillPotential)" strokeWidth={1.5} name="Potential" />
+                <Area type="monotone" dataKey="actual" stroke="#818cf8" fill="url(#fillActual)" strokeWidth={1.5} name="Actual" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex items-center gap-5 mt-4 pt-3 border-t border-neutral-100">
-            <span className="flex items-center gap-2 text-xs text-neutral-500">
-              <span className="w-4 h-0.5 bg-indigo-600 rounded" /> Actual
+          <div className="flex items-center gap-5 mt-4 pt-3 border-t border-white/[0.04]">
+            <span className="flex items-center gap-2 text-xs text-white/40">
+              <span className="w-4 h-0.5 bg-[#818cf8] rounded" /> Actual
             </span>
-            <span className="flex items-center gap-2 text-xs text-neutral-500">
-              <span className="w-4 h-0.5 bg-indigo-200 rounded" /> Potential
+            <span className="flex items-center gap-2 text-xs text-white/40">
+              <span className="w-4 h-0.5 bg-white/20 rounded" /> Potential
             </span>
           </div>
         </div>
@@ -387,16 +389,16 @@ export default function RevenueRadar() {
       >
         {selectedOpportunity && (
           <div className="space-y-4">
-            <div className="flex items-center gap-3 pb-3 border-b border-neutral-100">
-              <div className="w-9 h-9 rounded-lg bg-neutral-100 flex items-center justify-center">
-                <Bot className="w-4 h-4 text-neutral-600" />
+            <div className="flex items-center gap-3 pb-3 border-b border-white/[0.04]">
+              <div className="w-9 h-9 rounded-lg bg-white/[0.04] flex items-center justify-center">
+                <Bot className="w-4 h-4 text-white/60" />
               </div>
               <div>
-                <p className="text-sm font-medium text-neutral-900">Message to {selectedOpportunity.customerName}</p>
-                <p className="text-xs text-neutral-400">via WhatsApp</p>
+                <p className="text-sm font-medium text-white">Message to {selectedOpportunity.customerName}</p>
+                <p className="text-xs text-white/30">via WhatsApp</p>
               </div>
             </div>
-            <div className="bg-neutral-50 rounded-lg p-4 text-sm text-neutral-700 leading-relaxed border border-neutral-100">
+            <div className="bg-white/[0.03] rounded-lg p-4 text-sm text-white/70 leading-relaxed border border-white/[0.04]">
               <p>Hi {selectedOpportunity.customerName.split(' ')[0]},</p>
               <p className="mt-2">Hope you're doing well! This is from {currentTenant?.name || 'our studio'}{currentTenant?.city ? `, ${currentTenant.city}` : ''}.</p>
               <p className="mt-2">
@@ -408,7 +410,7 @@ export default function RevenueRadar() {
               </p>
               <p className="mt-2">Let us know if you have any questions!</p>
             </div>
-            <p className="text-xs text-neutral-400">Generated by Movo AI — you can edit before sending</p>
+            <p className="text-xs text-white/30">Generated by Movo AI — you can edit before sending</p>
           </div>
         )}
       </Modal>

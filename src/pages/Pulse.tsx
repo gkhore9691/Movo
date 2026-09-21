@@ -124,8 +124,8 @@ export default function Pulse() {
     >
       {/* Greeting — just text */}
       <div>
-        <h1 className="text-2xl font-semibold text-neutral-900">{getGreeting()}, {currentUser?.name?.split(' ')[0] ?? 'there'}</h1>
-        <p className="text-sm text-neutral-500 mt-1">
+        <h1 className="text-2xl font-semibold text-white">{getGreeting()}, {currentUser?.name?.split(' ')[0] ?? 'there'}</h1>
+        <p className="text-sm text-white/40 mt-1">
           Your studio has {carsInStudio.length} cars in progress and {followUpsDue} follow-ups due.
         </p>
       </div>
@@ -138,11 +138,11 @@ export default function Pulse() {
           { label: 'Cars in Studio', value: String(carsInStudio.length), trend: null, up: true },
           { label: 'Open Enquiries', value: String(openEnquiries.length), trend: null, up: false },
         ].map(s => (
-          <div key={s.label} className="bg-white border border-neutral-200 rounded-xl p-5">
-            <p className="text-xs text-neutral-500 font-medium">{s.label}</p>
-            <p className="text-2xl font-semibold text-neutral-900 mt-1 tracking-tight">{s.value}</p>
+          <div key={s.label} className="border border-white/[0.06] rounded-xl p-5">
+            <p className="text-xs text-white/40 font-medium">{s.label}</p>
+            <p className="text-2xl font-semibold text-white mt-1 tracking-tight">{s.value}</p>
             {s.trend && (
-              <p className={`text-xs mt-1 ${s.up ? 'text-emerald-600' : 'text-red-600'}`}>{s.trend} vs last week</p>
+              <p className={`text-xs mt-1 ${s.up ? 'text-emerald-400' : 'text-red-400'}`}>{s.trend} vs last week</p>
             )}
           </div>
         ))}
@@ -151,28 +151,28 @@ export default function Pulse() {
       {/* Recommendations — uniform white cards */}
       <div>
         <div className="flex items-center gap-2 mb-4">
-          <span className="w-1.5 h-1.5 rounded-full bg-neutral-400" />
-          <h2 className="text-sm font-medium text-neutral-900">Recommendations</h2>
+          <span className="w-1.5 h-1.5 rounded-full bg-white/30" />
+          <h2 className="text-sm font-medium text-white">Recommendations</h2>
         </div>
         <div className="space-y-3">
           {recommendations.map((rec, i) => (
             <div
               key={i}
               onClick={() => navigate(rec.route)}
-              className="bg-white border border-neutral-200 rounded-xl p-4 flex items-center gap-4 cursor-pointer hover:border-neutral-300 transition-colors"
+              className="border border-white/[0.06] rounded-xl p-4 flex items-center gap-4 cursor-pointer hover:border-white/[0.12] transition-colors"
             >
               <span className="text-lg shrink-0">{rec.emoji}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-neutral-900">{rec.title}</p>
-                <p className="text-sm text-neutral-500 mt-0.5">{rec.description}</p>
+                <p className="text-sm font-medium text-white">{rec.title}</p>
+                <p className="text-sm text-white/40 mt-0.5">{rec.description}</p>
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); navigate(rec.route) }}
-                className="text-sm text-indigo-600 hover:text-indigo-700 font-medium shrink-0 hidden sm:flex items-center gap-1"
+                className="text-sm text-[#6366f1] hover:text-[#818cf8] font-medium shrink-0 hidden sm:flex items-center gap-1"
               >
                 {rec.action} <ArrowRight className="w-3.5 h-3.5" />
               </button>
-              <ChevronRight className="w-4 h-4 text-neutral-300 sm:hidden shrink-0" />
+              <ChevronRight className="w-4 h-4 text-white/20 sm:hidden shrink-0" />
             </div>
           ))}
         </div>
@@ -181,18 +181,18 @@ export default function Pulse() {
       {/* Two column: Schedule + Sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Today's Schedule */}
-        <div className="lg:col-span-2 bg-white border border-neutral-200 rounded-xl">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-100">
-            <h2 className="text-sm font-medium text-neutral-900">Today's Schedule</h2>
+        <div className="lg:col-span-2 border border-white/[0.06] rounded-xl">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.04]">
+            <h2 className="text-sm font-medium text-white">Today's Schedule</h2>
             <button
               onClick={() => navigate('/bookings')}
-              className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+              className="text-xs text-[#6366f1] hover:text-[#818cf8] font-medium"
             >
               View all
             </button>
           </div>
           {todaysBookings.length === 0 ? (
-            <p className="text-sm text-neutral-400 py-10 text-center">No bookings scheduled for today.</p>
+            <p className="text-sm text-white/30 py-10 text-center">No bookings scheduled for today.</p>
           ) : (
             <div>
               {todaysBookings.map((booking, i) => {
@@ -202,21 +202,21 @@ export default function Pulse() {
                 return (
                   <div
                     key={booking.id}
-                    className={`flex items-center gap-4 px-5 py-3.5 hover:bg-neutral-50 transition-colors cursor-pointer ${
-                      i < todaysBookings.length - 1 ? 'border-b border-neutral-100' : ''
+                    className={`flex items-center gap-4 px-5 py-3.5 hover:bg-white/[0.04] transition-colors cursor-pointer ${
+                      i < todaysBookings.length - 1 ? 'border-b border-white/[0.04]' : ''
                     }`}
                     onClick={() => navigate('/bookings')}
                   >
-                    <span className="text-sm font-mono text-neutral-400 w-16 shrink-0">
+                    <span className="text-sm font-mono text-white/30 w-16 shrink-0">
                       {formatTime(booking.time)}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-neutral-900 truncate">{customer?.name}</p>
-                      <p className="text-xs text-neutral-500 truncate">
+                      <p className="text-sm font-medium text-white truncate">{customer?.name}</p>
+                      <p className="text-xs text-white/40 truncate">
                         {vehicle?.make} {vehicle?.model} · {serviceNames.join(', ')}
                       </p>
                     </div>
-                    <span className="text-sm text-neutral-900 shrink-0">{formatCurrency(booking.estimatedPrice)}</span>
+                    <span className="text-sm text-white shrink-0">{formatCurrency(booking.estimatedPrice)}</span>
                     <StatusBadge status={booking.status} />
                   </div>
                 )
@@ -228,10 +228,10 @@ export default function Pulse() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Active Jobs */}
-          <div className="bg-white border border-neutral-200 rounded-xl">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-100">
-              <h2 className="text-sm font-medium text-neutral-900">Active Jobs</h2>
-              <button onClick={() => navigate('/jobs')} className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
+          <div className="border border-white/[0.06] rounded-xl">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.04]">
+              <h2 className="text-sm font-medium text-white">Active Jobs</h2>
+              <button onClick={() => navigate('/jobs')} className="text-xs text-[#6366f1] hover:text-[#818cf8] font-medium">
                 View all
               </button>
             </div>
@@ -242,16 +242,16 @@ export default function Pulse() {
                 return (
                   <div
                     key={job.id}
-                    className={`flex items-center gap-3 px-5 py-3 hover:bg-neutral-50 transition-colors cursor-pointer ${
-                      i < activeJobs.length - 1 ? 'border-b border-neutral-100' : ''
+                    className={`flex items-center gap-3 px-5 py-3 hover:bg-white/[0.04] transition-colors cursor-pointer ${
+                      i < activeJobs.length - 1 ? 'border-b border-white/[0.04]' : ''
                     }`}
                     onClick={() => navigate('/jobs')}
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-neutral-900 truncate">
+                      <p className="text-sm font-medium text-white truncate">
                         {vehicle?.make} {vehicle?.model}
                       </p>
-                      <p className="text-xs text-neutral-500 truncate">{customer?.name}</p>
+                      <p className="text-xs text-white/40 truncate">{customer?.name}</p>
                     </div>
                     <StatusBadge status={job.status} />
                   </div>
@@ -261,25 +261,25 @@ export default function Pulse() {
           </div>
 
           {/* Recent Activity */}
-          <div className="bg-white border border-neutral-200 rounded-xl">
-            <div className="px-5 py-4 border-b border-neutral-100">
-              <h2 className="text-sm font-medium text-neutral-900">Recent Activity</h2>
+          <div className="border border-white/[0.06] rounded-xl">
+            <div className="px-5 py-4 border-b border-white/[0.04]">
+              <h2 className="text-sm font-medium text-white">Recent Activity</h2>
             </div>
             <div>
               {recentNotifications.map((notif, i) => (
                 <div
                   key={notif.id}
                   className={`flex gap-3 px-5 py-3 ${
-                    i < recentNotifications.length - 1 ? 'border-b border-neutral-100' : ''
-                  } ${notif.actionUrl ? 'cursor-pointer hover:bg-neutral-50 transition-colors' : ''}`}
+                    i < recentNotifications.length - 1 ? 'border-b border-white/[0.04]' : ''
+                  } ${notif.actionUrl ? 'cursor-pointer hover:bg-white/[0.04] transition-colors' : ''}`}
                   onClick={() => notif.actionUrl && navigate(notif.actionUrl)}
                 >
                   <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
-                    notif.read ? 'bg-neutral-300' : 'bg-indigo-600'
+                    notif.read ? 'bg-white/20' : 'bg-[#6366f1]'
                   }`} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-neutral-700 leading-snug">{notif.description}</p>
-                    <p className="text-xs text-neutral-400 mt-0.5">{formatRelativeDate(notif.timestamp)}</p>
+                    <p className="text-sm text-white/70 leading-snug">{notif.description}</p>
+                    <p className="text-xs text-white/30 mt-0.5">{formatRelativeDate(notif.timestamp)}</p>
                   </div>
                 </div>
               ))}

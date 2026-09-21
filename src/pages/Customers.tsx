@@ -114,8 +114,8 @@ export default function Customers() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Customers</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage your customer relationships</p>
+          <h1 className="text-xl font-semibold text-white">Customers</h1>
+          <p className="text-sm text-white/40 mt-1">Manage your customer relationships</p>
         </div>
         <Button icon={<UserPlus className="w-4 h-4" />} onClick={() => setShowAddModal(true)}>Add Customer</Button>
       </div>
@@ -141,8 +141,8 @@ export default function Customers() {
               onClick={() => setFilter(f.key)}
               className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all duration-150 ${
                 filter === f.key
-                  ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100 border border-transparent'
+                  ? 'bg-[#6366f1]/10 text-[#818cf8] border border-[#6366f1]/20'
+                  : 'text-white/40 hover:text-white/70 hover:bg-white/[0.06] border border-transparent'
               }`}
             >
               {f.icon}
@@ -154,9 +154,9 @@ export default function Customers() {
 
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16">
-          <Users className="w-10 h-10 text-slate-300 mb-3" />
-          <p className="text-sm font-medium text-slate-500">No customers found</p>
-          <p className="text-xs text-slate-400 mt-1">Try adjusting your search or filters</p>
+          <Users className="w-10 h-10 text-white/20 mb-3" />
+          <p className="text-sm font-medium text-white/40">No customers found</p>
+          <p className="text-xs text-white/30 mt-1">Try adjusting your search or filters</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -171,23 +171,23 @@ export default function Customers() {
                     <Avatar name={customer.name} size="lg" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors truncate">
+                        <h3 className="text-sm font-semibold text-white group-hover:text-[#818cf8] transition-colors truncate">
                           {customer.name}
                         </h3>
-                        <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-500 transition-colors shrink-0" />
+                        <ArrowRight className="w-4 h-4 text-white/20 group-hover:text-[#818cf8] transition-colors shrink-0" />
                       </div>
-                      <p className="text-xs text-slate-500 mt-0.5">{customer.phone}</p>
+                      <p className="text-xs text-white/40 mt-0.5">{customer.phone}</p>
 
                       {cvs.length > 0 && (
                         <div className="mt-2 space-y-1">
                           {cvs.slice(0, 2).map(v => (
-                            <p key={v.id} className="text-xs text-slate-600">
+                            <p key={v.id} className="text-xs text-white/60">
                               {v.make} {v.model}
-                              <span className="text-slate-400 ml-1.5">{v.registrationNumber}</span>
+                              <span className="text-white/30 ml-1.5">{v.registrationNumber}</span>
                             </p>
                           ))}
                           {cvs.length > 2 && (
-                            <p className="text-xs text-slate-400">+{cvs.length - 2} more</p>
+                            <p className="text-xs text-white/30">+{cvs.length - 2} more</p>
                           )}
                         </div>
                       )}
@@ -212,11 +212,11 @@ export default function Customers() {
                         ))}
                       </div>
 
-                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
-                        <span className="text-xs font-medium text-slate-900">
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/[0.04]">
+                        <span className="text-xs font-medium text-white">
                           {formatCurrency(customer.lifetimeSpend)}
                         </span>
-                        <span className="text-xs text-slate-400">
+                        <span className="text-xs text-white/30">
                           {lastVisit ? formatRelativeDate(lastVisit) : `Since ${new Date(customer.customerSince).getFullYear()}`}
                         </span>
                       </div>

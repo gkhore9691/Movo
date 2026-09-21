@@ -39,7 +39,7 @@ export default function AppLayout() {
       <AskMovo />
       <Sidebar open={sidebarOpen} onClose={handleSidebarClose} />
 
-      <div className="lg:ml-60">
+      <div className="lg:ml-60 min-h-screen">
         <TopBar
           title={title}
           onMenuClick={handleMenuClick}

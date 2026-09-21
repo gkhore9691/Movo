@@ -19,13 +19,13 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className={wrapperClassName}>
         {label && (
-          <label className="block text-sm font-medium text-neutral-700 mb-1">{label}</label>
+          <label className="block text-xs font-medium text-white/40 uppercase tracking-wider mb-1.5">{label}</label>
         )}
         <div className="relative">
           <select
             ref={ref}
-            className={`w-full appearance-none rounded-lg border bg-white text-sm text-neutral-900 transition-colors duration-150 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 disabled:bg-neutral-50 disabled:text-neutral-500 pl-3 pr-10 py-2 ${
-              error ? 'border-red-300' : 'border-neutral-300'
+            className={`w-full appearance-none rounded-md border bg-white/[0.04] text-sm text-white transition-colors duration-150 focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/30 disabled:opacity-40 pl-3 pr-10 py-2 ${
+              error ? 'border-red-400/50' : 'border-white/[0.10]'
             } ${className}`}
             {...props}
           >
@@ -40,9 +40,9 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" />
         </div>
-        {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+        {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
       </div>
     )
   }

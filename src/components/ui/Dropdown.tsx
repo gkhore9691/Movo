@@ -39,7 +39,7 @@ export function Dropdown({ trigger, items, align = 'right', className = '' }: Dr
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.1 }}
-            className={`absolute z-50 mt-1 min-w-[180px] bg-white border border-neutral-200 rounded-lg shadow-lg py-1 ${
+            className={`absolute z-50 mt-1 min-w-[180px] bg-[#282c3a] border border-white/[0.08] rounded-lg shadow-xl py-1 ${
               align === 'right' ? 'right-0' : 'left-0'
             }`}
           >
@@ -52,11 +52,11 @@ export function Dropdown({ trigger, items, align = 'right', className = '' }: Dr
                 }}
                 className={`w-full flex items-center gap-2 px-3 py-1.5 text-sm font-medium transition-colors duration-150 cursor-pointer ${
                   item.danger
-                    ? 'text-red-600 hover:bg-red-50'
-                    : 'text-neutral-700 hover:bg-neutral-50'
+                    ? 'text-red-400 hover:bg-red-500/10'
+                    : 'text-white/80 hover:bg-white/[0.06]'
                 }`}
               >
-                {item.icon && <span className="text-neutral-400 shrink-0">{item.icon}</span>}
+                {item.icon && <span className="text-white/30 shrink-0">{item.icon}</span>}
                 {item.label}
               </button>
             ))}

@@ -53,8 +53,8 @@ export default function Vehicles() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Vehicles</h1>
-          <p className="text-sm text-slate-500 mt-0.5">{vehicles.length} registered vehicles</p>
+          <h1 className="text-xl font-semibold text-white">Vehicles</h1>
+          <p className="text-sm text-white/40 mt-0.5">{vehicles.length} registered vehicles</p>
         </div>
         <div className="flex items-center gap-3">
           <SearchInput
@@ -88,8 +88,8 @@ export default function Vehicles() {
             onClick={() => setFilterStatus('all')}
             className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
               filterStatus === 'all'
-                ? 'bg-slate-900 text-white'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                ? 'bg-white/10 text-white'
+                : 'text-white/60 border border-white/[0.06] hover:bg-white/[0.04]'
             }`}
           >
             All
@@ -98,8 +98,8 @@ export default function Vehicles() {
             onClick={() => setFilterStatus('in_studio')}
             className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
               filterStatus === 'in_studio'
-                ? 'bg-slate-900 text-white'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                ? 'bg-white/10 text-white'
+                : 'text-white/60 border border-white/[0.06] hover:bg-white/[0.04]'
             }`}
           >
             In Studio
@@ -108,7 +108,7 @@ export default function Vehicles() {
         <select
           value={filterMake}
           onChange={e => setFilterMake(e.target.value)}
-          className="px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 bg-white text-slate-600 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="px-3 py-1.5 text-xs font-medium rounded-lg border border-white/[0.10] bg-white/[0.04] text-white/60 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30"
         >
           {MAKES.map(m => (
             <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>
@@ -135,45 +135,45 @@ export default function Vehicles() {
                     className="w-10 h-10 rounded-lg flex items-center justify-center"
                     style={{
                       backgroundColor: ['BMW', 'Mercedes-Benz'].includes(vehicle.make)
-                        ? '#eef2ff' : '#f1f5f9'
+                        ? 'rgba(99,102,241,0.10)' : 'rgba(255,255,255,0.04)'
                     }}
                   >
                     <Car className={`w-5 h-5 ${
                       ['BMW', 'Mercedes-Benz'].includes(vehicle.make)
-                        ? 'text-indigo-600' : 'text-slate-500'
+                        ? 'text-[#818cf8]' : 'text-white/40'
                     }`} />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">
+                    <p className="text-sm font-semibold text-white">
                       {vehicle.make} {vehicle.model}
                     </p>
-                    <p className="text-xs text-slate-500">{vehicle.color}</p>
+                    <p className="text-xs text-white/40">{vehicle.color}</p>
                   </div>
                 </div>
                 {activeJob && <StatusBadge status={activeJob.status} />}
               </div>
 
-              <p className="text-sm font-mono font-semibold text-slate-700 mb-3 tracking-wider">
+              <p className="text-sm font-mono font-semibold text-white/70 mb-3 tracking-wider">
                 {vehicle.registrationNumber}
               </p>
 
-              <div className="flex items-center justify-between text-xs text-slate-500">
+              <div className="flex items-center justify-between text-xs text-white/40">
                 <span>{customer?.name ?? 'Unknown'}</span>
                 {spend > 0 && (
-                  <span className="font-medium text-slate-700">{formatCurrency(spend)}</span>
+                  <span className="font-medium text-white/70">{formatCurrency(spend)}</span>
                 )}
               </div>
 
               {!activeJob && lastVisit && (
-                <p className="text-xs text-slate-400 mt-2">
+                <p className="text-xs text-white/30 mt-2">
                   Last visit: {formatRelativeDate(lastVisit)}
                 </p>
               )}
 
               {activeJob && (
-                <div className="mt-3 pt-3 border-t border-slate-100">
+                <div className="mt-3 pt-3 border-t border-white/[0.04]">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-500">In Studio</span>
+                    <span className="text-xs text-white/40">In Studio</span>
                     <Badge variant="primary" size="sm">{formatCurrency(activeJob.estimatedPrice)}</Badge>
                   </div>
                 </div>
@@ -185,9 +185,9 @@ export default function Vehicles() {
 
       {filtered.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Car className="w-12 h-12 text-slate-300 mb-4" />
-          <p className="text-sm font-medium text-slate-600">No vehicles found</p>
-          <p className="text-xs text-slate-400 mt-1">Try adjusting your search or filters</p>
+          <Car className="w-12 h-12 text-white/20 mb-4" />
+          <p className="text-sm font-medium text-white/60">No vehicles found</p>
+          <p className="text-xs text-white/30 mt-1">Try adjusting your search or filters</p>
         </div>
       )}
 
@@ -246,7 +246,7 @@ function AddVehicleModal({
     onClose()
   }
 
-  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  const inputClass = "w-full rounded-lg border border-white/[0.10] bg-white/[0.04] text-sm text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30"
 
   return (
     <Modal
@@ -264,7 +264,7 @@ function AddVehicleModal({
     >
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Customer *</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Customer *</label>
           <select value={customerId} onChange={e => setCustomerId(e.target.value)} className={inputClass}>
             <option value="">Select customer...</option>
             {customers.map(c => (
@@ -274,20 +274,20 @@ function AddVehicleModal({
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Make *</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Make *</label>
             <input value={make} onChange={e => setMake(e.target.value)} placeholder="e.g. Mahindra" className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Model *</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Model *</label>
             <input value={model} onChange={e => setModel(e.target.value)} placeholder="e.g. Thar" className={inputClass} />
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Registration No.</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Registration No.</label>
           <input value={regNumber} onChange={e => setRegNumber(e.target.value)} placeholder="e.g. MP09-AB-1234" className={inputClass} />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Color</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Color</label>
           <input value={color} onChange={e => setColor(e.target.value)} placeholder="e.g. White" className={inputClass} />
         </div>
       </div>

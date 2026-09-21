@@ -48,7 +48,7 @@ export default function CustomerDetail() {
   if (!customer) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <p className="text-sm text-slate-500">Customer not found</p>
+        <p className="text-sm text-white/40">Customer not found</p>
         <Button variant="ghost" className="mt-3" onClick={() => navigate('/customers')}>
           Back to Customers
         </Button>
@@ -82,7 +82,7 @@ export default function CustomerDetail() {
       events.push({
         type: 'job',
         icon: <Car className="w-3.5 h-3.5" />,
-        color: 'bg-indigo-500',
+        color: 'bg-[#6366f1]/100',
         title: `Job: ${serviceNames}`,
         description: `Status: ${job.status.replace(/_/g, ' ')} — ${formatCurrency(job.estimatedPrice)}`,
         timestamp: job.createdAt,
@@ -156,7 +156,7 @@ export default function CustomerDetail() {
 
       <button
         onClick={() => navigate('/customers')}
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-white/40 hover:text-white transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to Customers
@@ -168,11 +168,11 @@ export default function CustomerDetail() {
         <div className="flex-1">
           <div className="flex items-start justify-between flex-wrap gap-3">
             <div>
-              <h1 className="text-2xl font-semibold text-slate-900">{customer.name}</h1>
+              <h1 className="text-2xl font-semibold text-white">{customer.name}</h1>
               <div className="flex items-center gap-3 mt-1">
-                <span className="text-sm text-slate-500">{formatPhone(customer.phone)}</span>
-                <span className="text-slate-300">·</span>
-                <span className="text-sm text-slate-500">{customer.email}</span>
+                <span className="text-sm text-white/40">{formatPhone(customer.phone)}</span>
+                <span className="text-white/20">·</span>
+                <span className="text-sm text-white/40">{customer.email}</span>
               </div>
               <div className="flex items-center gap-2 mt-2">
                 <Badge variant="outline" size="sm">
@@ -232,29 +232,29 @@ export default function CustomerDetail() {
               actions={<Button variant="secondary" size="sm" icon={<Plus className="w-3.5 h-3.5" />} onClick={() => setShowAddVehicle(true)}>Add Vehicle</Button>}
             />
             {customerVehicles.length === 0 ? (
-              <p className="text-sm text-slate-400">No vehicles on record</p>
+              <p className="text-sm text-white/30">No vehicles on record</p>
             ) : (
               <div className="space-y-3">
                 {customerVehicles.map(v => (
                   <Link
                     key={v.id}
                     to={`/vehicles/${v.id}`}
-                    className="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:border-slate-200 hover:bg-slate-50 transition-all group"
+                    className="flex items-center justify-between p-3 rounded-lg border border-white/[0.04] hover:border-white/[0.06] hover:bg-white/[0.04] transition-all group"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
-                        <Car className="w-5 h-5 text-slate-500" />
+                      <div className="w-10 h-10 rounded-lg bg-white/[0.04] flex items-center justify-center">
+                        <Car className="w-5 h-5 text-white/40" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-slate-900 group-hover:text-indigo-600 transition-colors">
+                        <p className="text-sm font-medium text-white group-hover:text-[#818cf8] transition-colors">
                           {v.make} {v.model}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-white/40">
                           {v.registrationNumber} · {v.color}
                         </p>
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-500 transition-colors" />
+                    <ChevronRight className="w-4 h-4 text-white/20 group-hover:text-[#818cf8] transition-colors" />
                   </Link>
                 ))}
               </div>
@@ -268,7 +268,7 @@ export default function CustomerDetail() {
               subtitle={`${customerJobs.length} job${customerJobs.length !== 1 ? 's' : ''}`}
             />
             {customerJobs.length === 0 ? (
-              <p className="text-sm text-slate-400">No service history yet</p>
+              <p className="text-sm text-white/30">No service history yet</p>
             ) : (
               <div className="space-y-2">
                 {customerJobs.map(job => {
@@ -277,19 +277,19 @@ export default function CustomerDetail() {
                   return (
                     <div
                       key={job.id}
-                      className="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:bg-slate-50 hover:border-slate-200 transition-all cursor-pointer"
+                      className="flex items-center justify-between p-3 rounded-lg border border-white/[0.04] hover:bg-white/[0.04] hover:border-white/[0.06] transition-all cursor-pointer"
                       onClick={() => navigate('/jobs')}
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-900">{serviceNames}</p>
+                        <p className="text-sm font-medium text-white">{serviceNames}</p>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-xs text-slate-500">{vehicle ? `${vehicle.make} ${vehicle.model}` : ''}</span>
-                          <span className="text-slate-300">·</span>
-                          <span className="text-xs text-slate-500">{formatDate(job.createdAt)}</span>
+                          <span className="text-xs text-white/40">{vehicle ? `${vehicle.make} ${vehicle.model}` : ''}</span>
+                          <span className="text-white/20">·</span>
+                          <span className="text-xs text-white/40">{formatDate(job.createdAt)}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-medium text-slate-900">
+                        <span className="text-sm font-medium text-white">
                           {formatCurrency(job.actualPrice || job.estimatedPrice)}
                         </span>
                         <StatusBadge status={job.status} />
@@ -305,10 +305,10 @@ export default function CustomerDetail() {
           <Card>
             <CardHeader title="Timeline" subtitle="Complete interaction history" />
             {timeline.length === 0 ? (
-              <p className="text-sm text-slate-400">No interactions yet</p>
+              <p className="text-sm text-white/30">No interactions yet</p>
             ) : (
               <div className="relative">
-                <div className="absolute left-[11px] top-2 bottom-2 w-px bg-slate-200" />
+                <div className="absolute left-[11px] top-2 bottom-2 w-px bg-white/[0.06]" />
                 <div className="space-y-4">
                   {timeline.map((event, i) => (
                     <div key={`${event.type}-${i}`} className="flex items-start gap-3 relative">
@@ -316,9 +316,9 @@ export default function CustomerDetail() {
                         {event.icon}
                       </div>
                       <div className="flex-1 min-w-0 pt-0.5">
-                        <p className="text-sm font-medium text-slate-900">{event.title}</p>
-                        <p className="text-xs text-slate-500 mt-0.5">{event.description}</p>
-                        <p className="text-xs text-slate-400 mt-1">{formatRelativeDate(event.timestamp)}</p>
+                        <p className="text-sm font-medium text-white">{event.title}</p>
+                        <p className="text-xs text-white/40 mt-0.5">{event.description}</p>
+                        <p className="text-xs text-white/30 mt-1">{formatRelativeDate(event.timestamp)}</p>
                       </div>
                     </div>
                   ))}
@@ -332,15 +332,15 @@ export default function CustomerDetail() {
         <div className="space-y-6">
           {/* Next Recommended Action */}
           {retentionInfo && retentionInfo.status !== 'declined' && (
-            <Card className="border-indigo-200 bg-indigo-50/50">
+            <Card className="border-[#6366f1]/20 bg-[#6366f1]/10">
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
-                  <Sparkles className="w-5 h-5 text-indigo-600" />
+                <div className="w-9 h-9 rounded-lg bg-[#6366f1]/15 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-5 h-5 text-[#6366f1]" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-medium text-indigo-600 uppercase tracking-wide">Recommended</p>
-                  <p className="text-sm font-semibold text-slate-900 mt-1">{retentionInfo.recommendedService}</p>
-                  <p className="text-xs text-slate-600 mt-1">
+                  <p className="text-xs font-medium text-[#6366f1] uppercase tracking-wide">Recommended</p>
+                  <p className="text-sm font-semibold text-white mt-1">{retentionInfo.recommendedService}</p>
+                  <p className="text-xs text-white/60 mt-1">
                     Last visit was {retentionInfo.daysSinceVisit} days ago. Estimated value: {formatCurrency(retentionInfo.estimatedValue)}
                   </p>
                   <Button size="sm" className="mt-3" onClick={() => navigate('/bookings')}>
@@ -352,14 +352,14 @@ export default function CustomerDetail() {
           )}
 
           {!retentionInfo && (
-            <Card className="border-emerald-200 bg-emerald-50/50">
+            <Card className="border-emerald-500/20 bg-emerald-500/10">
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
-                  <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                <div className="w-9 h-9 rounded-lg bg-emerald-500/15 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-emerald-600 uppercase tracking-wide">Up to Date</p>
-                  <p className="text-sm text-slate-600 mt-1">No pending follow-ups for this customer.</p>
+                  <p className="text-xs font-medium text-emerald-400 uppercase tracking-wide">Up to Date</p>
+                  <p className="text-sm text-white/60 mt-1">No pending follow-ups for this customer.</p>
                 </div>
               </div>
             </Card>
@@ -370,16 +370,16 @@ export default function CustomerDetail() {
             <CardHeader title="Payment Summary" />
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-500">Total Invoiced</span>
-                <span className="text-sm font-medium text-slate-900">{formatCurrency(totalInvoiced)}</span>
+                <span className="text-sm text-white/40">Total Invoiced</span>
+                <span className="text-sm font-medium text-white">{formatCurrency(totalInvoiced)}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-500">Total Paid</span>
-                <span className="text-sm font-medium text-emerald-600">{formatCurrency(totalPaid)}</span>
+                <span className="text-sm text-white/40">Total Paid</span>
+                <span className="text-sm font-medium text-emerald-400">{formatCurrency(totalPaid)}</span>
               </div>
-              <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                <span className="text-sm font-medium text-slate-700">Outstanding</span>
-                <span className={`text-sm font-semibold ${outstanding > 0 ? 'text-amber-600' : 'text-slate-900'}`}>
+              <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
+                <span className="text-sm font-medium text-white/70">Outstanding</span>
+                <span className={`text-sm font-semibold ${outstanding > 0 ? 'text-amber-400' : 'text-white'}`}>
                   {formatCurrency(outstanding)}
                 </span>
               </div>
@@ -391,8 +391,8 @@ export default function CustomerDetail() {
             <CardHeader title="Communication" />
             <div className="space-y-4">
               <div>
-                <p className="text-xs text-slate-500 mb-1">Preferred Contact</p>
-                <p className="text-sm font-medium text-slate-900">WhatsApp</p>
+                <p className="text-xs text-white/40 mb-1">Preferred Contact</p>
+                <p className="text-sm font-medium text-white">WhatsApp</p>
               </div>
               <Toggle
                 checked={aiHandling}
@@ -407,14 +407,14 @@ export default function CustomerDetail() {
           <Card>
             <CardHeader title="Notes" />
             <textarea
-              className="w-full text-sm text-slate-600 border border-slate-200 rounded-lg p-3 resize-none focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full text-sm text-white/60 border border-white/[0.06] rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30 focus:border-[#6366f1]/30"
               rows={4}
               placeholder="Add notes about this customer..."
               value={notes}
               onChange={(e) => { setNotes(e.target.value); setNotesSaved(false) }}
             />
             <div className="flex items-center justify-between mt-2">
-              {notesSaved && <span className="text-xs text-emerald-600">Saved</span>}
+              {notesSaved && <span className="text-xs text-emerald-400">Saved</span>}
               {!notesSaved && <span />}
               <Button
                 variant="secondary"
@@ -451,7 +451,7 @@ function EditCustomerModal({
   const [address, setAddress] = useState(customer.address)
   const [tags, setTags] = useState(customer.tags.join(', '))
 
-  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  const inputClass = "w-full rounded-lg border border-white/[0.06] text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30"
 
   return (
     <Modal
@@ -471,25 +471,25 @@ function EditCustomerModal({
     >
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Name</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Name</label>
           <input value={name} onChange={e => setName(e.target.value)} className={inputClass} />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Phone</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Phone</label>
             <input value={phone} onChange={e => setPhone(e.target.value)} className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Email</label>
             <input value={email} onChange={e => setEmail(e.target.value)} className={inputClass} />
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Address</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Address</label>
           <input value={address} onChange={e => setAddress(e.target.value)} className={inputClass} />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Tags (comma-separated)</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Tags (comma-separated)</label>
           <input value={tags} onChange={e => setTags(e.target.value)} placeholder="vip, premium, repeat" className={inputClass} />
         </div>
       </div>
@@ -514,7 +514,7 @@ function AddVehicleModal({
   const [color, setColor] = useState('')
   const [saving, setSaving] = useState(false)
 
-  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  const inputClass = "w-full rounded-lg border border-white/[0.06] text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30"
 
   return (
     <Modal
@@ -551,20 +551,20 @@ function AddVehicleModal({
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Make *</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Make *</label>
             <input value={make} onChange={e => setMake(e.target.value)} placeholder="e.g. Hyundai" className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Model *</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Model *</label>
             <input value={model} onChange={e => setModel(e.target.value)} placeholder="e.g. Creta" className={inputClass} />
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Registration No. *</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Registration No. *</label>
           <input value={regNumber} onChange={e => setRegNumber(e.target.value)} placeholder="e.g. MH01AB1234" className={inputClass} />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Color</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Color</label>
           <input value={color} onChange={e => setColor(e.target.value)} placeholder="e.g. White" className={inputClass} />
         </div>
       </div>

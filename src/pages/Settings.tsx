@@ -100,11 +100,11 @@ export default function Settings() {
     <div className="space-y-6 max-w-3xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Settings</h1>
-          <p className="text-sm text-slate-500 mt-1">Configure your Movo workspace</p>
+          <h1 className="text-2xl font-semibold text-white">Settings</h1>
+          <p className="text-sm text-white/40 mt-1">Configure your Movo workspace</p>
         </div>
         {saveStatus && (
-          <span className={`text-xs font-medium px-3 py-1 rounded-full ${saveStatus === 'Saved' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+          <span className={`text-xs font-medium px-3 py-1 rounded-full ${saveStatus === 'Saved' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
             {saveStatus}
           </span>
         )}
@@ -137,16 +137,16 @@ export default function Settings() {
           <div className="space-y-4">
             {Object.entries(servicesByCategory).map(([category, catServices]) => (
               <div key={category}>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">{category}</p>
-                <div className="divide-y divide-slate-100">
+                <p className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2">{category}</p>
+                <div className="divide-y divide-white/[0.06]">
                   {catServices.map(svc => (
                     <div key={svc.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
                       <div>
-                        <p className="text-sm font-medium text-slate-900">{svc.name}</p>
-                        <p className="text-xs text-slate-500">{svc.duration}</p>
+                        <p className="text-sm font-medium text-white">{svc.name}</p>
+                        <p className="text-xs text-white/40">{svc.duration}</p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-medium text-slate-700">
+                        <span className="text-sm font-medium text-white/70">
                           {formatCurrency(svc.basePrice)} – {formatCurrency(svc.maxPrice)}
                         </span>
                         <Button variant="ghost" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => setEditingService(svc)} />
@@ -167,13 +167,13 @@ export default function Settings() {
             title="Working Hours"
             actions={<Button variant="ghost" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => setShowEditHours(true)}>Edit</Button>}
           />
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-white/[0.06]">
             {workingHours.map(wh => {
               const display = wh.open && wh.close ? `${wh.open} – ${wh.close}` : 'Closed'
               return (
                 <div key={wh.day} className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
-                  <span className="text-sm text-slate-600 w-28">{wh.day}</span>
-                  <span className={`text-sm font-medium ${display === 'Closed' ? 'text-slate-400' : 'text-slate-900'}`}>
+                  <span className="text-sm text-white/60 w-28">{wh.day}</span>
+                  <span className={`text-sm font-medium ${display === 'Closed' ? 'text-white/30' : 'text-white'}`}>
                     {display}
                   </span>
                 </div>
@@ -189,8 +189,8 @@ export default function Settings() {
           <CardHeader title="Studio Capacity" />
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600">Maximum vehicles per day</p>
-              <p className="text-xs text-slate-400">Limits booking availability</p>
+              <p className="text-sm text-white/60">Maximum vehicles per day</p>
+              <p className="text-xs text-white/30">Limits booking availability</p>
             </div>
             <div className="flex items-center gap-2">
               <input
@@ -198,9 +198,9 @@ export default function Settings() {
                 value={capacity}
                 onChange={e => setCapacity(Number(e.target.value))}
                 onBlur={() => saveTenant({ maxCapacity: capacity })}
-                className="w-16 px-3 py-1.5 text-sm font-medium text-center border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-16 px-3 py-1.5 text-sm font-medium text-center text-white bg-white/[0.04] border border-white/[0.10] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30"
               />
-              <span className="text-sm text-slate-500">vehicles</span>
+              <span className="text-sm text-white/40">vehicles</span>
             </div>
           </div>
         </Card>
@@ -229,8 +229,8 @@ export default function Settings() {
             <Toggle checked={aiAutoRespond} onChange={handleAiToggle('auto_respond', setAiAutoRespond)} label="Auto-respond to Enquiries" description="AI automatically replies to new customer messages" />
 
             <div>
-              <label className="text-sm font-medium text-slate-900">Language Preference</label>
-              <p className="text-xs text-slate-500 mb-2">Language AI uses when responding to customers</p>
+              <label className="text-sm font-medium text-white">Language Preference</label>
+              <p className="text-xs text-white/40 mb-2">Language AI uses when responding to customers</p>
               <div className="flex gap-2">
                 {[
                   { id: 'english', label: 'English' },
@@ -242,8 +242,8 @@ export default function Settings() {
                     onClick={() => { setAiLanguage(lang.id); saveTenant({ ai_language: lang.id }) }}
                     className={`px-4 py-2 text-sm rounded-lg border transition-all cursor-pointer ${
                       aiLanguage === lang.id
-                        ? 'bg-indigo-50 border-indigo-200 text-indigo-700 font-medium'
-                        : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                        ? 'bg-[#6366f1]/10 border-[#6366f1]/20 text-[#818cf8] font-medium'
+                        : 'bg-white/[0.04] border-white/[0.06] text-white/60 hover:border-white/[0.12]'
                     }`}
                   >
                     {lang.label}
@@ -253,8 +253,8 @@ export default function Settings() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-900">Response Tone</label>
-              <p className="text-xs text-slate-500 mb-2">How the AI should communicate with customers</p>
+              <label className="text-sm font-medium text-white">Response Tone</label>
+              <p className="text-xs text-white/40 mb-2">How the AI should communicate with customers</p>
               <div className="flex gap-2">
                 {[
                   { id: 'professional', label: 'Professional' },
@@ -266,8 +266,8 @@ export default function Settings() {
                     onClick={() => { setAiTone(tone.id); saveTenant({ ai_tone: tone.id }) }}
                     className={`px-4 py-2 text-sm rounded-lg border transition-all cursor-pointer ${
                       aiTone === tone.id
-                        ? 'bg-indigo-50 border-indigo-200 text-indigo-700 font-medium'
-                        : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                        ? 'bg-[#6366f1]/10 border-[#6366f1]/20 text-[#818cf8] font-medium'
+                        : 'bg-white/[0.04] border-white/[0.06] text-white/60 hover:border-white/[0.12]'
                     }`}
                   >
                     {tone.label}
@@ -293,13 +293,13 @@ export default function Settings() {
             title="Team"
             actions={<Button variant="secondary" size="sm" onClick={() => navigate('/staff')}>View All</Button>}
           />
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-white/[0.06]">
             {staff.map(member => (
               <div key={member.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
                 <Avatar name={member.name} size="sm" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-slate-900">{member.name}</p>
-                  <p className="text-xs text-slate-500">{formatPhone(member.phone)}</p>
+                  <p className="text-sm font-medium text-white">{member.name}</p>
+                  <p className="text-xs text-white/40">{formatPhone(member.phone)}</p>
                 </div>
                 <Badge
                   variant={member.role === 'owner' || member.role === 'manager' ? 'primary' : member.role === 'sales' ? 'warning' : 'success'}
@@ -353,8 +353,8 @@ export default function Settings() {
 function InfoField({ label, value, className = '' }: { label: string; value: string; className?: string }) {
   return (
     <div className={className}>
-      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{label}</p>
-      <p className="text-sm text-slate-900 mt-1">{value}</p>
+      <p className="text-xs font-medium text-white/40 uppercase tracking-wide">{label}</p>
+      <p className="text-sm text-white mt-1">{value}</p>
     </div>
   )
 }
@@ -381,7 +381,7 @@ function EditProfileModal({
   const [gstNumber, setGstNumber] = useState(tenant.gstNumber)
   const [saving, setSaving] = useState(false)
 
-  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  const inputClass = "w-full rounded-lg border border-white/[0.10] bg-white/[0.04] text-white text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30 placeholder-white/30"
 
   return (
     <Modal
@@ -410,35 +410,35 @@ function EditProfileModal({
     >
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Business Name</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Business Name</label>
           <input value={name} onChange={e => setName(e.target.value)} className={inputClass} />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Phone</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Phone</label>
             <input value={phone} onChange={e => setPhone(e.target.value)} className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Email</label>
             <input value={email} onChange={e => setEmail(e.target.value)} className={inputClass} />
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Address</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Address</label>
           <input value={address} onChange={e => setAddress(e.target.value)} className={inputClass} />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">City</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">City</label>
             <input value={city} onChange={e => setCity(e.target.value)} className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">State</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">State</label>
             <input value={state} onChange={e => setState(e.target.value)} className={inputClass} />
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">GST Number</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">GST Number</label>
           <input value={gstNumber} onChange={e => setGstNumber(e.target.value)} className={inputClass} />
         </div>
       </div>
@@ -464,7 +464,7 @@ function EditHoursModal({
     setLocal(prev => prev.map((h, i) => i === idx ? { ...h, [field]: value } : h))
   }
 
-  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  const inputClass = "w-full rounded-lg border border-white/[0.10] bg-white/[0.04] text-white text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30 placeholder-white/30"
 
   return (
     <Modal
@@ -490,14 +490,14 @@ function EditHoursModal({
       <div className="space-y-3">
         {local.map((h, idx) => (
           <div key={h.day} className="flex items-center gap-3">
-            <span className="text-sm text-slate-700 w-24 shrink-0">{h.day}</span>
+            <span className="text-sm text-white/70 w-24 shrink-0">{h.day}</span>
             <input
               placeholder="e.g. 9:00 AM"
               value={h.open}
               onChange={e => updateHour(idx, 'open', e.target.value)}
               className={inputClass}
             />
-            <span className="text-slate-400">to</span>
+            <span className="text-white/30">to</span>
             <input
               placeholder="e.g. 7:00 PM"
               value={h.close}
@@ -506,7 +506,7 @@ function EditHoursModal({
             />
           </div>
         ))}
-        <p className="text-xs text-slate-400">Leave both fields empty to mark a day as closed.</p>
+        <p className="text-xs text-white/30">Leave both fields empty to mark a day as closed.</p>
       </div>
     </Modal>
   )
@@ -522,7 +522,7 @@ function AddServiceModal({ open, onClose }: { open: boolean; onClose: () => void
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  const inputClass = "w-full rounded-lg border border-white/[0.10] bg-white/[0.04] text-white text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30 placeholder-white/30"
 
   async function handleSave() {
     if (!name || !basePrice) return
@@ -561,32 +561,32 @@ function AddServiceModal({ open, onClose }: { open: boolean; onClose: () => void
       }
     >
       <div className="space-y-4">
-        {error && <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>}
+        {error && <p className="text-sm text-red-400 bg-red-500/10 rounded-lg px-3 py-2">{error}</p>}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Service Name *</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Service Name *</label>
           <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Full Detailing" className={inputClass} />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Description</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Description</label>
           <input value={description} onChange={e => setDescription(e.target.value)} placeholder="Brief description" className={inputClass} />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Base Price *</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Base Price *</label>
             <input type="number" value={basePrice} onChange={e => setBasePrice(e.target.value)} placeholder="0" className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Max Price</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Max Price</label>
             <input type="number" value={maxPrice} onChange={e => setMaxPrice(e.target.value)} placeholder="0" className={inputClass} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Duration</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Duration</label>
             <input value={duration} onChange={e => setDuration(e.target.value)} placeholder="e.g. 2-3 hours" className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Category</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Category</label>
             <input value={category} onChange={e => setCategory(e.target.value)} placeholder="e.g. Detailing" className={inputClass} />
           </div>
         </div>
@@ -613,7 +613,7 @@ function EditServiceModal({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  const inputClass = "w-full rounded-lg border border-white/[0.10] bg-white/[0.04] text-white text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30 placeholder-white/30"
 
   async function handleSave() {
     if (!name || !basePrice) return
@@ -653,32 +653,32 @@ function EditServiceModal({
       }
     >
       <div className="space-y-4">
-        {error && <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>}
+        {error && <p className="text-sm text-red-400 bg-red-500/10 rounded-lg px-3 py-2">{error}</p>}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Service Name *</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Service Name *</label>
           <input value={name} onChange={e => setName(e.target.value)} className={inputClass} />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Description</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Description</label>
           <input value={description} onChange={e => setDescription(e.target.value)} className={inputClass} />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Base Price *</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Base Price *</label>
             <input type="number" value={basePrice} onChange={e => setBasePrice(e.target.value)} className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Max Price</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Max Price</label>
             <input type="number" value={maxPrice} onChange={e => setMaxPrice(e.target.value)} className={inputClass} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Duration</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Duration</label>
             <input value={duration} onChange={e => setDuration(e.target.value)} className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Category</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Category</label>
             <input value={category} onChange={e => setCategory(e.target.value)} className={inputClass} />
           </div>
         </div>
@@ -716,7 +716,7 @@ function DsSyncCard() {
     <Card>
       <CardHeader title="Detailing Street CRM" />
       <div className="space-y-4">
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-white/40">
           Sync data from admin.detailingstreet.com — imports bookings, queries, invoices, and follow-ups into Movo.
           New bookings created in Movo are automatically pushed to DS.
         </p>
@@ -733,7 +733,7 @@ function DsSyncCard() {
             href="https://admin.detailingstreet.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-500 transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm text-[#6366f1] hover:text-[#818cf8] transition-colors"
           >
             Open DS Admin <ExternalLink className="w-3.5 h-3.5" />
           </a>
@@ -742,8 +742,8 @@ function DsSyncCard() {
         {result && (
           <div className={`flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm ${
             result.status === 'success'
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-              : 'bg-red-50 text-red-700 border border-red-200'
+              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+              : 'bg-red-500/10 text-red-400 border border-red-500/20'
           }`}>
             {result.status === 'success'
               ? <Check className="w-4 h-4 mt-0.5 shrink-0" />
@@ -753,7 +753,7 @@ function DsSyncCard() {
           </div>
         )}
 
-        <div className="text-xs text-slate-400 pt-1 border-t border-slate-100">
+        <div className="text-xs text-white/30 pt-1 border-t border-white/[0.04]">
           Auto-push: When you create a booking in Movo, it's automatically sent to Detailing Street.
         </div>
       </div>

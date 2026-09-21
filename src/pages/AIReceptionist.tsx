@@ -113,15 +113,15 @@ function formatMessageTime(timestamp: string): string {
 function TypingIndicator() {
   return (
     <div className="flex items-end gap-2 px-4">
-      <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
-        <Bot size={14} className="text-indigo-600" />
+      <div className="w-7 h-7 rounded-full bg-[#6366f1]/15 flex items-center justify-center shrink-0">
+        <Bot size={14} className="text-[#6366f1]" />
       </div>
-      <div className="bg-indigo-50 rounded-2xl rounded-bl-md px-4 py-3">
+      <div className="bg-[#6366f1]/10 rounded-2xl rounded-bl-md px-4 py-3">
         <div className="flex gap-1">
           {[0, 1, 2].map(i => (
             <motion.span
               key={i}
-              className="w-1.5 h-1.5 bg-indigo-400 rounded-full"
+              className="w-1.5 h-1.5 bg-[#818cf8] rounded-full"
               animate={{ y: [0, -4, 0] }}
               transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
             />
@@ -143,50 +143,50 @@ function ChatBubble({ message, showTime }: { message: Message; showTime: boolean
       className={`flex items-end gap-2 px-4 ${isCustomer ? 'justify-start' : 'justify-end'}`}
     >
       {isCustomer && (
-        <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
-          <User size={14} className="text-slate-600" />
+        <div className="w-7 h-7 rounded-full bg-white/[0.06] flex items-center justify-center shrink-0">
+          <User size={14} className="text-white/60" />
         </div>
       )}
       <div className={`max-w-[75%] space-y-1 ${isCustomer ? '' : 'flex flex-col items-end'}`}>
         {!isCustomer && (
-          <span className="text-[10px] font-medium text-slate-400 px-1">
+          <span className="text-[10px] font-medium text-white/30 px-1">
             {isAi ? 'Movo AI' : 'You'}
           </span>
         )}
         <div
           className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
             isCustomer
-              ? 'bg-slate-100 text-slate-800 rounded-bl-md'
+              ? 'bg-white/[0.04] text-white/90 rounded-bl-md'
               : isAi
-              ? 'bg-indigo-50 text-slate-800 rounded-br-md'
-              : 'bg-white border border-slate-200 text-slate-800 rounded-br-md'
+              ? 'bg-[#6366f1]/10 text-white/90 rounded-br-md'
+              : 'bg-white/[0.04] border border-white/[0.06] text-white/90 rounded-br-md'
           }`}
         >
           {message.content}
         </div>
         <div className={`flex items-center gap-1 px-1 ${isCustomer ? '' : 'flex-row-reverse'}`}>
           {showTime && (
-            <span className="text-[10px] text-slate-400">
+            <span className="text-[10px] text-white/30">
               {formatMessageTime(message.timestamp)}
             </span>
           )}
           {!isCustomer && (
             message.read
-              ? <CheckCheck size={12} className="text-indigo-500" />
-              : <Check size={12} className="text-slate-400" />
+              ? <CheckCheck size={12} className="text-[#818cf8]" />
+              : <Check size={12} className="text-white/30" />
           )}
         </div>
       </div>
       {!isCustomer && (
         <div
           className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
-            isAi ? 'bg-indigo-100' : 'bg-amber-100'
+            isAi ? 'bg-[#6366f1]/15' : 'bg-amber-500/10'
           }`}
         >
           {isAi ? (
-            <Bot size={14} className="text-indigo-600" />
+            <Bot size={14} className="text-[#6366f1]" />
           ) : (
-            <User size={14} className="text-amber-600" />
+            <User size={14} className="text-amber-400" />
           )}
         </div>
       )}
@@ -327,13 +327,13 @@ export default function AIReceptionist() {
     return (
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="p-4 border-b border-slate-200">
+        <div className="p-4 border-b border-white/[0.06]">
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-lg font-semibold text-slate-900">AI Receptionist</h1>
+            <h1 className="text-lg font-semibold text-white">AI Receptionist</h1>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowNewModal(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#6366f1] rounded-lg hover:bg-[#6366f1]/80 transition-colors"
               >
                 <Plus size={14} />
                 New
@@ -344,23 +344,23 @@ export default function AIReceptionist() {
             </div>
           </div>
           <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
             <input
               type="text"
               placeholder="Search conversations..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full pl-9 pr-3 py-2 text-sm bg-white/[0.04] border border-white/[0.10] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30 focus:border-transparent placeholder-white/30"
             />
           </div>
-          <div className="flex items-center gap-3 mt-3 text-xs text-slate-500">
+          <div className="flex items-center gap-3 mt-3 text-xs text-white/40">
             <span>{conversations.length} conversations</span>
-            <span className="w-1 h-1 rounded-full bg-slate-300" />
-            <span className="text-emerald-600 font-medium">{aiHandlingCount} AI handling</span>
+            <span className="w-1 h-1 rounded-full bg-white/20" />
+            <span className="text-emerald-400 font-medium">{aiHandlingCount} AI handling</span>
             {needAttentionCount > 0 && (
               <>
-                <span className="w-1 h-1 rounded-full bg-slate-300" />
-                <span className="text-amber-600 font-medium">{needAttentionCount} need attention</span>
+                <span className="w-1 h-1 rounded-full bg-white/20" />
+                <span className="text-amber-400 font-medium">{needAttentionCount} need attention</span>
               </>
             )}
           </div>
@@ -378,34 +378,34 @@ export default function AIReceptionist() {
               <button
                 key={conv.id}
                 onClick={() => handleSelectConversation(conv.id)}
-                className={`w-full text-left px-4 py-3 border-b border-slate-100 transition-colors hover:bg-slate-50 ${
-                  isActive ? 'bg-indigo-50/60 border-l-2 border-l-indigo-500' : ''
+                className={`w-full text-left px-4 py-3 border-b border-white/[0.04] transition-colors hover:bg-white/[0.04] ${
+                  isActive ? 'bg-[#6366f1]/10 border-l-2 border-l-[#6366f1]' : ''
                 }`}
               >
                 <div className="flex items-start gap-3">
                   <div className="relative">
                     <Avatar name={customer.name} size="md" />
                     <span
-                      className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${
+                      className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#181b25] ${
                         conv.aiHandling ? 'bg-emerald-500' : 'bg-amber-500'
                       }`}
                     />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-slate-900 truncate">
+                      <span className="text-sm font-medium text-white truncate">
                         {customer.name}
                       </span>
-                      <span className="text-[10px] text-slate-400 shrink-0 ml-2">
+                      <span className="text-[10px] text-white/30 shrink-0 ml-2">
                         {lastMsg ? formatRelativeDate(lastMsg.timestamp) : ''}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-500 truncate mt-0.5">
+                    <p className="text-xs text-white/40 truncate mt-0.5">
                       {conv.lastMessage}
                     </p>
                   </div>
                   {conv.unreadCount > 0 && (
-                    <span className="mt-1 flex items-center justify-center w-5 h-5 rounded-full bg-indigo-600 text-white text-[10px] font-bold shrink-0">
+                    <span className="mt-1 flex items-center justify-center w-5 h-5 rounded-full bg-[#6366f1] text-white text-[10px] font-bold shrink-0">
                       {conv.unreadCount}
                     </span>
                   )}
@@ -422,7 +422,7 @@ export default function AIReceptionist() {
   function ChatView() {
     if (!selected) {
       return (
-        <div className="flex-1 flex items-center justify-center bg-slate-50/50">
+        <div className="flex-1 flex items-center justify-center bg-white/[0.02]">
           <EmptyState
             icon={<MessageSquare size={48} />}
             title="Select a conversation"
@@ -442,8 +442,8 @@ export default function AIReceptionist() {
         <div
           className={`px-4 py-2 flex items-center justify-between text-xs font-medium border-b ${
             selected.aiHandling
-              ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-              : 'bg-amber-50 text-amber-700 border-amber-100'
+              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+              : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
           }`}
         >
           <div className="flex items-center gap-2">
@@ -459,24 +459,24 @@ export default function AIReceptionist() {
         </div>
 
         {/* Chat header */}
-        <div className="px-4 py-3 border-b border-slate-200 bg-white">
+        <div className="px-4 py-3 border-b border-white/[0.06] bg-white/[0.02]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setMobileShowChat(false)}
-                className="lg:hidden p-1 -ml-1 text-slate-500 hover:text-slate-700"
+                className="lg:hidden p-1 -ml-1 text-white/40 hover:text-white/70"
               >
                 <ArrowLeft size={20} />
               </button>
               <Avatar name={customer.name} size="md" />
               <div>
-                <h2 className="text-sm font-semibold text-slate-900">{customer.name}</h2>
-                <div className="flex items-center gap-2 text-xs text-slate-500">
+                <h2 className="text-sm font-semibold text-white">{customer.name}</h2>
+                <div className="flex items-center gap-2 text-xs text-white/40">
                   <Phone size={10} />
                   <span>{formatPhone(customer.phone)}</span>
                   {vehicle && (
                     <>
-                      <span className="w-1 h-1 rounded-full bg-slate-300" />
+                      <span className="w-1 h-1 rounded-full bg-white/20" />
                       <Car size={10} />
                       <span>{vehicle.make} {vehicle.model}</span>
                     </>
@@ -490,8 +490,8 @@ export default function AIReceptionist() {
                 onClick={() => toggleAiHandling(selected.id)}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                   selected.aiHandling
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                    : 'bg-amber-50 text-amber-700 border border-amber-200'
+                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                    : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
                 }`}
               >
                 {selected.aiHandling ? (
@@ -511,7 +511,7 @@ export default function AIReceptionist() {
                 size="sm"
                 onClick={handleArchive}
                 icon={<Archive size={14} />}
-                className="text-slate-400 hover:text-red-500"
+                className="text-white/30 hover:text-red-400"
               >
                 Close
               </Button>
@@ -528,13 +528,13 @@ export default function AIReceptionist() {
         </div>
 
         {/* Messages grouped by date */}
-        <div className="flex-1 overflow-y-auto py-4 space-y-1 bg-slate-50/30">
+        <div className="flex-1 overflow-y-auto py-4 space-y-1 bg-white/[0.01]">
           <AnimatePresence mode="popLayout">
             {messageGroups.map(group => (
               <div key={group.date}>
                 {/* Date header */}
                 <div className="flex items-center justify-center my-3">
-                  <span className="px-3 py-1 text-[10px] font-medium text-slate-500 bg-slate-100 rounded-full">
+                  <span className="px-3 py-1 text-[10px] font-medium text-white/40 bg-white/[0.04] rounded-full">
                     {group.date}
                   </span>
                 </div>
@@ -552,13 +552,13 @@ export default function AIReceptionist() {
         </div>
 
         {/* Quick replies */}
-        <div className="px-4 py-2 border-t border-slate-100 bg-white">
+        <div className="px-4 py-2 border-t border-white/[0.04] bg-white/[0.02]">
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
             {QUICK_REPLIES.map(reply => (
               <button
                 key={reply}
                 onClick={() => handleSend(reply)}
-                className="shrink-0 px-3 py-1 text-xs font-medium text-slate-600 bg-slate-100 rounded-full hover:bg-slate-200 transition-colors"
+                className="shrink-0 px-3 py-1 text-xs font-medium text-white/60 bg-white/[0.04] rounded-full hover:bg-white/[0.06] transition-colors"
               >
                 {reply}
               </button>
@@ -567,7 +567,7 @@ export default function AIReceptionist() {
         </div>
 
         {/* Input */}
-        <div className="px-4 py-3 border-t border-slate-200 bg-white">
+        <div className="px-4 py-3 border-t border-white/[0.06] bg-white/[0.02]">
           <div className="flex items-center gap-2">
             <input
               type="text"
@@ -575,7 +575,7 @@ export default function AIReceptionist() {
               value={inputValue}
               onChange={e => setInputValue(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
-              className="flex-1 px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="flex-1 px-4 py-2.5 text-sm bg-white/[0.04] border border-white/[0.10] text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30 focus:border-transparent placeholder-white/30"
             />
             <Button
               size="md"
@@ -614,18 +614,18 @@ export default function AIReceptionist() {
       >
         <div className="space-y-3">
           <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
             <input
               type="text"
               placeholder="Search customers..."
               value={newConvoSearch}
               onChange={e => setNewConvoSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full pl-9 pr-3 py-2 text-sm bg-white/[0.04] border border-white/[0.10] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30 focus:border-transparent placeholder-white/30"
             />
           </div>
           <div className="max-h-60 overflow-y-auto space-y-1">
             {availableCustomers.length === 0 && (
-              <p className="text-sm text-slate-400 text-center py-4">No customers available</p>
+              <p className="text-sm text-white/30 text-center py-4">No customers available</p>
             )}
             {availableCustomers.map(c => (
               <button
@@ -633,17 +633,17 @@ export default function AIReceptionist() {
                 onClick={() => setNewConvoCustomerId(c.id)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
                   newConvoCustomerId === c.id
-                    ? 'bg-indigo-50 border border-indigo-200'
-                    : 'hover:bg-slate-50 border border-transparent'
+                    ? 'bg-[#6366f1]/10 border border-[#6366f1]/30'
+                    : 'hover:bg-white/[0.04] border border-transparent'
                 }`}
               >
                 <Avatar name={c.name} size="sm" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900 truncate">{c.name}</p>
-                  <p className="text-xs text-slate-500">{formatPhone(c.phone)}</p>
+                  <p className="text-sm font-medium text-white truncate">{c.name}</p>
+                  <p className="text-xs text-white/40">{formatPhone(c.phone)}</p>
                 </div>
                 {newConvoCustomerId === c.id && (
-                  <Check size={16} className="text-indigo-600 shrink-0" />
+                  <Check size={16} className="text-[#6366f1] shrink-0" />
                 )}
               </button>
             ))}
@@ -655,9 +655,9 @@ export default function AIReceptionist() {
 
   return (
     <>
-      <div className="h-[calc(100vh-4rem)] flex bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <div className="h-[calc(100vh-4rem)] flex bg-white/[0.02] rounded-xl border border-white/[0.06] overflow-hidden">
         {/* Conversation list -- hidden on mobile when chat is open */}
-        <div className={`w-80 border-r border-slate-200 shrink-0 ${mobileShowChat ? 'hidden lg:flex lg:flex-col' : 'flex flex-col w-full lg:w-80'}`}>
+        <div className={`w-80 border-r border-white/[0.06] shrink-0 ${mobileShowChat ? 'hidden lg:flex lg:flex-col' : 'flex flex-col w-full lg:w-80'}`}>
           <ConversationList />
         </div>
 

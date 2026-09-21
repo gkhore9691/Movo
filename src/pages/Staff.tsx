@@ -60,8 +60,8 @@ export default function Staff() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Staff</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage your team</p>
+          <h1 className="text-2xl font-semibold text-white">Staff</h1>
+          <p className="text-sm text-white/40 mt-1">Manage your team</p>
         </div>
         <Button icon={<Plus className="w-4 h-4" />} onClick={() => setShowAddModal(true)}>Add Member</Button>
       </div>
@@ -104,7 +104,7 @@ export default function Staff() {
                 <div className="flex items-start gap-4">
                   <Avatar name={member.name} size="xl" />
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-base font-semibold text-slate-900">{member.name}</h3>
+                    <h3 className="text-base font-semibold text-white">{member.name}</h3>
                     <Badge
                       variant={roleBadgeColors[member.role] || 'default'}
                       size="sm"
@@ -114,11 +114,11 @@ export default function Staff() {
                     </Badge>
 
                     <div className="mt-3 space-y-1.5">
-                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <div className="flex items-center gap-2 text-xs text-white/40">
                         <Phone className="w-3.5 h-3.5" />
                         <span>{formatPhone(member.phone)}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <div className="flex items-center gap-2 text-xs text-white/40">
                         <Mail className="w-3.5 h-3.5" />
                         <span>{member.email}</span>
                       </div>
@@ -129,24 +129,24 @@ export default function Staff() {
                 {/* Job stats */}
                 <div className="mt-4 flex items-center gap-4">
                   <div>
-                    <p className="text-xs text-slate-500">Active Jobs</p>
-                    <p className="text-lg font-semibold text-slate-900">{member.activeJobs}</p>
+                    <p className="text-xs text-white/40">Active Jobs</p>
+                    <p className="text-lg font-semibold text-white">{member.activeJobs}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-500">Completed</p>
-                    <p className="text-lg font-semibold text-slate-900">{member.completedJobs}</p>
+                    <p className="text-xs text-white/40">Completed</p>
+                    <p className="text-lg font-semibold text-white">{member.completedJobs}</p>
                   </div>
                 </div>
 
                 {/* Performance bar */}
                 <div className="mt-3">
-                  <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+                  <div className="flex items-center justify-between text-xs text-white/40 mb-1">
                     <span>Performance</span>
                     <span>{maxCompleted > 0 ? Math.round((member.completedJobs / maxCompleted) * 100) : 0}%</span>
                   </div>
-                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
                     <motion.div
-                      className="h-full bg-indigo-500 rounded-full"
+                      className="h-full bg-[#818cf8] rounded-full"
                       initial={{ width: 0 }}
                       animate={{ width: `${maxCompleted > 0 ? (member.completedJobs / maxCompleted) * 100 : 0}%` }}
                       transition={{ duration: 0.6, delay: idx * 0.1 }}
@@ -156,10 +156,10 @@ export default function Staff() {
 
                 {/* Expand for assigned jobs */}
                 {memberJobs.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-slate-100">
+                  <div className="mt-3 pt-3 border-t border-white/[0.04]">
                     <button
                       onClick={() => setExpandedId(isExpanded ? null : member.id)}
-                      className="flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 cursor-pointer w-full"
+                      className="flex items-center gap-1.5 text-xs font-medium text-white/40 hover:text-white/70 cursor-pointer w-full"
                     >
                       <ChevronDown
                         className={`w-3.5 h-3.5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
@@ -183,13 +183,13 @@ export default function Staff() {
                               return (
                                 <div
                                   key={job.id}
-                                  className="flex items-center justify-between p-2 bg-slate-50 rounded-lg text-xs"
+                                  className="flex items-center justify-between p-2 bg-white/[0.03] rounded-lg text-xs"
                                 >
                                   <div>
-                                    <p className="font-medium text-slate-700">
+                                    <p className="font-medium text-white/70">
                                       {vehicle ? `${vehicle.make} ${vehicle.model}` : 'Vehicle'}
                                     </p>
-                                    <p className="text-slate-500">{service}</p>
+                                    <p className="text-white/40">{service}</p>
                                   </div>
                                   <Badge
                                     variant={

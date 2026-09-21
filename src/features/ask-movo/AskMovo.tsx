@@ -637,7 +637,7 @@ export default function AskMovo() {
 
   const searchIconMap: Record<string, React.ReactNode> = useMemo(
     () => ({
-      customer: <User className="w-4 h-4 text-indigo-500" />,
+      customer: <User className="w-4 h-4 text-[#818cf8]" />,
       vehicle: <Car className="w-4 h-4 text-emerald-500" />,
       job: <Wrench className="w-4 h-4 text-amber-500" />,
       lead: <PhoneIcon className="w-4 h-4 text-rose-500" />,
@@ -667,15 +667,15 @@ export default function AskMovo() {
 
           {/* Palette */}
           <motion.div
-            className="relative w-full max-w-2xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden"
+            className="relative w-full max-w-2xl mx-4 bg-[#1e2130] rounded-2xl shadow-2xl overflow-hidden border border-white/[0.08]"
             initial={{ opacity: 0, scale: 0.95, y: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -10 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
           >
             {/* Input */}
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100">
-              <Sparkles className="w-5 h-5 text-indigo-500 shrink-0" />
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.04]">
+              <Sparkles className="w-5 h-5 text-[#818cf8] shrink-0" />
               <input
                 ref={inputRef}
                 type="text"
@@ -686,19 +686,19 @@ export default function AskMovo() {
                   if (e.key === 'Escape') closeAskMovo()
                 }}
                 placeholder="Ask Movo anything..."
-                className="flex-1 text-lg text-slate-900 placeholder-slate-400 outline-none bg-transparent"
+                className="flex-1 text-lg text-white placeholder-white/30 outline-none bg-transparent"
               />
               {query && (
                 <button
                   onClick={() => handleSubmit()}
-                  className="p-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                  className="p-1.5 rounded-lg bg-[#6366f1] text-white hover:bg-[#6366f1]/80 transition-colors"
                 >
                   <Send className="w-4 h-4" />
                 </button>
               )}
               <button
                 onClick={closeAskMovo}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -708,29 +708,29 @@ export default function AskMovo() {
               {/* Search results */}
               {searchResults.length > 0 && !isThinking && !response && (
                 <div className="p-3">
-                  <p className="px-2 pb-2 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                  <p className="px-2 pb-2 text-xs font-medium text-white/30 uppercase tracking-wide">
                     Search results
                   </p>
                   {searchResults.map((r) => (
                     <button
                       key={`${r.type}-${r.id}`}
                       onClick={() => handleSearchResultClick(r.route)}
-                      className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg hover:bg-slate-50 transition-colors text-left"
+                      className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg hover:bg-white/[0.04] transition-colors text-left"
                     >
-                      <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100">
+                      <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.04]">
                         {searchIconMap[r.type] || (
-                          <Search className="w-4 h-4 text-slate-400" />
+                          <Search className="w-4 h-4 text-white/30" />
                         )}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-900 truncate">
+                        <p className="text-sm font-medium text-white truncate">
                           {r.label}
                         </p>
-                        <p className="text-xs text-slate-500 truncate">
+                        <p className="text-xs text-white/40 truncate">
                           {r.sub}
                         </p>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-slate-300" />
+                      <ArrowRight className="w-4 h-4 text-white/20" />
                     </button>
                   ))}
                 </div>
@@ -739,7 +739,7 @@ export default function AskMovo() {
               {/* Suggestions */}
               {showSuggestions && (
                 <div className="p-4">
-                  <p className="px-1 pb-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                  <p className="px-1 pb-3 text-xs font-medium text-white/30 uppercase tracking-wide">
                     Try asking
                   </p>
                   <div className="grid grid-cols-1 gap-1.5">
@@ -750,10 +750,10 @@ export default function AskMovo() {
                           setQuery(s)
                           handleSubmit(s)
                         }}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 text-left transition-colors group"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/[0.04] text-left transition-colors group"
                       >
-                        <Search className="w-4 h-4 text-slate-300 group-hover:text-indigo-500 transition-colors" />
-                        <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
+                        <Search className="w-4 h-4 text-white/20 group-hover:text-[#818cf8] transition-colors" />
+                        <span className="text-sm text-white/60 group-hover:text-white transition-colors">
                           {s}
                         </span>
                       </button>
@@ -761,8 +761,8 @@ export default function AskMovo() {
                   </div>
 
                   {recentQueries.length > 0 && (
-                    <div className="mt-4 pt-4 border-t border-slate-100">
-                      <p className="px-1 pb-2 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                    <div className="mt-4 pt-4 border-t border-white/[0.04]">
+                      <p className="px-1 pb-2 text-xs font-medium text-white/30 uppercase tracking-wide">
                         Recent
                       </p>
                       {recentQueries.map((rq) => (
@@ -772,10 +772,10 @@ export default function AskMovo() {
                             setQuery(rq)
                             handleSubmit(rq)
                           }}
-                          className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 text-left transition-colors w-full"
+                          className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[0.04] text-left transition-colors w-full"
                         >
-                          <Clock className="w-4 h-4 text-slate-300" />
-                          <span className="text-sm text-slate-500">{rq}</span>
+                          <Clock className="w-4 h-4 text-white/20" />
+                          <span className="text-sm text-white/40">{rq}</span>
                         </button>
                       ))}
                     </div>
@@ -786,14 +786,14 @@ export default function AskMovo() {
               {/* Thinking indicator */}
               {isThinking && (
                 <div className="px-5 py-8 flex items-center gap-3">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100">
-                    <Sparkles className="w-4 h-4 text-indigo-600" />
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#6366f1]/15">
+                    <Sparkles className="w-4 h-4 text-[#6366f1]" />
                   </div>
                   <div className="flex gap-1">
                     {[0, 1, 2].map((i) => (
                       <motion.div
                         key={i}
-                        className="w-2 h-2 rounded-full bg-indigo-400"
+                        className="w-2 h-2 rounded-full bg-[#818cf8]"
                         animate={{ opacity: [0.3, 1, 0.3] }}
                         transition={{
                           duration: 1,
@@ -803,7 +803,7 @@ export default function AskMovo() {
                       />
                     ))}
                   </div>
-                  <span className="text-sm text-slate-400">
+                  <span className="text-sm text-white/30">
                     Movo is thinking...
                   </span>
                 </div>
@@ -818,14 +818,14 @@ export default function AskMovo() {
                   transition={{ duration: 0.25 }}
                 >
                   <div className="flex items-start gap-3 mb-4">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 shrink-0 mt-0.5">
-                      <Sparkles className="w-4 h-4 text-indigo-600" />
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#6366f1]/15 shrink-0 mt-0.5">
+                      <Sparkles className="w-4 h-4 text-[#6366f1]" />
                     </div>
                     <div>
-                      <h3 className="text-base font-semibold text-slate-900">
+                      <h3 className="text-base font-semibold text-white">
                         {response.title}
                       </h3>
-                      <p className="text-sm text-slate-500 mt-0.5">
+                      <p className="text-sm text-white/40 mt-0.5">
                         {response.description}
                       </p>
                     </div>
@@ -836,15 +836,15 @@ export default function AskMovo() {
                       {response.items.map((item, i) => (
                         <div
                           key={i}
-                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-50"
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/[0.03]"
                         >
                           <span className="text-base">{item.icon}</span>
                           <div className="flex-1 min-w-0">
-                            <span className="text-sm font-medium text-slate-700">
+                            <span className="text-sm font-medium text-white/70">
                               {item.label}
                             </span>
                           </div>
-                          <span className="text-sm text-slate-500 text-right">
+                          <span className="text-sm text-white/40 text-right">
                             {item.value}
                           </span>
                         </div>
@@ -857,7 +857,7 @@ export default function AskMovo() {
                     {response.action && (
                       <button
                         onClick={() => handleAction(response.action!)}
-                        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
+                        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#6366f1] rounded-lg hover:bg-[#6366f1]/80 transition-colors"
                       >
                         {response.action.label}
                         <ArrowRight className="w-4 h-4" />
@@ -870,10 +870,10 @@ export default function AskMovo() {
                           onClick={() => handleAction(act)}
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
                             act.phone
-                              ? 'border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100'
+                              ? 'border-emerald-500/20 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20'
                               : act.whatsapp
-                              ? 'border-green-200 text-green-700 bg-green-50 hover:bg-green-100'
-                              : 'border-slate-200 text-slate-700 bg-slate-50 hover:bg-slate-100'
+                              ? 'border-green-500/20 text-green-400 bg-green-500/10 hover:bg-green-500/20'
+                              : 'border-white/[0.06] text-white/70 bg-white/[0.03] hover:bg-white/[0.06]'
                           }`}
                         >
                           {act.phone && <PhoneIcon className="w-3 h-3" />}
@@ -887,22 +887,22 @@ export default function AskMovo() {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100 bg-slate-50/50">
-              <div className="flex items-center gap-4 text-xs text-slate-400">
+            <div className="flex items-center justify-between px-5 py-3 border-t border-white/[0.04] bg-white/[0.02]">
+              <div className="flex items-center gap-4 text-xs text-white/30">
                 <span className="flex items-center gap-1">
-                  <kbd className="px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 font-mono text-[10px]">
+                  <kbd className="px-1.5 py-0.5 rounded bg-white/[0.06] text-white/40 font-mono text-[10px]">
                     ↵
                   </kbd>
                   to ask
                 </span>
                 <span className="flex items-center gap-1">
-                  <kbd className="px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 font-mono text-[10px]">
+                  <kbd className="px-1.5 py-0.5 rounded bg-white/[0.06] text-white/40 font-mono text-[10px]">
                     esc
                   </kbd>
                   to close
                 </span>
               </div>
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-white/30">
                 Powered by Movo AI
               </span>
             </div>

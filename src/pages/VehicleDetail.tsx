@@ -59,7 +59,7 @@ export default function VehicleDetail() {
     <div>
       <button
         onClick={() => navigate('/vehicles')}
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 mb-6 cursor-pointer transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-white/40 hover:text-white/70 mb-6 cursor-pointer transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to Vehicles
@@ -67,25 +67,25 @@ export default function VehicleDetail() {
 
       <div className="mb-6">
         <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center">
-            <Car className="w-7 h-7 text-slate-500" />
+          <div className="w-14 h-14 rounded-xl bg-white/[0.04] flex items-center justify-center">
+            <Car className="w-7 h-7 text-white/40" />
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-3">
-              <h1 className="text-xl font-semibold text-slate-900">
+              <h1 className="text-xl font-semibold text-white">
                 {vehicle.make} {vehicle.model}
               </h1>
               {activeJob && <StatusBadge status={activeJob.status} />}
             </div>
-            <p className="text-lg font-mono font-semibold text-slate-600 mt-1 tracking-wider">
+            <p className="text-lg font-mono font-semibold text-white/60 mt-1 tracking-wider">
               {vehicle.registrationNumber}
             </p>
             <div className="flex items-center gap-2 mt-2">
               <span
-                className="w-3 h-3 rounded-full border border-slate-200"
+                className="w-3 h-3 rounded-full border border-white/[0.06]"
                 style={{ backgroundColor: vehicle.color.toLowerCase().includes('white') ? '#f8fafc' : vehicle.color.toLowerCase().includes('black') ? '#1e293b' : vehicle.color.toLowerCase().includes('grey') || vehicle.color.toLowerCase().includes('silver') ? '#94a3b8' : vehicle.color.toLowerCase().includes('red') ? '#ef4444' : vehicle.color.toLowerCase().includes('blue') ? '#3b82f6' : vehicle.color.toLowerCase().includes('purple') ? '#8b5cf6' : vehicle.color.toLowerCase().includes('beige') ? '#d4a574' : '#94a3b8' }}
               />
-              <span className="text-sm text-slate-500">{vehicle.color}</span>
+              <span className="text-sm text-white/40">{vehicle.color}</span>
             </div>
             {customer && (
               <Link
@@ -93,7 +93,7 @@ export default function VehicleDetail() {
                 className="inline-flex items-center gap-2 mt-3 group"
               >
                 <Avatar name={customer.name} size="sm" />
-                <span className="text-sm font-medium text-slate-700 group-hover:text-indigo-600 transition-colors">
+                <span className="text-sm font-medium text-white/70 group-hover:text-[#6366f1] transition-colors">
                   {customer.name}
                 </span>
               </Link>
@@ -119,7 +119,7 @@ export default function VehicleDetail() {
           <Card>
             <CardHeader title="Service History" subtitle={`${vehicleJobs.length} jobs`} />
             {vehicleJobs.length === 0 ? (
-              <p className="text-sm text-slate-500 text-center py-8">No service history yet</p>
+              <p className="text-sm text-white/40 text-center py-8">No service history yet</p>
             ) : (
               <div className="space-y-3">
                 {vehicleJobs.map(job => {
@@ -128,24 +128,24 @@ export default function VehicleDetail() {
                   return (
                     <div
                       key={job.id}
-                      className="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:border-slate-200 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-lg border border-white/[0.04] hover:border-white/[0.06] transition-colors"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="shrink-0">
                           <StatusBadge status={job.status} />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-slate-900 truncate">{svcNames}</p>
+                          <p className="text-sm font-medium text-white truncate">{svcNames}</p>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-xs text-slate-500">{formatDate(job.createdAt)}</span>
-                            {tech && <span className="text-xs text-slate-400">· {tech.name}</span>}
+                            <span className="text-xs text-white/40">{formatDate(job.createdAt)}</span>
+                            {tech && <span className="text-xs text-white/30">· {tech.name}</span>}
                           </div>
                           {job.notes && (
-                            <p className="text-xs text-slate-400 mt-0.5 truncate">{job.notes}</p>
+                            <p className="text-xs text-white/30 mt-0.5 truncate">{job.notes}</p>
                           )}
                         </div>
                       </div>
-                      <span className="text-sm font-semibold text-slate-700 shrink-0 ml-3">
+                      <span className="text-sm font-semibold text-white/70 shrink-0 ml-3">
                         {formatCurrency(job.actualPrice ?? job.estimatedPrice)}
                       </span>
                     </div>
@@ -163,26 +163,26 @@ export default function VehicleDetail() {
                 return [
                   <div
                     key={`${job.id}-before`}
-                    className="aspect-[4/3] rounded-lg bg-slate-50 border border-dashed border-slate-200 flex flex-col items-center justify-center gap-2"
+                    className="aspect-[4/3] rounded-lg bg-white/[0.03] border border-dashed border-white/[0.06] flex flex-col items-center justify-center gap-2"
                   >
-                    <Camera className="w-6 h-6 text-slate-300" />
-                    <span className="text-xs text-slate-400 text-center px-2">{svcName} — Before</span>
-                    <span className="text-[10px] text-slate-300">{formatDate(job.createdAt)}</span>
+                    <Camera className="w-6 h-6 text-white/20" />
+                    <span className="text-xs text-white/30 text-center px-2">{svcName} — Before</span>
+                    <span className="text-[10px] text-white/20">{formatDate(job.createdAt)}</span>
                   </div>,
                   <div
                     key={`${job.id}-after`}
-                    className="aspect-[4/3] rounded-lg bg-slate-50 border border-dashed border-slate-200 flex flex-col items-center justify-center gap-2"
+                    className="aspect-[4/3] rounded-lg bg-white/[0.03] border border-dashed border-white/[0.06] flex flex-col items-center justify-center gap-2"
                   >
-                    <Camera className="w-6 h-6 text-slate-300" />
-                    <span className="text-xs text-slate-400 text-center px-2">{svcName} — After</span>
-                    <span className="text-[10px] text-slate-300">{formatDate(job.updatedAt)}</span>
+                    <Camera className="w-6 h-6 text-white/20" />
+                    <span className="text-xs text-white/30 text-center px-2">{svcName} — After</span>
+                    <span className="text-[10px] text-white/20">{formatDate(job.updatedAt)}</span>
                   </div>,
                 ]
               })}
               {vehicleJobs.length === 0 && (
                 <div className="col-span-full py-8 text-center">
-                  <Camera className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                  <p className="text-xs text-slate-400">No photos yet</p>
+                  <Camera className="w-8 h-8 text-white/20 mx-auto mb-2" />
+                  <p className="text-xs text-white/30">No photos yet</p>
                 </div>
               )}
             </div>
@@ -191,27 +191,27 @@ export default function VehicleDetail() {
 
         <div className="space-y-6">
           {activeJob && (
-            <Card className="border-indigo-200 bg-indigo-50/30">
+            <Card className="border-[#6366f1]/20 bg-[#6366f1]/5">
               <CardHeader title="Current Job" />
               <div className="space-y-3">
                 <StatusBadge status={activeJob.status} />
-                <p className="text-sm font-medium text-slate-900">
+                <p className="text-sm font-medium text-white">
                   {activeJob.serviceIds.map(id => getService(id)?.name).join(', ')}
                 </p>
                 <StepProgress
                   current={JOB_STAGES.indexOf(activeJob.status)}
                   total={JOB_STAGES.length}
                 />
-                <div className="flex items-center justify-between text-xs text-slate-500">
+                <div className="flex items-center justify-between text-xs text-white/40">
                   <span>Started {formatRelativeDate(activeJob.createdAt)}</span>
-                  <span className="font-medium text-slate-700">
+                  <span className="font-medium text-white/70">
                     {formatCurrency(activeJob.estimatedPrice)}
                   </span>
                 </div>
                 {activeJob.assignedTo && (
-                  <div className="flex items-center gap-2 pt-2 border-t border-indigo-100">
+                  <div className="flex items-center gap-2 pt-2 border-t border-[#6366f1]/10">
                     <Avatar name={getStaffMember(activeJob.assignedTo)?.name ?? ''} size="sm" />
-                    <span className="text-xs text-slate-600">
+                    <span className="text-xs text-white/60">
                       {getStaffMember(activeJob.assignedTo)?.name}
                     </span>
                   </div>
@@ -230,9 +230,9 @@ export default function VehicleDetail() {
           <Card>
             <CardHeader title="Recommended Next Service" />
             <div className="space-y-3">
-              <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100">
-                <p className="text-sm font-semibold text-emerald-800">{recommendedService.name}</p>
-                <p className="text-xs text-emerald-600 mt-0.5">{recommendedService.reason}</p>
+              <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/15">
+                <p className="text-sm font-semibold text-emerald-400">{recommendedService.name}</p>
+                <p className="text-xs text-emerald-400/70 mt-0.5">{recommendedService.reason}</p>
               </div>
               <Button variant="secondary" size="sm" className="w-full" onClick={() => navigate('/bookings')}>
                 Schedule Now
@@ -262,13 +262,13 @@ function VehicleNotes({ defaultValue }: { defaultValue: string }) {
     <Card>
       <CardHeader title="Vehicle Notes" />
       <textarea
-        className="w-full text-sm text-slate-600 border border-slate-200 rounded-lg p-3 resize-none focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+        className="w-full text-sm text-white bg-white/[0.04] border border-white/[0.10] rounded-lg p-3 resize-none focus:outline-none focus:ring-1 focus:ring-[#6366f1]/30 focus:border-[#6366f1]/30"
         rows={4}
         placeholder="Add notes about this vehicle..."
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
-      <p className="text-xs text-slate-400 mt-2">Local scratchpad only — not saved to server</p>
+      <p className="text-xs text-white/30 mt-2">Local scratchpad only — not saved to server</p>
     </Card>
   )
 }
@@ -289,7 +289,7 @@ function EditVehicleModal({
   const [regNumber, setRegNumber] = useState(vehicle.registrationNumber)
   const [color, setColor] = useState(vehicle.color)
 
-  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  const inputClass = "w-full rounded-lg border border-white/[0.10] bg-white/[0.04] text-sm text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30"
 
   return (
     <Modal
@@ -307,20 +307,20 @@ function EditVehicleModal({
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Make</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Make</label>
             <input value={make} onChange={e => setMake(e.target.value)} className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Model</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Model</label>
             <input value={model} onChange={e => setModel(e.target.value)} className={inputClass} />
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Registration No.</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Registration No.</label>
           <input value={regNumber} onChange={e => setRegNumber(e.target.value)} className={inputClass} />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Color</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Color</label>
           <input value={color} onChange={e => setColor(e.target.value)} className={inputClass} />
         </div>
       </div>

@@ -7,10 +7,10 @@ interface ProgressBarProps {
 }
 
 const colorClasses = {
-  primary: 'bg-indigo-600',
-  success: 'bg-emerald-600',
-  warning: 'bg-amber-500',
-  danger: 'bg-red-600',
+  primary: 'bg-indigo-400',
+  success: 'bg-emerald-400',
+  warning: 'bg-amber-400',
+  danger: 'bg-red-400',
 }
 
 export function ProgressBar({
@@ -24,14 +24,14 @@ export function ProgressBar({
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <div className="flex-1 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+      <div className="flex-1 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-300 ${colorClasses[color]}`}
           style={{ width: `${pct}%` }}
         />
       </div>
       {showLabel && (
-        <span className="text-xs text-neutral-500 tabular-nums">{Math.round(pct)}%</span>
+        <span className="text-xs text-white/40 tabular-nums">{Math.round(pct)}%</span>
       )}
     </div>
   )
@@ -52,14 +52,14 @@ export function StepProgress({ current, total, labels, className = '' }: StepPro
           <div
             className={`h-1.5 rounded-full flex-1 transition-all duration-300 ${
               i < current
-                ? 'bg-indigo-600'
+                ? 'bg-indigo-400'
                 : i === current
-                  ? 'bg-indigo-200'
-                  : 'bg-neutral-100'
+                  ? 'bg-indigo-400/30'
+                  : 'bg-white/[0.06]'
             }`}
           />
           {labels && i < total && (
-            <span className="text-[10px] text-neutral-400 hidden sm:inline">{labels[i]}</span>
+            <span className="text-[10px] text-white/30 hidden sm:inline">{labels[i]}</span>
           )}
         </div>
       ))}

@@ -24,7 +24,7 @@ const STATUS_LABELS: Record<LeadStatus, string> = {
 }
 
 const COLUMN_COLORS: Record<LeadStatus, string> = {
-  new: 'border-t-slate-400',
+  new: 'border-t-white/30',
   contacted: 'border-t-blue-500',
   quoted: 'border-t-indigo-500',
   negotiation: 'border-t-amber-500',
@@ -52,9 +52,9 @@ function getFollowUpUrgency(followUpDate: string): 'overdue' | 'today' | 'future
 }
 
 const urgencyColors = {
-  overdue: 'text-rose-600 bg-rose-50',
-  today: 'text-amber-600 bg-amber-50',
-  future: 'text-emerald-600 bg-emerald-50',
+  overdue: 'text-rose-400 bg-rose-500/10',
+  today: 'text-amber-400 bg-amber-500/10',
+  future: 'text-emerald-400 bg-emerald-500/10',
 }
 
 export default function Leads() {
@@ -128,8 +128,8 @@ export default function Leads() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Leads</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Manage your enquiry pipeline</p>
+          <h1 className="text-xl font-semibold text-white">Leads</h1>
+          <p className="text-sm text-white/40 mt-0.5">Manage your enquiry pipeline</p>
         </div>
         <div className="flex items-center gap-3">
           <SearchInput
@@ -182,17 +182,17 @@ export default function Leads() {
               const columnValue = columnLeads.reduce((s, l) => s + l.quotedPrice, 0)
               return (
                 <div key={status} className="w-72 shrink-0">
-                  <div className={`bg-white border border-slate-200 rounded-xl border-t-2 ${COLUMN_COLORS[status]}`}>
-                    <div className="px-4 py-3 border-b border-slate-100">
+                  <div className={`border border-white/[0.06] rounded-xl border-t-2 ${COLUMN_COLORS[status]}`}>
+                    <div className="px-4 py-3 border-b border-white/[0.04]">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-slate-900">{STATUS_LABELS[status]}</span>
-                          <span className="text-xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-full">
+                          <span className="text-sm font-semibold text-white">{STATUS_LABELS[status]}</span>
+                          <span className="text-xs bg-white/[0.04] text-white/60 px-1.5 py-0.5 rounded-full">
                             {columnLeads.length}
                           </span>
                         </div>
                         {columnValue > 0 && (
-                          <span className="text-xs text-slate-500">{formatCurrency(columnValue)}</span>
+                          <span className="text-xs text-white/40">{formatCurrency(columnValue)}</span>
                         )}
                       </div>
                     </div>
@@ -210,7 +210,7 @@ export default function Leads() {
                         ))}
                       </AnimatePresence>
                       {columnLeads.length === 0 && (
-                        <div className="flex items-center justify-center h-20 text-xs text-slate-400">
+                        <div className="flex items-center justify-center h-20 text-xs text-white/30">
                           No leads
                         </div>
                       )}
@@ -229,15 +229,15 @@ export default function Leads() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-100">
-                  <th className="text-left font-medium text-slate-500 px-4 py-3">Name</th>
-                  <th className="text-left font-medium text-slate-500 px-4 py-3">Vehicle</th>
-                  <th className="text-left font-medium text-slate-500 px-4 py-3">Service</th>
-                  <th className="text-left font-medium text-slate-500 px-4 py-3">Status</th>
-                  <th className="text-left font-medium text-slate-500 px-4 py-3">Quoted</th>
-                  <th className="text-left font-medium text-slate-500 px-4 py-3">Source</th>
-                  <th className="text-left font-medium text-slate-500 px-4 py-3">Follow-up</th>
-                  <th className="text-left font-medium text-slate-500 px-4 py-3">Created</th>
+                <tr className="border-b border-white/[0.04]">
+                  <th className="text-left font-medium text-white/40 text-xs uppercase tracking-wider px-4 py-3">Name</th>
+                  <th className="text-left font-medium text-white/40 text-xs uppercase tracking-wider px-4 py-3">Vehicle</th>
+                  <th className="text-left font-medium text-white/40 text-xs uppercase tracking-wider px-4 py-3">Service</th>
+                  <th className="text-left font-medium text-white/40 text-xs uppercase tracking-wider px-4 py-3">Status</th>
+                  <th className="text-left font-medium text-white/40 text-xs uppercase tracking-wider px-4 py-3">Quoted</th>
+                  <th className="text-left font-medium text-white/40 text-xs uppercase tracking-wider px-4 py-3">Source</th>
+                  <th className="text-left font-medium text-white/40 text-xs uppercase tracking-wider px-4 py-3">Follow-up</th>
+                  <th className="text-left font-medium text-white/40 text-xs uppercase tracking-wider px-4 py-3">Created</th>
                 </tr>
               </thead>
               <tbody>
@@ -247,32 +247,32 @@ export default function Leads() {
                   return (
                     <tr
                       key={lead.id}
-                      className="border-b border-slate-50 hover:bg-slate-50 cursor-pointer transition-colors"
+                      className="border-b border-white/[0.04] hover:bg-white/[0.04] cursor-pointer transition-colors"
                       onClick={() => setSelectedLead(lead)}
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">
                           <Avatar name={lead.name} size="sm" />
-                          <span className="font-medium text-slate-900">{lead.name}</span>
+                          <span className="font-medium text-white">{lead.name}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-slate-600">
+                      <td className="px-4 py-3 text-white/60">
                         {lead.vehicleMake ? `${lead.vehicleMake} ${lead.vehicleModel}` : '—'}
                       </td>
-                      <td className="px-4 py-3 text-slate-600">{svcs.join(', ')}</td>
+                      <td className="px-4 py-3 text-white/60">{svcs.join(', ')}</td>
                       <td className="px-4 py-3">
                         <StatusBadge status={lead.status} />
                       </td>
-                      <td className="px-4 py-3 text-slate-900 font-medium">
+                      <td className="px-4 py-3 text-white font-medium">
                         {lead.quotedPrice > 0 ? formatCurrency(lead.quotedPrice) : '—'}
                       </td>
-                      <td className="px-4 py-3 text-slate-500">{lead.source}</td>
+                      <td className="px-4 py-3 text-white/40">{lead.source}</td>
                       <td className="px-4 py-3">
                         <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${urgencyColors[urgency]}`}>
                           {urgency === 'overdue' ? 'Overdue' : urgency === 'today' ? 'Today' : formatRelativeDate(lead.followUpDate)}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-slate-500">{formatRelativeDate(lead.createdAt)}</td>
+                      <td className="px-4 py-3 text-white/40">{formatRelativeDate(lead.createdAt)}</td>
                     </tr>
                   )
                 })}
@@ -354,15 +354,15 @@ function LeadCard({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="bg-white border border-slate-200 rounded-lg p-3 hover:border-slate-300 hover:shadow-sm transition-all duration-150 cursor-pointer group"
+      className="border border-white/[0.06] rounded-lg p-3 hover:border-white/[0.12] transition-all duration-150 cursor-pointer group"
       onClick={onClick}
     >
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2">
           <Avatar name={lead.name} size="sm" />
           <div>
-            <p className="text-sm font-medium text-slate-900">{lead.name}</p>
-            <p className="text-xs text-slate-500">
+            <p className="text-sm font-medium text-white">{lead.name}</p>
+            <p className="text-xs text-white/40">
               {lead.vehicleMake ? `${lead.vehicleMake} ${lead.vehicleModel}` : '—'}
             </p>
           </div>
@@ -370,7 +370,7 @@ function LeadCard({
         {canAdvance && (
           <button
             onClick={(e) => { e.stopPropagation(); onAdvance() }}
-            className="opacity-0 group-hover:opacity-100 p-1 rounded-md bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-all"
+            className="opacity-0 group-hover:opacity-100 p-1 rounded-md bg-[#6366f1]/10 text-[#6366f1] hover:bg-[#6366f1]/15 transition-all"
             title={`Advance to ${NEXT_STATUS[lead.status]}`}
           >
             <ArrowRight className="w-3.5 h-3.5" />
@@ -379,22 +379,22 @@ function LeadCard({
       </div>
 
       <div className="space-y-1.5">
-        <p className="text-xs text-slate-500">{svcs.join(', ')}</p>
+        <p className="text-xs text-white/40">{svcs.join(', ')}</p>
 
         <div className="flex items-center justify-between">
           {lead.quotedPrice > 0 && (
-            <span className="text-xs font-semibold text-slate-900">
+            <span className="text-xs font-semibold text-white">
               {formatCurrency(lead.quotedPrice)}
             </span>
           )}
           <Badge variant="outline" size="sm">{lead.source}</Badge>
         </div>
 
-        <div className="flex items-center justify-between pt-1 border-t border-slate-50">
+        <div className="flex items-center justify-between pt-1 border-t border-white/[0.04]">
           <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${urgencyColors[urgency]}`}>
             {urgency === 'overdue' ? 'Overdue' : urgency === 'today' ? 'Follow up today' : formatRelativeDate(lead.followUpDate)}
           </span>
-          <span className="text-[10px] text-slate-400">{formatRelativeDate(lead.createdAt)}</span>
+          <span className="text-[10px] text-white/30">{formatRelativeDate(lead.createdAt)}</span>
         </div>
       </div>
     </motion.div>
@@ -452,12 +452,12 @@ function LeadDetailModal({
         <div className="flex items-center gap-3">
           <StatusBadge status={lead.status} />
           {lead.quotedPrice > 0 && (
-            <span className="text-lg font-semibold text-slate-900">
+            <span className="text-lg font-semibold text-white">
               {formatCurrency(lead.quotedPrice)}
             </span>
           )}
           {lead.customerId && (
-            <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
               <CheckCircle2 className="w-3 h-3" />
               Converted
             </span>
@@ -467,40 +467,40 @@ function LeadDetailModal({
         {/* Contact Info */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-xs font-medium text-slate-500 mb-1">Contact</p>
+            <p className="text-xs font-medium text-white/40 mb-1">Contact</p>
             <div className="flex items-center gap-2">
               <Avatar name={lead.name} size="sm" />
               <div>
-                <p className="text-sm font-medium text-slate-900">{lead.name}</p>
-                <p className="text-xs text-slate-500">{lead.phone}</p>
+                <p className="text-sm font-medium text-white">{lead.name}</p>
+                <p className="text-xs text-white/40">{lead.phone}</p>
               </div>
             </div>
           </div>
           <div>
-            <p className="text-xs font-medium text-slate-500 mb-1">Vehicle</p>
-            <p className="text-sm text-slate-900">
+            <p className="text-xs font-medium text-white/40 mb-1">Vehicle</p>
+            <p className="text-sm text-white">
               {lead.vehicleMake ? `${lead.vehicleMake} ${lead.vehicleModel}` : '—'}
             </p>
-            <p className="text-xs text-slate-500">{lead.vehicleRegistration}</p>
+            <p className="text-xs text-white/40">{lead.vehicleRegistration}</p>
           </div>
         </div>
 
         {/* Email */}
         {lead.email && (
           <div>
-            <p className="text-xs font-medium text-slate-500 mb-1">Email</p>
-            <p className="text-sm text-slate-900">{lead.email}</p>
+            <p className="text-xs font-medium text-white/40 mb-1">Email</p>
+            <p className="text-sm text-white">{lead.email}</p>
           </div>
         )}
 
         {/* Services */}
         <div>
-          <p className="text-xs font-medium text-slate-500 mb-2">Services of Interest</p>
+          <p className="text-xs font-medium text-white/40 mb-2">Services of Interest</p>
           <div className="space-y-2">
             {svcs.map((svc: any) => (
-              <div key={svc.id} className="flex items-center justify-between bg-slate-50 rounded-lg px-3 py-2">
-                <span className="text-sm text-slate-900">{svc.name}</span>
-                <span className="text-sm text-slate-500">
+              <div key={svc.id} className="flex items-center justify-between bg-white/[0.03] rounded-lg px-3 py-2">
+                <span className="text-sm text-white">{svc.name}</span>
+                <span className="text-sm text-white/40">
                   {formatCurrency(svc.basePrice)} — {formatCurrency(svc.maxPrice)}
                 </span>
               </div>
@@ -511,29 +511,29 @@ function LeadDetailModal({
         {/* Details */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-xs font-medium text-slate-500 mb-1">Source</p>
-            <p className="text-sm text-slate-900">{lead.source}</p>
+            <p className="text-xs font-medium text-white/40 mb-1">Source</p>
+            <p className="text-sm text-white">{lead.source}</p>
           </div>
           <div>
-            <p className="text-xs font-medium text-slate-500 mb-1">Follow-up Date</p>
-            <p className="text-sm text-slate-900">{formatDate(lead.followUpDate)}</p>
+            <p className="text-xs font-medium text-white/40 mb-1">Follow-up Date</p>
+            <p className="text-sm text-white">{formatDate(lead.followUpDate)}</p>
           </div>
           <div>
-            <p className="text-xs font-medium text-slate-500 mb-1">Created</p>
-            <p className="text-sm text-slate-900">{formatDate(lead.createdAt)}</p>
+            <p className="text-xs font-medium text-white/40 mb-1">Created</p>
+            <p className="text-sm text-white">{formatDate(lead.createdAt)}</p>
           </div>
         </div>
 
         {/* Notes */}
         {lead.notes && (
           <div>
-            <p className="text-xs font-medium text-slate-500 mb-1">Notes</p>
-            <p className="text-sm text-slate-700 bg-slate-50 rounded-lg px-3 py-2">{lead.notes}</p>
+            <p className="text-xs font-medium text-white/40 mb-1">Notes</p>
+            <p className="text-sm text-white/70 bg-white/[0.03] rounded-lg px-3 py-2">{lead.notes}</p>
           </div>
         )}
 
         {/* Quick Actions */}
-        <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+        <div className="flex items-center gap-2 pt-2 border-t border-white/[0.04]">
           <Button
             variant="secondary" size="sm" icon={<Phone className="w-3.5 h-3.5" />}
             onClick={() => lead.phone && window.open(`tel:${lead.phone}`)}
@@ -626,7 +626,7 @@ function EditLeadModal({
     setSaving(false)
   }
 
-  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  const inputClass = "w-full rounded-lg border border-white/[0.10] bg-white/[0.04] text-sm px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30"
 
   return (
     <Modal
@@ -647,7 +647,7 @@ function EditLeadModal({
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Name *</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Name *</label>
             <input
               value={name}
               onChange={e => setName(e.target.value)}
@@ -656,7 +656,7 @@ function EditLeadModal({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Phone *</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Phone *</label>
             <input
               value={phone}
               onChange={e => setPhone(e.target.value)}
@@ -667,7 +667,7 @@ function EditLeadModal({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Email</label>
           <input
             value={email}
             onChange={e => setEmail(e.target.value)}
@@ -678,7 +678,7 @@ function EditLeadModal({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Vehicle Make</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Vehicle Make</label>
             <input
               value={vehicleMake}
               onChange={e => setVehicleMake(e.target.value)}
@@ -687,7 +687,7 @@ function EditLeadModal({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Vehicle Model</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Vehicle Model</label>
             <input
               value={vehicleModel}
               onChange={e => setVehicleModel(e.target.value)}
@@ -698,7 +698,7 @@ function EditLeadModal({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Registration No.</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Registration No.</label>
           <input
             value={vehicleRegistration}
             onChange={e => setVehicleRegistration(e.target.value)}
@@ -708,21 +708,21 @@ function EditLeadModal({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Services ({selectedServiceIds.length} selected)</label>
-          <div className="max-h-48 overflow-y-auto border border-slate-200 rounded-lg p-2 space-y-3">
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Services ({selectedServiceIds.length} selected)</label>
+          <div className="max-h-48 overflow-y-auto border border-white/[0.06] rounded-lg p-2 space-y-3">
             {Object.entries(servicesByCategory).map(([cat, catServices]) => (
               <div key={cat}>
-                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-1">{cat}</p>
+                <p className="text-[10px] font-semibold text-white/30 uppercase tracking-wide mb-1">{cat}</p>
                 {catServices.map(svc => (
-                  <label key={svc.id} className="flex items-center gap-2 py-1 cursor-pointer hover:bg-slate-50 rounded px-1">
+                  <label key={svc.id} className="flex items-center gap-2 py-1 cursor-pointer hover:bg-white/[0.04] rounded px-1">
                     <input
                       type="checkbox"
                       checked={selectedServiceIds.includes(svc.id)}
                       onChange={() => toggleService(svc.id)}
-                      className="rounded border-slate-300"
+                      className="rounded border-white/[0.08]"
                     />
-                    <span className="text-sm text-slate-700 flex-1">{svc.name}</span>
-                    <span className="text-xs text-slate-400">{formatCurrency(svc.basePrice)}+</span>
+                    <span className="text-sm text-white/70 flex-1">{svc.name}</span>
+                    <span className="text-xs text-white/30">{formatCurrency(svc.basePrice)}+</span>
                   </label>
                 ))}
               </div>
@@ -732,7 +732,7 @@ function EditLeadModal({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Quoted Price</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Quoted Price</label>
             <input
               value={quotedPrice}
               onChange={e => setQuotedPrice(e.target.value)}
@@ -742,7 +742,7 @@ function EditLeadModal({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Follow-up Date</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Follow-up Date</label>
             <input
               value={followUpDate}
               onChange={e => setFollowUpDate(e.target.value)}
@@ -753,7 +753,7 @@ function EditLeadModal({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Source</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Source</label>
           <select
             value={source}
             onChange={e => setSource(e.target.value)}
@@ -766,7 +766,7 @@ function EditLeadModal({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Notes</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Notes</label>
           <textarea
             value={notes}
             onChange={e => setNotes(e.target.value)}
@@ -857,7 +857,7 @@ function NewLeadModal({
     onClose()
   }
 
-  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  const inputClass = "w-full rounded-lg border border-white/[0.10] bg-white/[0.04] text-sm px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30"
 
   return (
     <Modal
@@ -876,7 +876,7 @@ function NewLeadModal({
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Name *</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Name *</label>
             <input
               value={name}
               onChange={e => setName(e.target.value)}
@@ -885,7 +885,7 @@ function NewLeadModal({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Phone *</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Phone *</label>
             <input
               value={phone}
               onChange={e => setPhone(e.target.value)}
@@ -896,7 +896,7 @@ function NewLeadModal({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Email</label>
           <input
             value={email}
             onChange={e => setEmail(e.target.value)}
@@ -907,7 +907,7 @@ function NewLeadModal({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Vehicle Make</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Vehicle Make</label>
             <input
               value={vehicleMake}
               onChange={e => setVehicleMake(e.target.value)}
@@ -916,7 +916,7 @@ function NewLeadModal({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Vehicle Model</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Vehicle Model</label>
             <input
               value={vehicleModel}
               onChange={e => setVehicleModel(e.target.value)}
@@ -927,7 +927,7 @@ function NewLeadModal({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Registration No.</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Registration No.</label>
           <input
             value={vehicleRegistration}
             onChange={e => setVehicleRegistration(e.target.value)}
@@ -937,21 +937,21 @@ function NewLeadModal({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Services * ({selectedServiceIds.length} selected)</label>
-          <div className="max-h-48 overflow-y-auto border border-slate-200 rounded-lg p-2 space-y-3">
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Services * ({selectedServiceIds.length} selected)</label>
+          <div className="max-h-48 overflow-y-auto border border-white/[0.06] rounded-lg p-2 space-y-3">
             {Object.entries(servicesByCategory).map(([cat, catServices]) => (
               <div key={cat}>
-                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-1">{cat}</p>
+                <p className="text-[10px] font-semibold text-white/30 uppercase tracking-wide mb-1">{cat}</p>
                 {catServices.map(svc => (
-                  <label key={svc.id} className="flex items-center gap-2 py-1 cursor-pointer hover:bg-slate-50 rounded px-1">
+                  <label key={svc.id} className="flex items-center gap-2 py-1 cursor-pointer hover:bg-white/[0.04] rounded px-1">
                     <input
                       type="checkbox"
                       checked={selectedServiceIds.includes(svc.id)}
                       onChange={() => toggleService(svc.id)}
-                      className="rounded border-slate-300"
+                      className="rounded border-white/[0.08]"
                     />
-                    <span className="text-sm text-slate-700 flex-1">{svc.name}</span>
-                    <span className="text-xs text-slate-400">{formatCurrency(svc.basePrice)}+</span>
+                    <span className="text-sm text-white/70 flex-1">{svc.name}</span>
+                    <span className="text-xs text-white/30">{formatCurrency(svc.basePrice)}+</span>
                   </label>
                 ))}
               </div>
@@ -960,7 +960,7 @@ function NewLeadModal({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Source *</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Source *</label>
           <select
             value={source}
             onChange={e => setSource(e.target.value)}
@@ -973,7 +973,7 @@ function NewLeadModal({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Notes</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Notes</label>
           <textarea
             value={notes}
             onChange={e => setNotes(e.target.value)}

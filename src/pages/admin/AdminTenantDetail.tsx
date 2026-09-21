@@ -71,11 +71,11 @@ export default function AdminTenantDetail() {
   }
 
   if (loading) {
-    return <div className="text-neutral-500 text-sm">Loading tenant...</div>;
+    return <div className="text-white/40 text-sm">Loading tenant...</div>;
   }
 
   if (!tenant) {
-    return <div className="text-neutral-500 text-sm">Tenant not found.</div>;
+    return <div className="text-white/40 text-sm">Tenant not found.</div>;
   }
 
   const infoFields = [
@@ -93,7 +93,7 @@ export default function AdminTenantDetail() {
     <div>
       <button
         onClick={() => navigate('/admin/tenants')}
-        className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-300 transition-colors mb-6"
+        className="flex items-center gap-1.5 text-sm text-white/40 hover:text-white/60 transition-colors mb-6"
       >
         <ArrowLeft size={14} />
         Back to Tenants
@@ -101,13 +101,13 @@ export default function AdminTenantDetail() {
 
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-white">{tenant.name}</h1>
-          <p className="text-sm text-neutral-500 mt-0.5">{tenant.slug}</p>
+          <h1 className="text-xl font-semibold text-white tracking-tight" style={{ fontFamily: 'Geist, Inter, sans-serif' }}>{tenant.name}</h1>
+          <p className="text-sm text-white/30 mt-0.5">{tenant.slug}</p>
         </div>
         <button
           onClick={handleToggleActive}
           disabled={toggling}
-          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 ${
+          className={`rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 ${
             tenant.isActive
               ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
               : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
@@ -130,9 +130,9 @@ export default function AdminTenantDetail() {
         ].map((stat) => (
           <div
             key={stat.label}
-            className="rounded-xl border border-neutral-800 bg-neutral-900 p-4"
+            className="rounded-xl border border-white/[0.06] bg-[#181b25] p-4"
           >
-            <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-1">
+            <p className="text-xs font-medium text-white/40 uppercase tracking-wide mb-1">
               {stat.label}
             </p>
             <p className="text-xl font-semibold text-white">{stat.value}</p>
@@ -141,15 +141,15 @@ export default function AdminTenantDetail() {
       </div>
 
       {/* Business Info */}
-      <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-5">
+      <div className="rounded-xl border border-white/[0.06] bg-[#181b25] p-5">
         <h2 className="text-sm font-medium text-white mb-4">Business Information</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {infoFields.map((field) => (
             <div key={field.label}>
-              <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+              <p className="text-xs font-medium text-white/40 uppercase tracking-wide">
                 {field.label}
               </p>
-              <p className="text-sm text-neutral-300 mt-1">{field.value || '-'}</p>
+              <p className="text-sm text-white/70 mt-1">{field.value || '-'}</p>
             </div>
           ))}
         </div>

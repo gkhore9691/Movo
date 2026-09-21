@@ -20,7 +20,7 @@ function StarRating({ rating, max = 5 }: { rating: number; max?: number }) {
         <Star
           key={i}
           className={`w-4 h-4 ${
-            i < rating ? 'text-amber-400 fill-amber-400' : 'text-slate-200'
+            i < rating ? 'text-amber-400 fill-amber-400' : 'text-white/20'
           }`}
         />
       ))}
@@ -65,8 +65,8 @@ export default function Reviews() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Reviews</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Customer feedback and Google reviews</p>
+          <h1 className="text-xl font-semibold text-white">Reviews</h1>
+          <p className="text-sm text-white/40 mt-0.5">Customer feedback and Google reviews</p>
         </div>
         <Button icon={<Plus className="w-4 h-4" />} onClick={() => setShowRequestReview(true)}>
           Request Review
@@ -88,11 +88,11 @@ export default function Reviews() {
         <CardHeader title="Review Workflow" subtitle="Automated post-delivery flow" />
         <div className="flex items-center gap-2 flex-wrap">
           <WorkflowStep label="Job Delivered" icon={<CheckCircle className="w-3.5 h-3.5" />} active />
-          <ArrowRight className="w-4 h-4 text-slate-300 shrink-0" />
+          <ArrowRight className="w-4 h-4 text-white/20 shrink-0" />
           <WorkflowStep label="Wait 1 Day" icon={<Clock className="w-3.5 h-3.5" />} />
-          <ArrowRight className="w-4 h-4 text-slate-300 shrink-0" />
+          <ArrowRight className="w-4 h-4 text-white/20 shrink-0" />
           <WorkflowStep label="Request Review" icon={<Send className="w-3.5 h-3.5" />} />
-          <ArrowRight className="w-4 h-4 text-slate-300 shrink-0" />
+          <ArrowRight className="w-4 h-4 text-white/20 shrink-0" />
           <div className="flex flex-col gap-1">
             <WorkflowStep label="★ 4-5 → Google Review" icon={<Star className="w-3.5 h-3.5" />} variant="success" />
             <WorkflowStep label="★ 1-3 → Private Feedback" icon={<MessageSquare className="w-3.5 h-3.5" />} variant="warning" />
@@ -120,9 +120,9 @@ export default function Reviews() {
               key={review.id}
               className={`${
                 review.status === 'published'
-                  ? 'border-emerald-200'
+                  ? 'border-emerald-500/20'
                   : isNegative && review.status === 'received'
-                    ? 'border-amber-200'
+                    ? 'border-amber-500/20'
                     : ''
               }`}
             >
@@ -131,8 +131,8 @@ export default function Reviews() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="text-sm font-semibold text-slate-900">{customer?.name}</h3>
-                      <p className="text-xs text-slate-500 mt-0.5">{svcNames} · {formatRelativeDate(review.createdAt)}</p>
+                      <h3 className="text-sm font-semibold text-white">{customer?.name}</h3>
+                      <p className="text-xs text-white/40 mt-0.5">{svcNames} · {formatRelativeDate(review.createdAt)}</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <StatusBadge status={review.status} />
@@ -146,7 +146,7 @@ export default function Reviews() {
                   )}
 
                   {review.comment && (
-                    <p className="text-sm text-slate-600 mt-2 leading-relaxed">
+                    <p className="text-sm text-white/60 mt-2 leading-relaxed">
                       "{review.comment}"
                     </p>
                   )}
@@ -223,15 +223,15 @@ export default function Reviews() {
               <div className="flex items-center gap-3">
                 <Avatar name={fbCustomer?.name ?? 'Unknown'} size="lg" />
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">{fbCustomer?.name}</p>
-                  <p className="text-xs text-slate-500">{fbSvcNames} · {formatRelativeDate(showViewFeedback.createdAt)}</p>
+                  <p className="text-sm font-semibold text-white">{fbCustomer?.name}</p>
+                  <p className="text-xs text-white/40">{fbSvcNames} · {formatRelativeDate(showViewFeedback.createdAt)}</p>
                 </div>
               </div>
               <div>
                 <StarRating rating={showViewFeedback.rating} />
               </div>
-              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                <p className="text-sm text-slate-700 leading-relaxed italic">
+              <div className="p-4 bg-white/[0.03] rounded-lg border border-white/[0.06]">
+                <p className="text-sm text-white/70 leading-relaxed italic">
                   "{showViewFeedback.comment || 'No comment provided.'}"
                 </p>
               </div>
@@ -268,14 +268,14 @@ export default function Reviews() {
       >
         {showRespondPrivately && (
           <div className="space-y-4">
-            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-              <p className="text-xs text-slate-500 mb-1">Original feedback:</p>
-              <p className="text-sm text-slate-700 italic">"{showRespondPrivately.comment || 'No comment'}"</p>
+            <div className="p-3 bg-white/[0.03] rounded-lg border border-white/[0.06]">
+              <p className="text-xs text-white/40 mb-1">Original feedback:</p>
+              <p className="text-sm text-white/70 italic">"{showRespondPrivately.comment || 'No comment'}"</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Your response</label>
+              <label className="block text-sm font-medium text-white/70 mb-1.5">Your response</label>
               <textarea
-                className="w-full text-sm text-slate-600 border border-slate-200 rounded-lg p-3 resize-none focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full text-sm text-white bg-white/[0.04] border border-white/[0.10] rounded-lg p-3 resize-none focus:outline-none focus:ring-1 focus:ring-[#6366f1]/30 focus:border-[#6366f1]/30 placeholder-white/30"
                 rows={4}
                 placeholder="Write a private response to address their concerns..."
                 value={responseText}
@@ -366,7 +366,7 @@ function RequestReviewModal({
           disabled={!selectedCustomer || deliveredJobs.length === 0}
         />
         {selectedCustomer && deliveredJobs.length === 0 && (
-          <p className="text-xs text-amber-600">No delivered jobs found for this customer.</p>
+          <p className="text-xs text-amber-400">No delivered jobs found for this customer.</p>
         )}
       </div>
     </Modal>
@@ -385,9 +385,9 @@ function WorkflowStep({
   variant?: 'default' | 'success' | 'warning'
 }) {
   const variantClasses = {
-    default: active ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-slate-50 border-slate-200 text-slate-600',
-    success: 'bg-emerald-50 border-emerald-200 text-emerald-700',
-    warning: 'bg-amber-50 border-amber-200 text-amber-700',
+    default: active ? 'bg-[#6366f1]/10 border-[#6366f1]/20 text-[#818cf8]' : 'bg-white/[0.03] border-white/[0.06] text-white/60',
+    success: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
+    warning: 'bg-amber-500/10 border-amber-500/20 text-amber-400',
   }
 
   return (

@@ -10,7 +10,7 @@ import { useApp } from '@/contexts/AppContext'
 import { Card, CardHeader, Stat, Badge } from '@/components/ui'
 import { formatCurrency } from '@/utils/format'
 
-const CHART_COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6', '#06b6d4']
+const CHART_COLORS = ['#818cf8', '#34d399', '#fbbf24', '#fb7185', '#a78bfa', '#22d3ee']
 
 export default function Analytics() {
   const { invoices, leads, jobs, customers, staff, services } = useApp()
@@ -90,11 +90,11 @@ export default function Analytics() {
 
   const leadFunnelData = useMemo(() => {
     const stages: { name: string; count: number; color: string }[] = [
-      { name: 'New', count: leads.filter(l => l.status === 'new').length, color: '#94a3b8' },
-      { name: 'Contacted', count: leads.filter(l => l.status === 'contacted').length, color: '#3b82f6' },
-      { name: 'Quoted', count: leads.filter(l => l.status === 'quoted').length, color: '#4f46e5' },
-      { name: 'Negotiation', count: leads.filter(l => l.status === 'negotiation').length, color: '#f59e0b' },
-      { name: 'Won', count: leads.filter(l => l.status === 'won').length, color: '#10b981' },
+      { name: 'New', count: leads.filter(l => l.status === 'new').length, color: 'rgba(255,255,255,0.3)' },
+      { name: 'Contacted', count: leads.filter(l => l.status === 'contacted').length, color: '#60a5fa' },
+      { name: 'Quoted', count: leads.filter(l => l.status === 'quoted').length, color: '#818cf8' },
+      { name: 'Negotiation', count: leads.filter(l => l.status === 'negotiation').length, color: '#fbbf24' },
+      { name: 'Won', count: leads.filter(l => l.status === 'won').length, color: '#34d399' },
     ]
     return stages
   }, [leads])
@@ -135,8 +135,8 @@ export default function Analytics() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900">Analytics</h1>
-        <p className="text-sm text-slate-500 mt-1">Business performance at a glance</p>
+        <h1 className="text-2xl font-semibold text-white">Analytics</h1>
+        <p className="text-sm text-white/40 mt-1">Business performance at a glance</p>
       </div>
 
       <motion.div
@@ -184,35 +184,36 @@ export default function Analytics() {
                 <AreaChart data={revenueData}>
                   <defs>
                     <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.15} />
-                      <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#818cf8" stopOpacity={0.15} />
+                      <stop offset="95%" stopColor="#818cf8" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <XAxis
                     dataKey="month"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 12, fill: '#94a3b8' }}
+                    tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.3)' }}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 12, fill: '#94a3b8' }}
+                    tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.3)' }}
                     tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
                   />
                   <Tooltip
                     formatter={(value: unknown) => [formatCurrency(Number(value)), 'Revenue']}
                     contentStyle={{
-                      borderRadius: '8px',
-                      border: '1px solid #e2e8f0',
-                      boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
+                      background: '#282c3a',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: 8,
+                      color: 'white',
                       fontSize: '12px',
                     }}
                   />
                   <Area
                     type="monotone"
                     dataKey="revenue"
-                    stroke="#4f46e5"
+                    stroke="#818cf8"
                     strokeWidth={2}
                     fill="url(#revenueGrad)"
                   />
@@ -237,20 +238,22 @@ export default function Analytics() {
                     type="number"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 12, fill: '#94a3b8' }}
+                    tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.3)' }}
                   />
                   <YAxis
                     type="category"
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 12, fill: '#64748b' }}
+                    tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.3)' }}
                     width={80}
                   />
                   <Tooltip
                     contentStyle={{
-                      borderRadius: '8px',
-                      border: '1px solid #e2e8f0',
+                      background: '#282c3a',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: 8,
+                      color: 'white',
                       fontSize: '12px',
                     }}
                   />
@@ -293,8 +296,10 @@ export default function Analytics() {
                     <Tooltip
                       formatter={(value: unknown) => [formatCurrency(Number(value)), 'Revenue']}
                       contentStyle={{
-                        borderRadius: '8px',
-                        border: '1px solid #e2e8f0',
+                        background: '#282c3a',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        borderRadius: 8,
+                        color: 'white',
                         fontSize: '12px',
                       }}
                     />
@@ -303,12 +308,12 @@ export default function Analytics() {
                       align="right"
                       layout="vertical"
                       iconSize={8}
-                      formatter={(value) => <span className="text-xs text-slate-600">{value}</span>}
+                      formatter={(value) => <span className="text-xs text-white/60">{value}</span>}
                     />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="text-sm text-slate-400 text-center w-full">No revenue data yet</p>
+                <p className="text-sm text-white/30 text-center w-full">No revenue data yet</p>
               )}
             </div>
           </Card>
@@ -329,37 +334,39 @@ export default function Analytics() {
                     dataKey="month"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 12, fill: '#94a3b8' }}
+                    tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.3)' }}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 12, fill: '#94a3b8' }}
+                    tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.3)' }}
                   />
                   <Tooltip
                     contentStyle={{
-                      borderRadius: '8px',
-                      border: '1px solid #e2e8f0',
+                      background: '#282c3a',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: 8,
+                      color: 'white',
                       fontSize: '12px',
                     }}
                   />
                   <Legend
                     iconSize={8}
-                    formatter={(value) => <span className="text-xs text-slate-600 capitalize">{value}</span>}
+                    formatter={(value) => <span className="text-xs text-white/60 capitalize">{value}</span>}
                   />
                   <Line
                     type="monotone"
                     dataKey="new"
-                    stroke="#10b981"
+                    stroke="#34d399"
                     strokeWidth={2}
-                    dot={{ fill: '#10b981', r: 3 }}
+                    dot={{ fill: '#34d399', r: 3 }}
                   />
                   <Line
                     type="monotone"
                     dataKey="repeat"
-                    stroke="#4f46e5"
+                    stroke="#818cf8"
                     strokeWidth={2}
-                    dot={{ fill: '#4f46e5', r: 3 }}
+                    dot={{ fill: '#818cf8', r: 3 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -380,18 +387,18 @@ export default function Analytics() {
             <CardHeader title="Operations" subtitle="Average time per stage & workload" />
 
             <div className="mb-6">
-              <h4 className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-3">Avg. Time per Stage</h4>
+              <h4 className="text-xs font-medium text-white/40 uppercase tracking-wide mb-3">Avg. Time per Stage</h4>
               <div className="space-y-2">
                 {stageTimeData.map(st => (
                   <div key={st.stage} className="flex items-center justify-between">
-                    <span className="text-xs text-slate-600 w-40 truncate">{st.stage}</span>
-                    <div className="flex-1 mx-3 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <span className="text-xs text-white/60 w-40 truncate">{st.stage}</span>
+                    <div className="flex-1 mx-3 h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-indigo-400 rounded-full"
+                        className="h-full bg-[#818cf8] rounded-full"
                         style={{ width: `${Math.min((st.hours / 48) * 100, 100)}%` }}
                       />
                     </div>
-                    <span className="text-xs text-slate-500 w-12 text-right">
+                    <span className="text-xs text-white/40 w-12 text-right">
                       {st.hours >= 24 ? `${Math.round(st.hours / 24)}d` : `${st.hours}h`}
                     </span>
                   </div>
@@ -400,18 +407,18 @@ export default function Analytics() {
             </div>
 
             <div>
-              <h4 className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-3">Current Workload</h4>
+              <h4 className="text-xs font-medium text-white/40 uppercase tracking-wide mb-3">Current Workload</h4>
               <div className="space-y-2">
                 {workload.map(w => (
                   <div key={w.name} className="flex items-center justify-between">
-                    <span className="text-xs text-slate-600 w-20">{w.name}</span>
+                    <span className="text-xs text-white/60 w-20">{w.name}</span>
                     <div className="flex-1 mx-3 flex items-center gap-1">
                       {Array.from({ length: Math.max(w.active, 0) }).map((_, i) => (
-                        <div key={i} className="w-4 h-4 rounded bg-indigo-100 border border-indigo-200" />
+                        <div key={i} className="w-4 h-4 rounded bg-[#6366f1]/10 border border-[#6366f1]/20" />
                       ))}
-                      {w.active === 0 && <span className="text-xs text-slate-400">No active jobs</span>}
+                      {w.active === 0 && <span className="text-xs text-white/30">No active jobs</span>}
                     </div>
-                    <span className="text-xs font-medium text-slate-700">{w.active} active</span>
+                    <span className="text-xs font-medium text-white/70">{w.active} active</span>
                   </div>
                 ))}
               </div>
@@ -438,19 +445,19 @@ export default function Analytics() {
                   return (
                     <div
                       key={inv.id}
-                      className="flex items-center justify-between p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors"
+                      className="flex items-center justify-between p-3 bg-white/[0.03] rounded-lg cursor-pointer hover:bg-white/[0.06] transition-colors"
                       onClick={() => navigate('/payments')}
                     >
                       <div>
-                        <p className="text-sm font-medium text-slate-700">
+                        <p className="text-sm font-medium text-white/70">
                           {customer?.name || 'Customer'}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-white/40">
                           {inv.id.toUpperCase()} · Balance: {formatCurrency(inv.balance)}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-semibold text-slate-900">{formatCurrency(inv.amount)}</p>
+                        <p className="text-sm font-semibold text-white">{formatCurrency(inv.amount)}</p>
                         <Badge
                           variant={inv.status === 'overdue' ? 'danger' : 'warning'}
                           size="sm"
@@ -463,7 +470,7 @@ export default function Analytics() {
                 })}
               </div>
             ) : (
-              <p className="text-sm text-slate-400 text-center py-8">All payments collected!</p>
+              <p className="text-sm text-white/30 text-center py-8">All payments collected!</p>
             )}
           </Card>
         </motion.div>

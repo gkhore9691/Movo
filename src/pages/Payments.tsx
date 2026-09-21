@@ -65,8 +65,8 @@ export default function Payments() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Payments</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Invoices and payment tracking</p>
+          <h1 className="text-xl font-semibold text-white">Payments</h1>
+          <p className="text-sm text-white/40 mt-0.5">Invoices and payment tracking</p>
         </div>
         <Button icon={<Plus className="w-4 h-4" />} onClick={() => setShowCreateInvoice(true)}>Create Invoice</Button>
       </div>
@@ -90,8 +90,8 @@ export default function Payments() {
         className="mb-6"
       />
 
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-        <div className="hidden md:grid grid-cols-[1fr_1.2fr_1fr_0.7fr_0.7fr_0.7fr_0.6fr_0.5fr] gap-4 px-5 py-3 border-b border-slate-100 text-xs font-medium text-slate-500 uppercase tracking-wide">
+      <div className="border border-white/[0.06] rounded-xl overflow-hidden">
+        <div className="hidden md:grid grid-cols-[1fr_1.2fr_1fr_0.7fr_0.7fr_0.7fr_0.6fr_0.5fr] gap-4 px-5 py-3 border-b border-white/[0.04] text-xs font-medium text-white/40 uppercase tracking-wide">
           <span>Invoice</span>
           <span>Customer</span>
           <span>Service</span>
@@ -110,22 +110,22 @@ export default function Payments() {
             <div
               key={invoice.id}
               onClick={() => setSelectedInvoice(invoice)}
-              className="grid grid-cols-1 md:grid-cols-[1fr_1.2fr_1fr_0.7fr_0.7fr_0.7fr_0.6fr_0.5fr] gap-2 md:gap-4 px-5 py-4 border-b border-slate-50 hover:bg-slate-50/50 cursor-pointer transition-colors"
+              className="grid grid-cols-1 md:grid-cols-[1fr_1.2fr_1fr_0.7fr_0.7fr_0.7fr_0.6fr_0.5fr] gap-2 md:gap-4 px-5 py-4 border-b border-white/[0.04] hover:bg-white/[0.04] cursor-pointer transition-colors"
             >
               <div>
-                <span className="text-sm font-mono font-medium text-slate-900">
+                <span className="text-sm font-mono font-medium text-white">
                   {getInvoiceNumber(invoice.id)}
                 </span>
-                <p className="text-xs text-slate-400 md:hidden mt-0.5">{customer?.name}</p>
+                <p className="text-xs text-white/30 md:hidden mt-0.5">{customer?.name}</p>
               </div>
               <button
-                className="text-sm text-indigo-600 hover:text-indigo-700 hover:underline hidden md:block truncate cursor-pointer"
+                className="text-sm text-[#6366f1] hover:text-[#818cf8] hover:underline hidden md:block truncate cursor-pointer"
                 onClick={(e) => { e.stopPropagation(); navigate(`/customers/${invoice.customerId}`) }}
               >{customer?.name ?? 'Unknown'}</button>
-              <span className="text-sm text-slate-600 hidden md:block truncate">{svcText}</span>
-              <span className="text-sm font-semibold text-slate-900">{formatCurrency(invoice.amount)}</span>
-              <span className="text-sm text-slate-500 hidden md:block">{formatCurrency(invoice.deposit)}</span>
-              <span className={`text-sm font-medium hidden md:block ${invoice.balance > 0 ? 'text-amber-600' : 'text-slate-400'}`}>
+              <span className="text-sm text-white/60 hidden md:block truncate">{svcText}</span>
+              <span className="text-sm font-semibold text-white">{formatCurrency(invoice.amount)}</span>
+              <span className="text-sm text-white/40 hidden md:block">{formatCurrency(invoice.deposit)}</span>
+              <span className={`text-sm font-medium hidden md:block ${invoice.balance > 0 ? 'text-amber-400' : 'text-white/30'}`}>
                 {invoice.balance > 0 ? formatCurrency(invoice.balance) : '—'}
               </span>
               <div className="hidden md:block">
@@ -133,7 +133,7 @@ export default function Payments() {
               </div>
               <div className="hidden md:flex items-center gap-1.5">
                 <PaymentMethodIcon method={invoice.paymentMethod} />
-                <span className="text-xs text-slate-500 capitalize">{invoice.paymentMethod ?? '—'}</span>
+                <span className="text-xs text-white/40 capitalize">{invoice.paymentMethod ?? '—'}</span>
               </div>
             </div>
           )
@@ -141,8 +141,8 @@ export default function Payments() {
 
         {filtered.length === 0 && (
           <div className="py-12 text-center">
-            <FileText className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-            <p className="text-sm text-slate-500">No invoices in this category</p>
+            <FileText className="w-10 h-10 text-white/20 mx-auto mb-3" />
+            <p className="text-sm text-white/40">No invoices in this category</p>
           </div>
         )}
       </div>
@@ -232,81 +232,81 @@ function InvoiceModal({
       <div className="space-y-6">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-lg font-bold text-slate-900">{currentTenant?.name ?? 'Business Name'}</h3>
+            <h3 className="text-lg font-bold text-white">{currentTenant?.name ?? 'Business Name'}</h3>
             {currentTenant?.address && (
-              <p className="text-sm text-slate-500">{currentTenant.address}, {currentTenant.city}, {currentTenant.state}</p>
+              <p className="text-sm text-white/40">{currentTenant.address}, {currentTenant.city}, {currentTenant.state}</p>
             )}
             {currentTenant?.gstNumber && (
-              <p className="text-sm text-slate-500">GSTIN: {currentTenant.gstNumber}</p>
+              <p className="text-sm text-white/40">GSTIN: {currentTenant.gstNumber}</p>
             )}
             {currentTenant?.phone && (
-              <p className="text-sm text-slate-500">Phone: {currentTenant.phone}</p>
+              <p className="text-sm text-white/40">Phone: {currentTenant.phone}</p>
             )}
           </div>
           <div className="text-right">
-            <p className="text-sm font-mono font-bold text-slate-900">{getInvoiceNumber(invoice.id)}</p>
-            <p className="text-sm text-slate-500">{formatDate(invoice.createdAt)}</p>
+            <p className="text-sm font-mono font-bold text-white">{getInvoiceNumber(invoice.id)}</p>
+            <p className="text-sm text-white/40">{formatDate(invoice.createdAt)}</p>
             <div className="mt-2">
               <StatusBadge status={invoice.status} />
             </div>
           </div>
         </div>
 
-        <div className="border-t border-slate-100 pt-4">
-          <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Bill To</p>
+        <div className="border-t border-white/[0.04] pt-4">
+          <p className="text-xs text-white/40 uppercase tracking-wide mb-1">Bill To</p>
           <button
-            className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 hover:underline cursor-pointer"
+            className="text-sm font-semibold text-[#6366f1] hover:text-[#818cf8] hover:underline cursor-pointer"
             onClick={() => { navigate(`/customers/${invoice.customerId}`); onClose() }}
           >{customer?.name}</button>
-          <p className="text-sm text-slate-500">{customer?.address}</p>
-          <p className="text-sm text-slate-500">{customer?.phone}</p>
+          <p className="text-sm text-white/40">{customer?.address}</p>
+          <p className="text-sm text-white/40">{customer?.phone}</p>
         </div>
 
-        <div className="border border-slate-200 rounded-lg overflow-hidden">
-          <div className="grid grid-cols-[1fr_auto_auto] gap-4 px-4 py-2.5 bg-slate-50 border-b border-slate-200 text-xs font-medium text-slate-500 uppercase tracking-wide">
+        <div className="border border-white/[0.06] rounded-lg overflow-hidden">
+          <div className="grid grid-cols-[1fr_auto_auto] gap-4 px-4 py-2.5 bg-white/[0.03] border-b border-white/[0.06] text-xs font-medium text-white/40 uppercase tracking-wide">
             <span>Service</span>
             <span>Qty</span>
             <span className="text-right">Amount</span>
           </div>
           {lineItems.map((item: { name: string; amount: number }, i: number) => (
-            <div key={i} className="grid grid-cols-[1fr_auto_auto] gap-4 px-4 py-3 border-b border-slate-50">
-              <span className="text-sm text-slate-900">{item.name}</span>
-              <span className="text-sm text-slate-500 text-center">1</span>
-              <span className="text-sm font-medium text-slate-900 text-right">{formatCurrency(Math.round(item.amount))}</span>
+            <div key={i} className="grid grid-cols-[1fr_auto_auto] gap-4 px-4 py-3 border-b border-white/[0.04]">
+              <span className="text-sm text-white">{item.name}</span>
+              <span className="text-sm text-white/40 text-center">1</span>
+              <span className="text-sm font-medium text-white text-right">{formatCurrency(Math.round(item.amount))}</span>
             </div>
           ))}
         </div>
 
-        <div className="space-y-2 border-t border-slate-100 pt-4">
+        <div className="space-y-2 border-t border-white/[0.04] pt-4">
           <div className="flex justify-between text-sm">
-            <span className="text-slate-500">Subtotal</span>
-            <span className="text-slate-900">{formatCurrency(subtotal)}</span>
+            <span className="text-white/40">Subtotal</span>
+            <span className="text-white">{formatCurrency(subtotal)}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-slate-500">GST (18%)</span>
-            <span className="text-slate-900">{formatCurrency(gst)}</span>
+            <span className="text-white/40">GST (18%)</span>
+            <span className="text-white">{formatCurrency(gst)}</span>
           </div>
-          <div className="flex justify-between text-sm font-bold border-t border-slate-200 pt-2">
-            <span className="text-slate-900">Total</span>
-            <span className="text-slate-900">{formatCurrency(total)}</span>
+          <div className="flex justify-between text-sm font-bold border-t border-white/[0.06] pt-2">
+            <span className="text-white">Total</span>
+            <span className="text-white">{formatCurrency(total)}</span>
           </div>
         </div>
 
-        <div className="space-y-2 border-t border-slate-100 pt-4">
+        <div className="space-y-2 border-t border-white/[0.04] pt-4">
           <div className="flex justify-between text-sm">
-            <span className="text-slate-500">Deposit Paid</span>
-            <span className="text-emerald-600 font-medium">{formatCurrency(invoice.deposit)}</span>
+            <span className="text-white/40">Deposit Paid</span>
+            <span className="text-emerald-400 font-medium">{formatCurrency(invoice.deposit)}</span>
           </div>
           <div className="flex justify-between text-sm font-bold">
-            <span className="text-slate-900">Balance Due</span>
-            <span className={invoice.balance > 0 ? 'text-amber-600' : 'text-emerald-600'}>
+            <span className="text-white">Balance Due</span>
+            <span className={invoice.balance > 0 ? 'text-amber-400' : 'text-emerald-400'}>
               {formatCurrency(invoice.balance > 0 ? invoice.balance + gst : 0)}
             </span>
           </div>
           {invoice.paymentMethod && (
             <div className="flex justify-between text-sm">
-              <span className="text-slate-500">Payment Method</span>
-              <span className="text-slate-700 capitalize flex items-center gap-1.5">
+              <span className="text-white/40">Payment Method</span>
+              <span className="text-white/70 capitalize flex items-center gap-1.5">
                 <PaymentMethodIcon method={invoice.paymentMethod} />
                 {invoice.paymentMethod}
               </span>
@@ -314,35 +314,35 @@ function InvoiceModal({
           )}
           {invoice.paidAt && (
             <div className="flex justify-between text-sm">
-              <span className="text-slate-500">Paid On</span>
-              <span className="text-slate-700">{formatDate(invoice.paidAt)}</span>
+              <span className="text-white/40">Paid On</span>
+              <span className="text-white/70">{formatDate(invoice.paidAt)}</span>
             </div>
           )}
         </div>
       </div>
       {showPaymentMethod && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm mx-4">
-            <h3 className="text-base font-semibold text-slate-900 mb-4">Select Payment Method</h3>
+          <div className="bg-[#1e2130] rounded-xl shadow-xl p-6 w-full max-w-sm mx-4 border border-white/[0.06]">
+            <h3 className="text-base font-semibold text-white mb-4">Select Payment Method</h3>
             <div className="space-y-2 mb-6">
               {([
-                { value: 'upi', label: 'UPI', icon: <Smartphone className="w-4 h-4 text-indigo-500" /> },
-                { value: 'cash', label: 'Cash', icon: <Banknote className="w-4 h-4 text-emerald-500" /> },
-                { value: 'card', label: 'Card', icon: <CreditCard className="w-4 h-4 text-blue-500" /> },
+                { value: 'upi', label: 'UPI', icon: <Smartphone className="w-4 h-4 text-[#818cf8]" /> },
+                { value: 'cash', label: 'Cash', icon: <Banknote className="w-4 h-4 text-emerald-400" /> },
+                { value: 'card', label: 'Card', icon: <CreditCard className="w-4 h-4 text-blue-400" /> },
               ] as const).map(opt => (
                 <button
                   key={opt.value}
                   onClick={() => setSelectedMethod(opt.value)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-colors ${
                     selectedMethod === opt.value
-                      ? 'bg-indigo-50 border-indigo-200'
-                      : 'border-slate-200 hover:bg-slate-50'
+                      ? 'bg-[#6366f1]/10 border-[#6366f1]/20'
+                      : 'border-white/[0.06] hover:bg-white/[0.04]'
                   }`}
                 >
                   {opt.icon}
-                  <span className="text-sm font-medium text-slate-900">{opt.label}</span>
+                  <span className="text-sm font-medium text-white">{opt.label}</span>
                   {selectedMethod === opt.value && (
-                    <CheckCircle2 className="w-4 h-4 text-indigo-600 ml-auto" />
+                    <CheckCircle2 className="w-4 h-4 text-[#6366f1] ml-auto" />
                   )}
                 </button>
               ))}
@@ -393,7 +393,7 @@ function CreateInvoiceModal({
     ? jobs.filter(j => j.customerId === customerId)
     : []
 
-  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  const inputClass = "w-full rounded-lg border border-white/[0.10] bg-white/[0.04] text-sm text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30"
 
   async function handleCreate() {
     if (!customerId || !amount) return
@@ -460,7 +460,7 @@ function CreateInvoiceModal({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Amount *</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Amount *</label>
             <input
               type="number"
               value={amount}
@@ -470,7 +470,7 @@ function CreateInvoiceModal({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Deposit</label>
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Deposit</label>
             <input
               type="number"
               value={deposit}
@@ -482,7 +482,7 @@ function CreateInvoiceModal({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Notes</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Notes</label>
           <textarea
             value={notes}
             onChange={e => setNotes(e.target.value)}
@@ -498,9 +498,9 @@ function CreateInvoiceModal({
 
 function PaymentMethodIcon({ method }: { method?: string }) {
   switch (method) {
-    case 'upi': return <Smartphone className="w-4 h-4 text-indigo-500" />
-    case 'card': return <CreditCard className="w-4 h-4 text-blue-500" />
-    case 'cash': return <Banknote className="w-4 h-4 text-emerald-500" />
-    default: return <CreditCard className="w-4 h-4 text-slate-400" />
+    case 'upi': return <Smartphone className="w-4 h-4 text-[#818cf8]" />
+    case 'card': return <CreditCard className="w-4 h-4 text-blue-400" />
+    case 'cash': return <Banknote className="w-4 h-4 text-emerald-400" />
+    default: return <CreditCard className="w-4 h-4 text-white/30" />
   }
 }

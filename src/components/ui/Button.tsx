@@ -15,13 +15,13 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800',
+    'bg-[#6366f1] text-white hover:bg-[#5558e6] active:scale-[0.98]',
   secondary:
-    'bg-white text-neutral-700 border border-neutral-300 hover:bg-neutral-50 active:bg-neutral-100',
+    'bg-white/[0.06] text-white/80 border border-white/[0.08] hover:bg-white/[0.10]',
   ghost:
-    'text-neutral-600 hover:bg-neutral-100 active:bg-neutral-200',
+    'text-white/60 hover:bg-white/[0.06]',
   danger:
-    'bg-red-600 text-white hover:bg-red-700 active:bg-red-800',
+    'bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25',
 }
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -49,7 +49,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         disabled={disabled || loading}
-        className={`inline-flex items-center justify-center font-medium rounded-lg transition-colors duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+        className={`inline-flex items-center justify-center font-medium rounded-md transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6366f1]/40 disabled:opacity-40 disabled:cursor-not-allowed ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
         {...props}
       >
         {loading ? (

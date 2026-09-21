@@ -50,25 +50,30 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     <>
       {open && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
           onClick={onClose}
         />
       )}
 
       <aside
-        className={`fixed top-0 left-0 z-50 flex h-screen w-60 flex-col bg-neutral-900 transition-transform duration-200 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 left-0 z-50 flex h-screen w-60 flex-col bg-[#0f1117] border-r border-white/[0.06] transition-transform duration-200 ease-in-out lg:translate-x-0 ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {/* Business Brand */}
+        {/* Logo / Brand */}
         <div className="flex items-center justify-between px-4 py-4">
           <div>
-            <p className="text-sm font-semibold text-white leading-tight">{currentTenant?.name ?? 'Movo'}</p>
-            {(currentTenant?.city) && <p className="text-[11px] text-neutral-500 mt-0.5">{currentTenant.city}</p>}
+            <p className="font-bold text-lg text-white tracking-tight" style={{ fontFamily: 'Geist, Inter, sans-serif' }}>movo</p>
+            {currentTenant?.name && (
+              <p className="text-[13px] font-medium text-white/60 leading-tight mt-0.5">{currentTenant.name}</p>
+            )}
+            {currentTenant?.city && (
+              <p className="text-[11px] text-white/30 mt-0.5">{currentTenant.city}</p>
+            )}
           </div>
           <button
             onClick={onClose}
-            className="rounded-md p-1 text-neutral-500 hover:text-neutral-300 lg:hidden"
+            className="rounded-md p-1 text-white/40 hover:text-white/60 lg:hidden"
           >
             <X size={16} />
           </button>
@@ -84,10 +89,10 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                   end={item.to === '/'}
                   onClick={onClose}
                   className={({ isActive }) =>
-                    `flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors duration-150 ${
+                    `relative flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] font-medium transition-colors duration-150 ${
                       isActive
-                        ? 'bg-white/10 text-white'
-                        : 'text-neutral-400 hover:text-neutral-200'
+                        ? 'bg-[#6366f1]/10 text-[#6366f1] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-4 before:w-0.5 before:bg-[#6366f1] before:rounded-full'
+                        : 'text-white/40 hover:text-white/60 hover:bg-white/[0.04]'
                     }`
                   }
                 >
@@ -100,16 +105,16 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         </nav>
 
         {/* Bottom */}
-        <div className="border-t border-neutral-800 px-2 py-2">
+        <div className="border-t border-white/[0.06] px-2 py-2">
           {currentUser?.role === 'admin' && (
             <NavLink
               to="/admin"
               onClick={onClose}
               className={({ isActive }) =>
-                `flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors duration-150 ${
+                `relative flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] font-medium transition-colors duration-150 ${
                   isActive
-                    ? 'bg-white/10 text-white'
-                    : 'text-neutral-500 hover:text-neutral-300'
+                    ? 'bg-[#6366f1]/10 text-[#6366f1] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-4 before:w-0.5 before:bg-[#6366f1] before:rounded-full'
+                    : 'text-[#6366f1] hover:bg-white/[0.04]'
                 }`
               }
             >
@@ -121,10 +126,10 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             to="/settings"
             onClick={onClose}
             className={({ isActive }) =>
-              `flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors duration-150 ${
+              `relative flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] font-medium transition-colors duration-150 ${
                 isActive
-                  ? 'bg-white/10 text-white'
-                  : 'text-neutral-500 hover:text-neutral-300'
+                  ? 'bg-[#6366f1]/10 text-[#6366f1] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-4 before:w-0.5 before:bg-[#6366f1] before:rounded-full'
+                  : 'text-white/40 hover:text-white/60 hover:bg-white/[0.04]'
               }`
             }
           >
@@ -134,17 +139,18 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
           {currentUser && (
             <div className="flex items-center gap-2 px-3 py-2 mt-1">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-medium text-white">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#6366f1] text-[10px] font-medium text-white">
                 {getInitials(currentUser.name)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-neutral-300 truncate">{currentUser.name}</p>
+                <p className="text-[13px] text-white truncate">{currentUser.name}</p>
+                <p className="text-[11px] text-white/30">{currentUser.role}</p>
               </div>
               <button
                 onClick={() => {
                   logout()
                 }}
-                className="text-neutral-600 hover:text-neutral-400 transition-colors"
+                className="text-white/30 hover:text-white/50 transition-colors text-xs"
                 title="Logout"
               >
                 <LogOut size={14} />
@@ -153,7 +159,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           )}
 
           <div className="px-3 py-2">
-            <p className="text-[10px] text-neutral-600">Powered by <span className="text-neutral-500 font-medium">Movo</span></p>
+            <p className="text-[10px] text-white/20">Powered by <span className="font-medium">Movo</span></p>
           </div>
         </div>
       </aside>

@@ -39,10 +39,10 @@ const presetTemplates = [
 ]
 
 const actionTypeColors: Record<string, string> = {
-  wait: 'bg-slate-100 text-slate-700 border-slate-200',
-  message: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  condition: 'bg-amber-50 text-amber-700 border-amber-200',
-  notification: 'bg-blue-50 text-blue-700 border-blue-200',
+  wait: 'bg-white/[0.04] text-white/70 border-white/[0.06]',
+  message: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  condition: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  notification: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
 }
 
 export default function Automations() {
@@ -60,8 +60,8 @@ export default function Automations() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Automations</h1>
-          <p className="text-sm text-slate-500 mt-1">Let Movo handle repetitive tasks automatically</p>
+          <h1 className="text-2xl font-semibold text-white">Automations</h1>
+          <p className="text-sm text-white/40 mt-1">Let Movo handle repetitive tasks automatically</p>
         </div>
         <Button icon={<Plus className="w-4 h-4" />} onClick={() => document.getElementById('templates')?.scrollIntoView({ behavior: 'smooth' })}>Create Automation</Button>
       </div>
@@ -105,8 +105,8 @@ export default function Automations() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="text-sm font-semibold text-slate-900">{automation.name}</h3>
-                      <p className="text-xs text-slate-500 mt-0.5">{automation.description}</p>
+                      <h3 className="text-sm font-semibold text-white">{automation.name}</h3>
+                      <p className="text-xs text-white/40 mt-0.5">{automation.description}</p>
                     </div>
                     <div className="flex items-center gap-1">
                       <Button variant="ghost" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => setEditingAutomation(automation)} />
@@ -118,7 +118,7 @@ export default function Automations() {
                   <div className="mt-4">
                     <button
                       onClick={() => setExpandedId(expandedId === automation.id ? null : automation.id)}
-                      className="flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 cursor-pointer"
+                      className="flex items-center gap-1.5 text-xs font-medium text-white/40 hover:text-white/70 cursor-pointer"
                     >
                       <ChevronRight
                         className={`w-3.5 h-3.5 transition-transform duration-200 ${
@@ -137,17 +137,17 @@ export default function Automations() {
                       >
                         <div className="flex flex-wrap items-center gap-2">
                           {/* WHEN trigger */}
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 text-xs font-medium">
-                            <span className="text-[10px] uppercase tracking-wider font-semibold text-blue-500">When</span>
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-medium">
+                            <span className="text-[10px] uppercase tracking-wider font-semibold text-blue-400/70">When</span>
                             {automation.trigger}
                           </div>
 
                           {/* Conditions */}
                           {automation.conditions.length > 0 && (
                             <>
-                              <ChevronRight className="w-4 h-4 text-slate-300 shrink-0" />
-                              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 text-xs font-medium">
-                                <span className="text-[10px] uppercase tracking-wider font-semibold text-amber-500">If</span>
+                              <ChevronRight className="w-4 h-4 text-white/20 shrink-0" />
+                              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-medium">
+                                <span className="text-[10px] uppercase tracking-wider font-semibold text-amber-400/70">If</span>
                                 {automation.conditions.join(' & ')}
                               </div>
                             </>
@@ -156,10 +156,10 @@ export default function Automations() {
                           {/* Actions */}
                           {automation.actions.map((action, i) => (
                             <div key={i} className="flex items-center gap-2">
-                              <ChevronRight className="w-4 h-4 text-slate-300 shrink-0" />
+                              <ChevronRight className="w-4 h-4 text-white/20 shrink-0" />
                               <div
                                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium ${
-                                  actionTypeColors[action.type] || 'bg-slate-50 text-slate-700 border-slate-200'
+                                  actionTypeColors[action.type] || 'bg-white/[0.03] text-white/70 border-white/[0.06]'
                                 }`}
                               >
                                 {action.delay && (
@@ -175,7 +175,7 @@ export default function Automations() {
                   </div>
 
                   {/* Footer */}
-                  <div className="flex items-center gap-3 mt-3 text-xs text-slate-400">
+                  <div className="flex items-center gap-3 mt-3 text-xs text-white/30">
                     {automation.lastRun && (
                       <span>Last run: {formatRelativeDate(automation.lastRun)}</span>
                     )}
@@ -199,8 +199,8 @@ export default function Automations() {
 
       {/* Preset templates */}
       <div id="templates">
-        <h2 className="text-lg font-semibold text-slate-900 mb-1">Popular Automations</h2>
-        <p className="text-sm text-slate-500 mb-4">Start with a template and customize to your needs</p>
+        <h2 className="text-lg font-semibold text-white mb-1">Popular Automations</h2>
+        <p className="text-sm text-white/40 mb-4">Start with a template and customize to your needs</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {presetTemplates.map((template, idx) => (
             <motion.div
@@ -211,24 +211,24 @@ export default function Automations() {
             >
               <Card className="h-full">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+                  <div className="p-2 bg-[#6366f1]/10 rounded-lg text-[#6366f1]">
                     {template.icon}
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-slate-900">{template.name}</h4>
-                    <p className="text-xs text-slate-500">{template.description}</p>
+                    <h4 className="text-sm font-semibold text-white">{template.name}</h4>
+                    <p className="text-xs text-white/40">{template.description}</p>
                   </div>
                 </div>
 
                 <div className="space-y-1.5 mb-4">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[10px] uppercase tracking-wider font-semibold text-blue-500 w-10">When</span>
-                    <span className="text-xs text-slate-600">{template.trigger}</span>
+                    <span className="text-xs text-white/60">{template.trigger}</span>
                   </div>
                   {template.actions.map((action, i) => (
                     <div key={i} className="flex items-center gap-1.5">
                       <span className="text-[10px] uppercase tracking-wider font-semibold text-emerald-500 w-10">Then</span>
-                      <span className="text-xs text-slate-600">{action}</span>
+                      <span className="text-xs text-white/60">{action}</span>
                     </div>
                   ))}
                 </div>
@@ -295,17 +295,17 @@ function EditAutomationForm({
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
-  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  const inputClass = "w-full rounded-lg border border-white/[0.10] bg-white/[0.04] text-white text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30"
 
   return (
     <>
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Name</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Name</label>
           <input value={name} onChange={e => setName(e.target.value)} className={inputClass} />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Description</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Description</label>
           <textarea
             value={description}
             onChange={e => setDescription(e.target.value)}

@@ -67,7 +67,7 @@ export default function RetentionEngine() {
         label: 'Due Now',
         description: '0–60 days since last visit',
         icon: <Clock className="w-4 h-4" />,
-        color: 'text-amber-600',
+        color: 'text-amber-400',
         badgeVariant: 'warning',
         items: dueNow,
       },
@@ -75,7 +75,7 @@ export default function RetentionEngine() {
         label: 'Overdue',
         description: '60–120 days since last visit',
         icon: <AlertTriangle className="w-4 h-4" />,
-        color: 'text-rose-600',
+        color: 'text-rose-400',
         badgeVariant: 'danger',
         items: overdue,
       },
@@ -83,7 +83,7 @@ export default function RetentionEngine() {
         label: 'Long Overdue',
         description: '120+ days since last visit',
         icon: <AlertTriangle className="w-4 h-4" />,
-        color: 'text-slate-600',
+        color: 'text-white/60',
         badgeVariant: 'default',
         items: longOverdue,
       },
@@ -105,8 +105,8 @@ export default function RetentionEngine() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">Retention Engine</h2>
-          <p className="text-sm text-slate-500 mt-0.5">Customers who should return for service</p>
+          <h2 className="text-lg font-semibold text-white">Retention Engine</h2>
+          <p className="text-sm text-white/40 mt-0.5">Customers who should return for service</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="secondary" size="sm" icon={<Send className="w-3.5 h-3.5" />} onClick={() => setCampaignOpen(true)}>
@@ -135,24 +135,24 @@ export default function RetentionEngine() {
             <Card key={key} padding="none">
               <button
                 onClick={() => toggleGroup(key)}
-                className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-slate-50 transition-colors"
+                className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-white/[0.04] transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <span className={group.color}>{group.icon}</span>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-slate-900">{group.label}</span>
+                      <span className="text-sm font-semibold text-white">{group.label}</span>
                       <Badge variant={group.badgeVariant} size="sm">{group.items.length}</Badge>
                     </div>
-                    <p className="text-xs text-slate-500 mt-0.5">{group.description}</p>
+                    <p className="text-xs text-white/40 mt-0.5">{group.description}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-slate-600">{formatCurrency(groupTotal)}</span>
+                  <span className="text-sm font-medium text-white/60">{formatCurrency(groupTotal)}</span>
                   {expanded ? (
-                    <ChevronUp className="w-4 h-4 text-slate-400" />
+                    <ChevronUp className="w-4 h-4 text-white/30" />
                   ) : (
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                    <ChevronDown className="w-4 h-4 text-white/30" />
                   )}
                 </div>
               </button>
@@ -166,29 +166,29 @@ export default function RetentionEngine() {
                     transition={{ duration: 0.2 }}
                     className="overflow-hidden"
                   >
-                    <div className="border-t border-slate-100">
+                    <div className="border-t border-white/[0.04]">
                       {group.items.map((row, i) => (
                         <div
                           key={row.customerId}
                           className={`flex items-center justify-between px-5 py-3 ${
-                            i < group.items.length - 1 ? 'border-b border-slate-50' : ''
-                          } hover:bg-slate-50 transition-colors`}
+                            i < group.items.length - 1 ? 'border-b border-white/[0.03]' : ''
+                          } hover:bg-white/[0.04] transition-colors`}
                         >
                           <div className="flex items-center gap-3">
                             <Avatar name={row.customerName} size="sm" />
                             <div>
-                              <p className="text-sm font-medium text-slate-900">{row.customerName}</p>
+                              <p className="text-sm font-medium text-white">{row.customerName}</p>
                               <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-xs text-slate-500">{row.vehicle}</span>
-                                <span className="text-slate-300">·</span>
-                                <span className="text-xs text-slate-500">{row.daysSinceVisit} days ago</span>
+                                <span className="text-xs text-white/40">{row.vehicle}</span>
+                                <span className="text-white/20">·</span>
+                                <span className="text-xs text-white/40">{row.daysSinceVisit} days ago</span>
                               </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-4">
                             <div className="text-right">
-                              <p className="text-xs text-slate-500">{row.recommendedService}</p>
-                              <p className="text-sm font-medium text-slate-900">{formatCurrency(row.estimatedValue)}</p>
+                              <p className="text-xs text-white/40">{row.recommendedService}</p>
+                              <p className="text-sm font-medium text-white">{formatCurrency(row.estimatedValue)}</p>
                             </div>
                             {row.status === 'booked' ? (
                               <Badge variant="success" size="sm" dot>Booked</Badge>
@@ -197,7 +197,7 @@ export default function RetentionEngine() {
                             ) : (
                               <div className="flex items-center gap-1.5">
                                 <button
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+                                  className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-all"
                                   onClick={() => {
                                     const cust = getCustomer(row.customerId)
                                     if (cust?.phone) window.open(`tel:${cust.phone}`)
@@ -206,7 +206,7 @@ export default function RetentionEngine() {
                                   <Phone className="w-3.5 h-3.5" />
                                 </button>
                                 <button
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+                                  className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-all"
                                   onClick={() => {
                                     const cust = getCustomer(row.customerId)
                                     if (cust?.phone) {
@@ -218,7 +218,7 @@ export default function RetentionEngine() {
                                   <MessageSquare className="w-3.5 h-3.5" />
                                 </button>
                                 <button
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
+                                  className="p-1.5 rounded-lg text-white/30 hover:text-[#6366f1] hover:bg-[#6366f1]/10 transition-all"
                                   onClick={() => navigate('/bookings')}
                                 >
                                   <CalendarPlus className="w-3.5 h-3.5" />
@@ -234,8 +234,8 @@ export default function RetentionEngine() {
               </AnimatePresence>
 
               {expanded && group.items.length === 0 && (
-                <div className="px-5 py-6 border-t border-slate-100 text-center">
-                  <p className="text-sm text-slate-400">No customers in this group</p>
+                <div className="px-5 py-6 border-t border-white/[0.04] text-center">
+                  <p className="text-sm text-white/30">No customers in this group</p>
                 </div>
               )}
             </Card>
@@ -264,16 +264,16 @@ export default function RetentionEngine() {
       >
         <div className="space-y-3">
           {actionableRows.map(row => (
-            <div key={row.customerId} className="p-3 border border-slate-100 rounded-lg">
+            <div key={row.customerId} className="p-3 border border-white/[0.04] rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <Avatar name={row.customerName} size="sm" />
-                  <span className="text-sm font-medium text-slate-900">{row.customerName}</span>
+                  <span className="text-sm font-medium text-white">{row.customerName}</span>
                 </div>
-                <span className="text-xs text-slate-500">{row.vehicle}</span>
+                <span className="text-xs text-white/40">{row.vehicle}</span>
               </div>
-              <div className="bg-slate-50 rounded-lg p-3">
-                <p className="text-xs text-slate-600 leading-relaxed">
+              <div className="bg-white/[0.03] rounded-lg p-3">
+                <p className="text-xs text-white/60 leading-relaxed">
                   Hi {row.customerName.split(' ')[0]}, it's been {row.daysSinceVisit} days since your last visit to {currentTenant?.name || 'our studio'}.
                   Your {row.vehicle} is due for a <strong>{row.recommendedService}</strong>. Book now and keep your car in top condition!
                   Reply to schedule an appointment.
@@ -282,7 +282,7 @@ export default function RetentionEngine() {
             </div>
           ))}
           {actionableRows.length === 0 && (
-            <p className="text-sm text-slate-400 text-center py-6">All customers have already been contacted or booked.</p>
+            <p className="text-sm text-white/30 text-center py-6">All customers have already been contacted or booked.</p>
           )}
         </div>
       </Modal>
@@ -306,12 +306,12 @@ export default function RetentionEngine() {
           </>
         }
       >
-        <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-4 mb-4">
+        <div className="bg-[#6366f1]/10 border border-[#6366f1]/20 rounded-lg p-4 mb-4">
           <div className="flex items-start gap-3">
-            <Bot className="w-5 h-5 text-indigo-600 mt-0.5" />
+            <Bot className="w-5 h-5 text-[#6366f1] mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-indigo-900">Movo will automatically:</p>
-              <ul className="text-xs text-indigo-700 mt-1 space-y-1 list-disc list-inside">
+              <p className="text-sm font-medium text-white">Movo will automatically:</p>
+              <ul className="text-xs text-white/70 mt-1 space-y-1 list-disc list-inside">
                 <li>Send personalized WhatsApp messages to each customer</li>
                 <li>Mention their specific vehicle and recommended service</li>
                 <li>Offer convenient booking slots based on your availability</li>
@@ -322,21 +322,21 @@ export default function RetentionEngine() {
           </div>
         </div>
 
-        <p className="text-sm text-slate-600 mb-3">
+        <p className="text-sm text-white/60 mb-3">
           <strong>{actionableRows.length} customers</strong> will be contacted:
         </p>
 
         <div className="space-y-2">
           {actionableRows.map(row => (
-            <div key={row.customerId} className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50">
+            <div key={row.customerId} className="flex items-center justify-between py-2 px-3 rounded-lg bg-white/[0.03]">
               <div className="flex items-center gap-2">
                 <Avatar name={row.customerName} size="sm" />
                 <div>
-                  <p className="text-sm font-medium text-slate-900">{row.customerName}</p>
-                  <p className="text-xs text-slate-500">{row.vehicle} · {row.recommendedService}</p>
+                  <p className="text-sm font-medium text-white">{row.customerName}</p>
+                  <p className="text-xs text-white/40">{row.vehicle} · {row.recommendedService}</p>
                 </div>
               </div>
-              <span className="text-sm font-medium text-slate-700">{formatCurrency(row.estimatedValue)}</span>
+              <span className="text-sm font-medium text-white/70">{formatCurrency(row.estimatedValue)}</span>
             </div>
           ))}
         </div>

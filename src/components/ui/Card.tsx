@@ -13,8 +13,8 @@ export function Card({ children, className = '', padding = 'md', onClick }: Card
   return (
     <div
       onClick={onClick}
-      className={`bg-white rounded-xl border border-neutral-200 ${paddings[padding]} ${
-        onClick ? 'cursor-pointer hover:border-neutral-300 transition-colors duration-150' : ''
+      className={`bg-[#181b25] rounded-lg border border-white/[0.06] ${paddings[padding]} ${
+        onClick ? 'cursor-pointer hover:border-white/[0.12] hover:-translate-y-0.5 transition-all duration-200' : ''
       } ${className}`}
     >
       {children}
@@ -33,8 +33,8 @@ export function CardHeader({ title, subtitle, actions, className = '' }: CardHea
   return (
     <div className={`flex items-start justify-between mb-4 ${className}`}>
       <div>
-        <h3 className="text-sm font-medium text-neutral-900">{title}</h3>
-        {subtitle && <p className="text-xs text-neutral-500 mt-0.5">{subtitle}</p>}
+        <h3 className="text-[15px] font-semibold text-white tracking-tight font-[Geist,var(--font-sans)]">{title}</h3>
+        {subtitle && <p className="text-xs text-white/40 mt-0.5">{subtitle}</p>}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>

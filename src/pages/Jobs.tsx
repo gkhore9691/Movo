@@ -33,9 +33,9 @@ function getStageName(status: JobStatus): string {
 }
 
 function stageLeftBorder(status: JobStatus): string {
-  if (['ready', 'delivered'].includes(status)) return 'border-l-emerald-300'
-  if (['car_received', 'inspection', 'work_in_progress', 'quality_check'].includes(status)) return 'border-l-indigo-300'
-  return 'border-l-neutral-200'
+  if (['ready', 'delivered'].includes(status)) return 'border-l-emerald-400'
+  if (['car_received', 'inspection', 'work_in_progress', 'quality_check'].includes(status)) return 'border-l-[#818cf8]'
+  return 'border-l-white/[0.06]'
 }
 
 type FilterMode = 'all' | 'active' | 'completed'
@@ -80,8 +80,8 @@ export default function Jobs() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold text-neutral-900">Jobs</h2>
-            <span className="text-xs text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded-md">{activeCount} active</span>
+            <h2 className="text-lg font-semibold text-white">Jobs</h2>
+            <span className="text-xs text-white/30 bg-white/[0.04] px-2 py-0.5 rounded-md">{activeCount} active</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -94,8 +94,8 @@ export default function Jobs() {
                 onClick={() => setFilterMode(mode)}
                 className={`px-3 py-1 text-xs font-medium transition-colors cursor-pointer ${
                   filterMode === mode
-                    ? 'text-neutral-900'
-                    : 'text-neutral-400 hover:text-neutral-600'
+                    ? 'text-white'
+                    : 'text-white/30 hover:text-white/60'
                 }`}
               >
                 {mode === 'active' ? 'Active' : mode.charAt(0).toUpperCase() + mode.slice(1)}
@@ -103,11 +103,11 @@ export default function Jobs() {
             ))}
           </div>
           {/* View toggle */}
-          <div className="flex items-center border border-neutral-200 rounded-lg">
+          <div className="flex items-center border border-white/[0.06] rounded-lg">
             <button
               onClick={() => setViewMode('pipeline')}
               className={`p-1.5 rounded-l-lg transition-colors cursor-pointer ${
-                viewMode === 'pipeline' ? 'bg-neutral-900 text-white' : 'text-neutral-500 hover:text-neutral-700'
+                viewMode === 'pipeline' ? 'bg-white/[0.10] text-white' : 'text-white/40 hover:text-white/70'
               }`}
             >
               <LayoutGrid className="w-4 h-4" />
@@ -115,7 +115,7 @@ export default function Jobs() {
             <button
               onClick={() => setViewMode('list')}
               className={`p-1.5 rounded-r-lg transition-colors cursor-pointer ${
-                viewMode === 'list' ? 'bg-neutral-900 text-white' : 'text-neutral-500 hover:text-neutral-700'
+                viewMode === 'list' ? 'bg-white/[0.10] text-white' : 'text-white/40 hover:text-white/70'
               }`}
             >
               <List className="w-4 h-4" />
@@ -187,13 +187,13 @@ function PipelineView({ jobs, getCustomer, getVehicle, getService, getStaffMembe
         {JOB_STAGES.map((stage, stageIdx) => {
           const stageJobs = jobs.filter(j => j.status === stage.key)
           return (
-            <div key={stage.key} className={`flex-1 min-w-[150px] ${stageIdx < JOB_STAGES.length - 1 ? 'border-r border-neutral-100 pr-3' : ''}`}>
+            <div key={stage.key} className={`flex-1 min-w-[150px] ${stageIdx < JOB_STAGES.length - 1 ? 'border-r border-white/[0.04] pr-3' : ''}`}>
               {/* Column header */}
               <div className="flex items-center justify-between mb-3 px-1">
-                <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+                <span className="text-xs font-medium text-white/40 uppercase tracking-wide">
                   {stage.label}
                 </span>
-                <span className="text-xs text-neutral-400">{stageJobs.length}</span>
+                <span className="text-xs text-white/30">{stageJobs.length}</span>
               </div>
 
               {/* Cards */}
@@ -215,29 +215,29 @@ function PipelineView({ jobs, getCustomer, getVehicle, getService, getStaffMembe
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.15 }}
                         onClick={() => onSelectJob(job)}
-                        className={`group bg-white rounded-lg border border-neutral-200 border-l-[3px] ${stageLeftBorder(job.status)} p-3 cursor-pointer transition-colors hover:border-neutral-300`}
+                        className={`group rounded-lg border border-white/[0.06] border-l-[3px] ${stageLeftBorder(job.status)} p-3 cursor-pointer transition-colors hover:border-white/[0.12]`}
                       >
-                        <p className="text-sm font-medium text-neutral-900">
+                        <p className="text-sm font-medium text-white">
                           {vehicle ? `${vehicle.make} ${vehicle.model}` : 'Unknown'}
                         </p>
-                        <p className="font-mono text-xs text-neutral-400 mt-0.5">{vehicle?.registrationNumber}</p>
-                        <p className="text-xs text-neutral-500 mt-1.5">{customer?.name}</p>
-                        <p className="text-xs text-neutral-500">{primaryService?.name}</p>
+                        <p className="font-mono text-xs text-white/30 mt-0.5">{vehicle?.registrationNumber}</p>
+                        <p className="text-xs text-white/40 mt-1.5">{customer?.name}</p>
+                        <p className="text-xs text-white/40">{primaryService?.name}</p>
 
-                        <div className="flex items-center justify-between mt-3 pt-2 border-t border-neutral-100">
+                        <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/[0.04]">
                           <div className="flex items-center gap-1.5">
                             {staffMember && (
-                              <span className="text-xs text-neutral-400">{staffMember.name.split(' ')[0]}</span>
+                              <span className="text-xs text-white/30">{staffMember.name.split(' ')[0]}</span>
                             )}
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-neutral-900 tabular-nums">
+                            <span className="text-xs font-medium text-white tabular-nums">
                               {formatCurrency(job.estimatedPrice)}
                             </span>
                             {nextStage && (
                               <button
                                 onClick={(e) => onAdvance(job, e)}
-                                className="text-xs text-neutral-400 hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                className="text-xs text-white/30 hover:text-[#6366f1] opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                                 title={`Advance to ${getStageName(nextStage)}`}
                               >
                                 →
@@ -252,7 +252,7 @@ function PipelineView({ jobs, getCustomer, getVehicle, getService, getStaffMembe
 
                 {stageJobs.length === 0 && (
                   <div className="py-8 text-center">
-                    <p className="text-xs text-neutral-400">No jobs</p>
+                    <p className="text-xs text-white/30">No jobs</p>
                   </div>
                 )}
               </div>
@@ -277,17 +277,17 @@ interface ListViewProps {
 
 function ListView({ jobs, getCustomer, getVehicle, getService, getStaffMember, onSelectJob }: ListViewProps) {
   return (
-    <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
+    <div className="border border-white/[0.06] rounded-xl overflow-hidden">
       <table className="w-full">
         <thead>
-          <tr className="border-b border-neutral-100">
-            <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500">Vehicle</th>
-            <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500">Customer</th>
-            <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500">Service</th>
-            <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500">Status</th>
-            <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500">Assigned</th>
-            <th className="text-right px-4 py-3 text-xs font-medium text-neutral-500">Price</th>
-            <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500">Updated</th>
+          <tr className="border-b border-white/[0.04]">
+            <th className="text-left px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">Vehicle</th>
+            <th className="text-left px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">Customer</th>
+            <th className="text-left px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">Service</th>
+            <th className="text-left px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">Status</th>
+            <th className="text-left px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">Assigned</th>
+            <th className="text-right px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">Price</th>
+            <th className="text-left px-4 py-3 text-xs font-medium text-white/40 uppercase tracking-wider">Updated</th>
           </tr>
         </thead>
         <tbody>
@@ -300,25 +300,25 @@ function ListView({ jobs, getCustomer, getVehicle, getService, getStaffMember, o
               <tr
                 key={job.id}
                 onClick={() => onSelectJob(job)}
-                className="cursor-pointer border-b border-neutral-50 hover:bg-neutral-50 transition-colors"
+                className="cursor-pointer border-b border-white/[0.04] hover:bg-white/[0.04] transition-colors"
               >
                 <td className="px-4 py-3">
-                  <p className="text-sm font-medium text-neutral-900">{vehicle ? `${vehicle.make} ${vehicle.model}` : '—'}</p>
-                  <p className="font-mono text-xs text-neutral-400 mt-0.5">{vehicle?.registrationNumber}</p>
+                  <p className="text-sm font-medium text-white">{vehicle ? `${vehicle.make} ${vehicle.model}` : '—'}</p>
+                  <p className="font-mono text-xs text-white/30 mt-0.5">{vehicle?.registrationNumber}</p>
                 </td>
-                <td className="px-4 py-3 text-sm text-neutral-600">{customer?.name}</td>
-                <td className="px-4 py-3 text-sm text-neutral-600">{primaryService?.name}</td>
+                <td className="px-4 py-3 text-sm text-white/60">{customer?.name}</td>
+                <td className="px-4 py-3 text-sm text-white/60">{primaryService?.name}</td>
                 <td className="px-4 py-3"><StatusBadge status={job.status} /></td>
-                <td className="px-4 py-3 text-sm text-neutral-600">{staffMember?.name}</td>
-                <td className="px-4 py-3 text-right text-sm font-medium text-neutral-900 tabular-nums">{formatCurrency(job.estimatedPrice)}</td>
-                <td className="px-4 py-3 text-xs text-neutral-400">{formatRelativeDate(job.updatedAt)}</td>
+                <td className="px-4 py-3 text-sm text-white/60">{staffMember?.name}</td>
+                <td className="px-4 py-3 text-right text-sm font-medium text-white tabular-nums">{formatCurrency(job.estimatedPrice)}</td>
+                <td className="px-4 py-3 text-xs text-white/30">{formatRelativeDate(job.updatedAt)}</td>
               </tr>
             )
           })}
         </tbody>
       </table>
       {jobs.length === 0 && (
-        <div className="py-12 text-center text-sm text-neutral-400">No jobs match the current filter</div>
+        <div className="py-12 text-center text-sm text-white/30">No jobs match the current filter</div>
       )}
     </div>
   )
@@ -364,7 +364,7 @@ function JobDetailModal({ job, onClose, getCustomer, getVehicle, getService, get
       footer={
         currentJob && (
           <div className="flex items-center gap-2 w-full">
-            <span className="text-xs text-neutral-400 mr-auto">Created {formatDate(currentJob.createdAt)}</span>
+            <span className="text-xs text-white/30 mr-auto">Created {formatDate(currentJob.createdAt)}</span>
             <Button
               variant="secondary" size="sm" icon={<Phone className="w-3.5 h-3.5" />}
               onClick={() => customer?.phone && window.open(`tel:${customer.phone}`)}
@@ -390,10 +390,10 @@ function JobDetailModal({ job, onClose, getCustomer, getVehicle, getService, get
           {/* Details */}
           <div className="grid grid-cols-2 gap-x-8 gap-y-4">
             <div>
-              <p className="text-xs text-neutral-500 mb-1">Customer</p>
+              <p className="text-xs text-white/40 mb-1">Customer</p>
               {customer && (
                 <button
-                  className="text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline cursor-pointer"
+                  className="text-sm font-medium text-[#6366f1] hover:text-[#818cf8] hover:underline cursor-pointer"
                   onClick={() => { navigate(`/customers/${currentJob.customerId}`); onClose() }}
                 >
                   {customer.name}
@@ -401,10 +401,10 @@ function JobDetailModal({ job, onClose, getCustomer, getVehicle, getService, get
               )}
             </div>
             <div>
-              <p className="text-xs text-neutral-500 mb-1">Vehicle</p>
+              <p className="text-xs text-white/40 mb-1">Vehicle</p>
               {vehicle && (
                 <button
-                  className="text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline cursor-pointer"
+                  className="text-sm font-medium text-[#6366f1] hover:text-[#818cf8] hover:underline cursor-pointer"
                   onClick={() => { navigate(`/vehicles/${currentJob.vehicleId}`); onClose() }}
                 >
                   {vehicle.make} {vehicle.model} ({vehicle.registrationNumber})
@@ -412,39 +412,39 @@ function JobDetailModal({ job, onClose, getCustomer, getVehicle, getService, get
               )}
             </div>
             <div>
-              <p className="text-xs text-neutral-500 mb-1">Services</p>
-              <p className="text-sm text-neutral-900">
+              <p className="text-xs text-white/40 mb-1">Services</p>
+              <p className="text-sm text-white">
                 {currentJob.serviceIds.map(sid => getService(sid)?.name).filter(Boolean).join(', ')}
               </p>
             </div>
             <div>
-              <p className="text-xs text-neutral-500 mb-1">Assigned to</p>
+              <p className="text-xs text-white/40 mb-1">Assigned to</p>
               {staffMember && (
                 <div className="flex items-center gap-2">
                   <Avatar name={staffMember.name} size="sm" />
-                  <p className="text-sm text-neutral-900">{staffMember.name}</p>
+                  <p className="text-sm text-white">{staffMember.name}</p>
                 </div>
               )}
             </div>
             <div>
-              <p className="text-xs text-neutral-500 mb-1">Estimated</p>
-              <p className="text-sm font-medium text-neutral-900 tabular-nums">{formatCurrency(currentJob.estimatedPrice)}</p>
+              <p className="text-xs text-white/40 mb-1">Estimated</p>
+              <p className="text-sm font-medium text-white tabular-nums">{formatCurrency(currentJob.estimatedPrice)}</p>
             </div>
             <div>
-              <p className="text-xs text-neutral-500 mb-1">Deposit</p>
-              <p className="text-sm font-medium text-neutral-900 tabular-nums">{formatCurrency(currentJob.deposit)}</p>
+              <p className="text-xs text-white/40 mb-1">Deposit</p>
+              <p className="text-sm font-medium text-white tabular-nums">{formatCurrency(currentJob.deposit)}</p>
             </div>
             {currentJob.notes && (
               <div className="col-span-2">
-                <p className="text-xs text-neutral-500 mb-1">Notes</p>
-                <p className="text-sm text-neutral-700">{currentJob.notes}</p>
+                <p className="text-xs text-white/40 mb-1">Notes</p>
+                <p className="text-sm text-white/70">{currentJob.notes}</p>
               </div>
             )}
           </div>
 
           {/* Timeline */}
           <div>
-            <p className="text-xs font-medium text-neutral-500 mb-3">Timeline</p>
+            <p className="text-xs font-medium text-white/40 mb-3">Timeline</p>
             <div className="relative ml-2">
               {[...currentJob.timeline].reverse().map((entry, i) => {
                 const emp = getStaffMember(entry.employeeId)
@@ -453,20 +453,20 @@ function JobDetailModal({ job, onClose, getCustomer, getVehicle, getService, get
                 return (
                   <div key={i} className="flex gap-3 relative">
                     {!isLast && (
-                      <div className="absolute left-[3px] top-4 w-px h-[calc(100%-4px)] bg-neutral-200" />
+                      <div className="absolute left-[3px] top-4 w-px h-[calc(100%-4px)] bg-white/[0.06]" />
                     )}
                     <div className="relative z-10 shrink-0 mt-1.5">
-                      <div className={`w-[7px] h-[7px] rounded-full ${isCurrent ? 'bg-indigo-600' : 'bg-neutral-400'}`} />
+                      <div className={`w-[7px] h-[7px] rounded-full ${isCurrent ? 'bg-[#6366f1]' : 'bg-white/30'}`} />
                     </div>
                     <div className="pb-4">
-                      <p className={`text-sm ${isCurrent ? 'font-medium text-neutral-900' : 'text-neutral-600'}`}>
+                      <p className={`text-sm ${isCurrent ? 'font-medium text-white' : 'text-white/60'}`}>
                         {getStageName(entry.stage as JobStatus)}
                       </p>
-                      <p className="text-xs text-neutral-400 mt-0.5">
+                      <p className="text-xs text-white/30 mt-0.5">
                         {formatRelativeDate(entry.timestamp)}
                         {emp && ` · ${emp.name}`}
                       </p>
-                      {entry.notes && <p className="text-xs text-neutral-500 mt-1">{entry.notes}</p>}
+                      {entry.notes && <p className="text-xs text-white/40 mt-1">{entry.notes}</p>}
                     </div>
                   </div>
                 )
@@ -476,14 +476,14 @@ function JobDetailModal({ job, onClose, getCustomer, getVehicle, getService, get
 
           {/* Add Note Input */}
           {showNoteInput && (
-            <div className="border border-neutral-200 rounded-lg p-3 space-y-2">
-              <p className="text-xs font-medium text-neutral-500">Add a note</p>
+            <div className="border border-white/[0.06] rounded-lg p-3 space-y-2">
+              <p className="text-xs font-medium text-white/40">Add a note</p>
               <textarea
                 value={noteText}
                 onChange={e => setNoteText(e.target.value)}
                 placeholder="Type your note..."
                 rows={3}
-                className="w-full rounded-lg border border-neutral-200 text-sm px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 text-neutral-900"
+                className="w-full rounded-lg border border-white/[0.10] bg-white/[0.04] text-sm px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30 text-white"
                 autoFocus
               />
               <div className="flex items-center justify-end gap-2">
@@ -512,17 +512,17 @@ function JourneyStepper({ currentStatus }: { currentStatus: JobStatus }) {
           <div key={stage.key} className="flex items-center flex-1 last:flex-none">
             <div className="flex flex-col items-center gap-1.5">
               <div className={`w-2 h-2 rounded-full ${
-                isCompleted ? 'bg-neutral-900' : isCurrent ? 'bg-indigo-600' : 'bg-neutral-200'
+                isCompleted ? 'bg-white' : isCurrent ? 'bg-[#6366f1]' : 'bg-white/[0.06]'
               }`} />
               <span className={`text-[10px] text-center leading-tight ${
-                isCurrent ? 'text-neutral-900 font-medium' : isCompleted ? 'text-neutral-600' : 'text-neutral-400'
+                isCurrent ? 'text-white font-medium' : isCompleted ? 'text-white/60' : 'text-white/30'
               }`}>
                 {stage.label}
               </span>
             </div>
             {i < JOB_STAGES.length - 1 && (
               <div className={`flex-1 h-px mx-1.5 mt-[-14px] ${
-                isCompleted ? 'bg-neutral-900' : 'border-t border-dashed border-neutral-200'
+                isCompleted ? 'bg-white' : 'border-t border-dashed border-white/[0.06]'
               }`} />
             )}
           </div>
@@ -630,7 +630,7 @@ function NewJobModal({
     handleClose()
   }
 
-  const inputClass = 'w-full rounded-lg border border-neutral-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-neutral-900'
+  const inputClass = 'w-full rounded-lg border border-white/[0.10] bg-white/[0.04] text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30 text-white'
 
   return (
     <Modal
@@ -651,7 +651,7 @@ function NewJobModal({
       <div className="space-y-4">
         {/* Customer */}
         <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1.5">Customer *</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Customer *</label>
           <select
             value={customerId}
             onChange={e => { setCustomerId(e.target.value); setVehicleId('') }}
@@ -666,7 +666,7 @@ function NewJobModal({
 
         {/* Vehicle */}
         <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1.5">Vehicle *</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Vehicle *</label>
           {customerVehicles.length > 0 ? (
             <select
               value={vehicleId}
@@ -681,7 +681,7 @@ function NewJobModal({
               ))}
             </select>
           ) : (
-            <p className="text-sm text-neutral-400 py-2">
+            <p className="text-sm text-white/30 py-2">
               {customerId ? 'No vehicles for this customer' : 'Select a customer first'}
             </p>
           )}
@@ -689,27 +689,27 @@ function NewJobModal({
 
         {/* Services */}
         <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1.5">Services *</label>
-          <div className="space-y-3 max-h-52 overflow-y-auto border border-neutral-200 rounded-lg p-2">
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Services *</label>
+          <div className="space-y-3 max-h-52 overflow-y-auto border border-white/[0.06] rounded-lg p-2">
             {Object.entries(servicesByCategory).map(([category, catServices]) => (
               <div key={category}>
-                <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1 px-2">{category}</p>
+                <p className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-1 px-2">{category}</p>
                 <div className="space-y-1">
                   {catServices.map((svc: any) => (
                     <label
                       key={svc.id}
                       className={`flex items-center gap-2.5 px-2 py-1.5 rounded-md cursor-pointer transition-colors ${
-                        selectedServiceIds.includes(svc.id) ? 'bg-indigo-50' : 'hover:bg-neutral-50'
+                        selectedServiceIds.includes(svc.id) ? 'bg-[#6366f1]/10' : 'hover:bg-white/[0.04]'
                       }`}
                     >
                       <input
                         type="checkbox"
                         checked={selectedServiceIds.includes(svc.id)}
                         onChange={() => toggleService(svc.id)}
-                        className="rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500"
+                        className="rounded border-white/[0.08] text-[#6366f1] focus:ring-[#6366f1]/30"
                       />
-                      <span className="text-sm text-neutral-900 flex-1">{svc.name}</span>
-                      <span className="text-xs text-neutral-400">{formatCurrency(svc.basePrice)}</span>
+                      <span className="text-sm text-white flex-1">{svc.name}</span>
+                      <span className="text-xs text-white/30">{formatCurrency(svc.basePrice)}</span>
                     </label>
                   ))}
                 </div>
@@ -721,16 +721,16 @@ function NewJobModal({
         {/* Per-service pricing */}
         {selectedServiceIds.length > 0 && (
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1.5">Service Pricing</label>
-            <div className="space-y-2 border border-neutral-200 rounded-lg p-3">
+            <label className="block text-sm font-medium text-white/70 mb-1.5">Service Pricing</label>
+            <div className="space-y-2 border border-white/[0.06] rounded-lg p-3">
               {selectedServiceIds.map(svcId => {
                 const svc = services.find((s: any) => s.id === svcId) as any
                 if (!svc) return null
                 return (
                   <div key={svcId} className="flex items-center justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-neutral-900 truncate">{svc.name}</p>
-                      <p className="text-xs text-neutral-400">Base: {formatCurrency(svc.basePrice)}{svc.maxPrice > 0 ? ` — Max: ${formatCurrency(svc.maxPrice)}` : ''}</p>
+                      <p className="text-sm text-white truncate">{svc.name}</p>
+                      <p className="text-xs text-white/30">Base: {formatCurrency(svc.basePrice)}{svc.maxPrice > 0 ? ` — Max: ${formatCurrency(svc.maxPrice)}` : ''}</p>
                     </div>
                     <div className="w-32 shrink-0">
                       <input
@@ -738,15 +738,15 @@ function NewJobModal({
                         value={servicePrices[svcId] ?? ''}
                         onChange={e => updateServicePrice(svcId, Number(e.target.value) || 0)}
                         placeholder="Price"
-                        className="w-full rounded-lg border border-neutral-200 text-sm px-3 py-1.5 text-right focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full rounded-lg border border-white/[0.10] bg-white/[0.04] text-sm px-3 py-1.5 text-right text-white focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30"
                       />
                     </div>
                   </div>
                 )
               })}
-              <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
-                <span className="text-sm font-medium text-neutral-700">Total</span>
-                <span className="text-sm font-semibold text-neutral-900">{formatCurrency(totalPrice)}</span>
+              <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
+                <span className="text-sm font-medium text-white/70">Total</span>
+                <span className="text-sm font-semibold text-white">{formatCurrency(totalPrice)}</span>
               </div>
             </div>
           </div>
@@ -754,7 +754,7 @@ function NewJobModal({
 
         {/* Assigned To */}
         <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1.5">Assigned To</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Assigned To</label>
           <select
             value={assignedTo}
             onChange={e => setAssignedTo(e.target.value)}
@@ -769,7 +769,7 @@ function NewJobModal({
 
         {/* Deposit */}
         <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1.5">Deposit</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Deposit</label>
           <input
             type="number"
             value={deposit}
@@ -781,7 +781,7 @@ function NewJobModal({
 
         {/* Notes */}
         <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1.5">Notes</label>
+          <label className="block text-sm font-medium text-white/70 mb-1.5">Notes</label>
           <textarea
             value={notes}
             onChange={e => setNotes(e.target.value)}
