@@ -104,20 +104,8 @@ export class SeedService {
     await this.seedServices();
     await this.seedStaff();
     await this.seedDefaultUser();
-    await this.seedCustomers();
-    await this.seedVehicles();
-    await this.seedJobs();
-    await this.updateVehicleCurrentJobs();
-    await this.seedLeads();
-    await this.seedBookings();
-    await this.seedInvoices();
-    await this.seedAutomations();
-    await this.seedReviews();
-    await this.seedConversations();
-    await this.seedNotifications();
-    await this.seedRetentionCustomers();
 
-    // Import DS extracted data if available
+    // Only seed real DS data — no fake demo records
     await this.seedDsData();
 
     this.logger.log('Seeding complete!');
