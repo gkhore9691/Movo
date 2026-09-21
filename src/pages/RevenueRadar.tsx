@@ -15,20 +15,13 @@ import { Button, Modal, StatusBadge } from '@/components/ui'
 import RetentionEngine from '@/features/retention/RetentionEngine'
 import { formatCurrency, formatRelativeDate } from '@/utils/format'
 
-const trendData = [
-  { day: 'Mon', potential: 125000, actual: 42000 },
-  { day: 'Tue', potential: 138000, actual: 58000 },
-  { day: 'Wed', potential: 142000, actual: 51000 },
-  { day: 'Thu', potential: 155000, actual: 67000 },
-  { day: 'Fri', potential: 148000, actual: 73000 },
-  { day: 'Sat', potential: 162000, actual: 89000 },
-  { day: 'Sun', potential: 142500, actual: 45000 },
-]
+/* trendData is now computed inside the component from leads + invoices */
 
 interface OpportunityItem {
   category: 'hot' | 'warm' | 'dormant'
   customerName: string
   customerId: string
+  phone: string
   vehicleInfo: string
   serviceInfo: string
   amount: number
@@ -38,12 +31,32 @@ interface OpportunityItem {
 }
 
 export default function RevenueRadar() {
-  const { leads, retentionCustomers, updateLeadStatus, updateRetentionStatus, getCustomer, getVehicle, getService } = useApp()
+  const { leads, invoices, retentionCustomers, updateLeadStatus, updateRetentionStatus, getCustomer, getService } = useApp()
   const navigate = useNavigate()
   const [movoModalOpen, setMovoModalOpen] = useState(false)
   const [selectedOpportunity, setSelectedOpportunity] = useState<OpportunityItem | null>(null)
   const [expandedCategory, setExpandedCategory] = useState<string | null>('hot')
   const [animatedTotal, setAnimatedTotal] = useState(0)
+
+  const trendData = useMemo(() => {
+    const now = new Date()
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(now)
+      d.setDate(d.getDate() - (6 - i))
+      const dayStr = d.toLocaleDateString('default', { weekday: 'short' })
+      const dayLeads = leads.filter(l => {
+        const created = new Date(l.createdAt)
+        return created.toDateString() === d.toDateString()
+      })
+      const potential = dayLeads.reduce((sum, l) => sum + l.quotedPrice, 0)
+      const dayInvoices = invoices.filter(inv => {
+        if (inv.status !== 'paid' || !inv.paidAt) return false
+        return new Date(inv.paidAt).toDateString() === d.toDateString()
+      })
+      const actual = dayInvoices.reduce((sum, inv) => sum + inv.amount, 0)
+      return { day: dayStr, potential, actual }
+    })
+  }, [leads, invoices])
 
   const opportunities = useMemo(() => {
     const items: OpportunityItem[] = []
@@ -51,14 +64,13 @@ export default function RevenueRadar() {
     leads
       .filter(l => ['quoted', 'negotiation'].includes(l.status))
       .forEach(l => {
-        const customer = getCustomer(l.customerId)
-        const vehicle = getVehicle(l.vehicleId)
         const serviceNames = l.serviceIds.map(id => getService(id)?.name).filter(Boolean)
         items.push({
           category: 'hot',
-          customerName: customer?.name || 'Unknown',
+          customerName: l.name || 'Unknown',
           customerId: l.customerId,
-          vehicleInfo: vehicle ? `${vehicle.make} ${vehicle.model}` : '',
+          phone: l.phone || '',
+          vehicleInfo: l.vehicleMake ? `${l.vehicleMake} ${l.vehicleModel}` : '',
           serviceInfo: serviceNames.join(', '),
           amount: l.quotedPrice,
           lastContact: l.createdAt,
@@ -70,14 +82,13 @@ export default function RevenueRadar() {
     leads
       .filter(l => l.status === 'contacted')
       .forEach(l => {
-        const customer = getCustomer(l.customerId)
-        const vehicle = getVehicle(l.vehicleId)
         const serviceNames = l.serviceIds.map(id => getService(id)?.name).filter(Boolean)
         items.push({
           category: 'warm',
-          customerName: customer?.name || 'Unknown',
+          customerName: l.name || 'Unknown',
           customerId: l.customerId,
-          vehicleInfo: vehicle ? `${vehicle.make} ${vehicle.model}` : '',
+          phone: l.phone || '',
+          vehicleInfo: l.vehicleMake ? `${l.vehicleMake} ${l.vehicleModel}` : '',
           serviceInfo: serviceNames.join(', '),
           amount: l.quotedPrice || getService(l.serviceIds[0])?.basePrice || 0,
           lastContact: l.createdAt,
@@ -94,6 +105,7 @@ export default function RevenueRadar() {
           category: 'dormant',
           customerName: customer?.name || 'Unknown',
           customerId: r.customerId,
+          phone: customer?.phone || '',
           vehicleInfo: '',
           serviceInfo: r.recommendedService,
           amount: r.estimatedValue,
@@ -104,7 +116,7 @@ export default function RevenueRadar() {
       })
 
     return items
-  }, [leads, retentionCustomers, getCustomer, getVehicle, getService])
+  }, [leads, retentionCustomers, getCustomer, getService])
 
   const hotTotal = useMemo(() => opportunities.filter(o => o.category === 'hot').reduce((s, o) => s + o.amount, 0), [opportunities])
   const warmTotal = useMemo(() => opportunities.filter(o => o.category === 'warm').reduce((s, o) => s + o.amount, 0), [opportunities])
@@ -256,8 +268,7 @@ export default function RevenueRadar() {
                                 className="p-1.5 rounded-md text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-colors"
                                 title="Call"
                                 onClick={() => {
-                                  const cust = getCustomer(opp.customerId)
-                                  if (cust?.phone) window.open(`tel:${cust.phone}`)
+                                  if (opp.phone) window.open(`tel:${opp.phone}`)
                                 }}
                               >
                                 <Phone className="w-3.5 h-3.5" />
@@ -266,9 +277,8 @@ export default function RevenueRadar() {
                                 className="p-1.5 rounded-md text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-colors"
                                 title="Message"
                                 onClick={() => {
-                                  const cust = getCustomer(opp.customerId)
-                                  if (cust?.phone) {
-                                    const num = cust.phone.replace(/\D/g, '').slice(-10)
+                                  if (opp.phone) {
+                                    const num = opp.phone.replace(/\D/g, '').slice(-10)
                                     window.open(`https://wa.me/91${num}`)
                                   }
                                 }}

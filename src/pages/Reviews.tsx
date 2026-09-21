@@ -1,8 +1,10 @@
 import { useState, useMemo } from 'react'
-import { Star, Send, ExternalLink, MessageSquare, ArrowRight, CheckCircle, Clock, Globe } from 'lucide-react'
+import { Star, Send, ExternalLink, MessageSquare, ArrowRight, CheckCircle, Clock, Globe, Plus } from 'lucide-react'
 import { useApp } from '@/contexts/AppContext'
-import { Card, CardHeader, Stat, Tabs, Badge, Button, Avatar, StatusBadge, EmptyState } from '@/components/ui'
+import { Card, CardHeader, Stat, Tabs, Badge, Button, Avatar, StatusBadge, EmptyState, Modal, Select } from '@/components/ui'
 import { formatDate, formatRelativeDate } from '@/utils/format'
+import { api } from '@/api/client'
+import type { Review } from '@/types'
 
 const TABS = [
   { id: 'all', label: 'All' },
@@ -27,8 +29,15 @@ function StarRating({ rating, max = 5 }: { rating: number; max?: number }) {
 }
 
 export default function Reviews() {
-  const { reviews, jobs, getCustomer, getService, updateReviewStatus } = useApp()
+  const { reviews, customers, jobs, getCustomer, getService, updateReviewStatus } = useApp()
   const [activeTab, setActiveTab] = useState('all')
+
+  // Modal state
+  const [showRequestReview, setShowRequestReview] = useState(false)
+  const [showViewFeedback, setShowViewFeedback] = useState<Review | null>(null)
+  const [showRespondPrivately, setShowRespondPrivately] = useState<Review | null>(null)
+  const [responseText, setResponseText] = useState('')
+  const [responseSent, setResponseSent] = useState(false)
 
   const avgRating = useMemo(() => {
     const withRatings = reviews.filter(r => r.status !== 'requested' && r.rating > 0)
@@ -54,9 +63,14 @@ export default function Reviews() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-slate-900">Reviews</h1>
-        <p className="text-sm text-slate-500 mt-0.5">Customer feedback and Google reviews</p>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-xl font-semibold text-slate-900">Reviews</h1>
+          <p className="text-sm text-slate-500 mt-0.5">Customer feedback and Google reviews</p>
+        </div>
+        <Button icon={<Plus className="w-4 h-4" />} onClick={() => setShowRequestReview(true)}>
+          Request Review
+        </Button>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -144,22 +158,27 @@ export default function Reviews() {
                       </Button>
                     )}
                     {review.status === 'received' && isPositive && (
-                      <Button variant="primary" size="sm" icon={<Star className="w-3.5 h-3.5" />} onClick={() => { updateReviewStatus(review.id, 'published'); window.open('#google-review', '_blank') }}>
+                      <Button variant="primary" size="sm" icon={<Star className="w-3.5 h-3.5" />} onClick={() => {
+                        updateReviewStatus(review.id, 'published')
+                        const phone = customer?.phone?.replace(/\D/g, '').slice(-10)
+                        const msg = encodeURIComponent(`Hi ${customer?.name}, thank you for choosing us! We'd love your feedback. Please leave us a Google review: https://g.page/review`)
+                        window.open(`https://wa.me/91${phone}?text=${msg}`, '_blank')
+                      }}>
                         Request Google Review
                       </Button>
                     )}
                     {review.status === 'received' && isNegative && (
                       <>
-                        <Button variant="secondary" size="sm" icon={<MessageSquare className="w-3.5 h-3.5" />} onClick={() => alert(`Feedback from ${customer?.name}:\n\n"${review.comment || 'No comment'}"`)}>
+                        <Button variant="secondary" size="sm" icon={<MessageSquare className="w-3.5 h-3.5" />} onClick={() => setShowViewFeedback(review)}>
                           View Feedback
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => alert('Private response sent')}>
+                        <Button variant="ghost" size="sm" onClick={() => { setShowRespondPrivately(review); setResponseText(''); setResponseSent(false) }}>
                           Respond Privately
                         </Button>
                       </>
                     )}
                     {review.status === 'published' && review.googleReviewUrl && (
-                      <Button variant="ghost" size="sm" icon={<ExternalLink className="w-3.5 h-3.5" />} onClick={() => window.open('#google-review', '_blank')}>
+                      <Button variant="ghost" size="sm" icon={<ExternalLink className="w-3.5 h-3.5" />} onClick={() => window.open(review.googleReviewUrl || 'https://g.page/review', '_blank')}>
                         View on Google
                       </Button>
                     )}
@@ -178,7 +197,179 @@ export default function Reviews() {
           />
         )}
       </div>
+
+      {/* Request Review Modal */}
+      <RequestReviewModal
+        open={showRequestReview}
+        onClose={() => setShowRequestReview(false)}
+        customers={customers}
+        jobs={jobs}
+      />
+
+      {/* View Feedback Modal */}
+      <Modal
+        open={!!showViewFeedback}
+        onClose={() => setShowViewFeedback(null)}
+        title="Customer Feedback"
+        size="md"
+        footer={<Button variant="secondary" onClick={() => setShowViewFeedback(null)}>Close</Button>}
+      >
+        {showViewFeedback && (() => {
+          const fbCustomer = getCustomer(showViewFeedback.customerId)
+          const fbJob = jobs.find(j => j.id === showViewFeedback.jobId)
+          const fbSvcNames = fbJob?.serviceIds.map(id => getService(id)?.name).filter(Boolean).join(', ') ?? 'Service'
+          return (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Avatar name={fbCustomer?.name ?? 'Unknown'} size="lg" />
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">{fbCustomer?.name}</p>
+                  <p className="text-xs text-slate-500">{fbSvcNames} · {formatRelativeDate(showViewFeedback.createdAt)}</p>
+                </div>
+              </div>
+              <div>
+                <StarRating rating={showViewFeedback.rating} />
+              </div>
+              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <p className="text-sm text-slate-700 leading-relaxed italic">
+                  "{showViewFeedback.comment || 'No comment provided.'}"
+                </p>
+              </div>
+            </div>
+          )
+        })()}
+      </Modal>
+
+      {/* Respond Privately Modal */}
+      <Modal
+        open={!!showRespondPrivately}
+        onClose={() => setShowRespondPrivately(null)}
+        title="Respond Privately"
+        subtitle={showRespondPrivately ? `To ${getCustomer(showRespondPrivately.customerId)?.name}` : ''}
+        size="md"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setShowRespondPrivately(null)}>Cancel</Button>
+            <Button
+              disabled={!responseText.trim() || responseSent}
+              onClick={async () => {
+                if (!showRespondPrivately) return
+                try {
+                  await api.patch(`/reviews/${showRespondPrivately.id}`, { response: responseText })
+                } catch { /* best-effort */ }
+                setResponseSent(true)
+                setTimeout(() => setShowRespondPrivately(null), 1500)
+              }}
+            >
+              {responseSent ? 'Sent!' : 'Send Response'}
+            </Button>
+          </>
+        }
+      >
+        {showRespondPrivately && (
+          <div className="space-y-4">
+            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+              <p className="text-xs text-slate-500 mb-1">Original feedback:</p>
+              <p className="text-sm text-slate-700 italic">"{showRespondPrivately.comment || 'No comment'}"</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Your response</label>
+              <textarea
+                className="w-full text-sm text-slate-600 border border-slate-200 rounded-lg p-3 resize-none focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                rows={4}
+                placeholder="Write a private response to address their concerns..."
+                value={responseText}
+                onChange={(e) => setResponseText(e.target.value)}
+              />
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
+  )
+}
+
+function RequestReviewModal({
+  open,
+  onClose,
+  customers,
+  jobs,
+}: {
+  open: boolean
+  onClose: () => void
+  customers: any[]
+  jobs: any[]
+}) {
+  const [selectedCustomer, setSelectedCustomer] = useState('')
+  const [selectedJob, setSelectedJob] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  const deliveredJobs = useMemo(() => {
+    if (!selectedCustomer) return []
+    return jobs.filter(j => j.customerId === selectedCustomer && j.status === 'delivered')
+  }, [selectedCustomer, jobs])
+
+  const customerOptions = customers.map(c => ({ value: c.id, label: c.name }))
+  const jobOptions = deliveredJobs.map(j => ({ value: j.id, label: `Job ${j.id} — ${formatDate(j.createdAt)}` }))
+
+  async function handleSubmit() {
+    if (!selectedCustomer || !selectedJob) return
+    setSubmitting(true)
+    try {
+      await api.post('/reviews', {
+        customerId: selectedCustomer,
+        jobId: selectedJob,
+        rating: 0,
+        comment: '',
+        status: 'requested',
+      })
+      setSelectedCustomer('')
+      setSelectedJob('')
+      onClose()
+    } catch {
+      // best-effort
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Request Review"
+      subtitle="Send a review request to a customer"
+      size="md"
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button disabled={!selectedCustomer || !selectedJob || submitting} onClick={handleSubmit}>
+            {submitting ? 'Sending...' : 'Send Request'}
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <Select
+          label="Customer"
+          placeholder="Select a customer"
+          options={customerOptions}
+          value={selectedCustomer}
+          onChange={(e) => { setSelectedCustomer(e.target.value); setSelectedJob('') }}
+        />
+        <Select
+          label="Delivered Job"
+          placeholder={selectedCustomer ? 'Select a job' : 'Select a customer first'}
+          options={jobOptions}
+          value={selectedJob}
+          onChange={(e) => setSelectedJob(e.target.value)}
+          disabled={!selectedCustomer || deliveredJobs.length === 0}
+        />
+        {selectedCustomer && deliveredJobs.length === 0 && (
+          <p className="text-xs text-amber-600">No delivered jobs found for this customer.</p>
+        )}
+      </div>
+    </Modal>
   )
 }
 

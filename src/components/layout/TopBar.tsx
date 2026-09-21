@@ -1,4 +1,6 @@
 import { Bell, Menu, Search } from 'lucide-react'
+import { useApp } from '@/contexts/AppContext'
+import { getInitials } from '@/utils/format'
 
 interface TopBarProps {
   title: string
@@ -7,6 +9,7 @@ interface TopBarProps {
 }
 
 export default function TopBar({ title, onMenuClick, onSearchClick }: TopBarProps) {
+  const { currentUser } = useApp()
   return (
     <header className="sticky top-0 z-30 flex h-12 items-center justify-between border-b border-neutral-200 bg-white px-4 lg:px-6">
       <div className="flex items-center gap-3">
@@ -38,7 +41,7 @@ export default function TopBar({ title, onMenuClick, onSearchClick }: TopBarProp
 
         <div className="ml-1 flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-200 text-[10px] font-medium text-neutral-600">
-            SP
+            {getInitials(currentUser?.name ?? '')}
           </div>
         </div>
       </div>

@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon,
@@ -23,13 +24,24 @@ export default function Bookings() {
   const {
     bookings, customers, vehicles, services,
     addBooking, updateBookingStatus, getCustomer, getVehicle, getService,
+    startJobFromBooking, addCustomer, addVehicle,
   } = useApp()
+
+  const [searchParams] = useSearchParams()
+  const prefillName = searchParams.get('leadName')
+  const prefillPhone = searchParams.get('leadPhone')
 
   const [view, setView] = useState('calendar')
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }))
   const [showNewBooking, setShowNewBooking] = useState(false)
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
   const [search, setSearch] = useState('')
+
+  useEffect(() => {
+    if (prefillName || prefillPhone) {
+      setShowNewBooking(true)
+    }
+  }, [prefillName, prefillPhone])
 
   const weekDays = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
@@ -294,6 +306,10 @@ export default function Bookings() {
         vehicles={vehicles}
         services={services}
         addBooking={addBooking}
+        prefillName={prefillName}
+        prefillPhone={prefillPhone}
+        addCustomer={addCustomer}
+        addVehicle={addVehicle}
       />
 
       {/* Booking Detail Modal */}
@@ -306,6 +322,10 @@ export default function Bookings() {
           getService={getService}
           onUpdateStatus={(status: BookingStatus) => {
             updateBookingStatus(selectedBooking.id, status)
+            setSelectedBooking(null)
+          }}
+          onStartJob={() => {
+            startJobFromBooking(selectedBooking.id)
             setSelectedBooking(null)
           }}
         />
@@ -321,6 +341,10 @@ function NewBookingModal({
   vehicles,
   services,
   addBooking,
+  prefillName,
+  prefillPhone,
+  addCustomer,
+  addVehicle,
 }: {
   open: boolean
   onClose: () => void
@@ -328,6 +352,10 @@ function NewBookingModal({
   vehicles: any[]
   services: any[]
   addBooking: (b: Booking) => void
+  prefillName?: string | null
+  prefillPhone?: string | null
+  addCustomer: (c: any) => void
+  addVehicle: (v: any) => void
 }) {
   const [step, setStep] = useState(1)
   const [customerId, setCustomerId] = useState('')
@@ -339,6 +367,19 @@ function NewBookingModal({
   const [deposit, setDeposit] = useState('')
   const [notes, setNotes] = useState('')
   const [customerSearch, setCustomerSearch] = useState('')
+
+  // New Customer inline
+  const [showNewCustomer, setShowNewCustomer] = useState(false)
+  const [newCustName, setNewCustName] = useState(prefillName ?? '')
+  const [newCustPhone, setNewCustPhone] = useState(prefillPhone ?? '')
+
+  // New Vehicle inline
+  const [showNewVehicle, setShowNewVehicle] = useState(false)
+  const [newVehMake, setNewVehMake] = useState('')
+  const [newVehModel, setNewVehModel] = useState('')
+  const [newVehYear, setNewVehYear] = useState('')
+  const [newVehReg, setNewVehReg] = useState('')
+  const [newVehColor, setNewVehColor] = useState('')
 
   const filteredCustomers = customerSearch
     ? customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()))
@@ -356,6 +397,41 @@ function NewBookingModal({
     if (svc) setPrice(String(svc.basePrice))
   }
 
+  function handleAddCustomer() {
+    if (!newCustName.trim() || !newCustPhone.trim()) return
+    const tempId = `cust-${Date.now()}`
+    addCustomer({
+      id: tempId,
+      name: newCustName.trim(),
+      phone: newCustPhone.trim(),
+      email: '',
+      address: '',
+      customerSince: new Date().toISOString(),
+      lifetimeSpend: 0,
+      notes: '',
+      tags: ['new'],
+    })
+    setCustomerId(tempId)
+    setShowNewCustomer(false)
+    setStep(2)
+  }
+
+  function handleAddVehicle() {
+    if (!newVehMake.trim() || !newVehModel.trim()) return
+    const tempId = `veh-${Date.now()}`
+    addVehicle({
+      id: tempId,
+      customerId,
+      make: newVehMake.trim(),
+      model: newVehModel.trim(),
+      year: Number(newVehYear) || new Date().getFullYear(),
+      registrationNumber: newVehReg.trim(),
+      color: newVehColor.trim(),
+    })
+    setVehicleId(tempId)
+    setShowNewVehicle(false)
+  }
+
   function reset() {
     setStep(1)
     setCustomerId('')
@@ -367,6 +443,15 @@ function NewBookingModal({
     setDeposit('')
     setNotes('')
     setCustomerSearch('')
+    setShowNewCustomer(false)
+    setNewCustName(prefillName ?? '')
+    setNewCustPhone(prefillPhone ?? '')
+    setShowNewVehicle(false)
+    setNewVehMake('')
+    setNewVehModel('')
+    setNewVehYear('')
+    setNewVehReg('')
+    setNewVehColor('')
   }
 
   function handleClose() {
@@ -471,6 +556,7 @@ function NewBookingModal({
                     key={c.id}
                     onClick={() => {
                       setCustomerId(c.id)
+                      setShowNewCustomer(false)
                       const cvs = vehicles.filter(v => v.customerId === c.id)
                       if (cvs.length === 1) setVehicleId(cvs[0].id)
                     }}
@@ -491,6 +577,42 @@ function NewBookingModal({
                   </button>
                 ))}
               </div>
+
+              {/* New Customer inline */}
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                {!showNewCustomer ? (
+                  <button
+                    onClick={() => setShowNewCustomer(true)}
+                    className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-dashed border-slate-300 text-sm text-slate-500 hover:text-slate-700 hover:border-slate-400 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" /> New Customer
+                  </button>
+                ) : (
+                  <div className="space-y-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <p className="text-xs font-medium text-slate-700">Create New Customer</p>
+                    <input
+                      value={newCustName}
+                      onChange={e => setNewCustName(e.target.value)}
+                      placeholder="Customer name"
+                      className="w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <input
+                      value={newCustPhone}
+                      onChange={e => setNewCustPhone(e.target.value)}
+                      placeholder="Phone number"
+                      className="w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <div className="flex items-center gap-2">
+                      <Button size="sm" onClick={handleAddCustomer} disabled={!newCustName.trim() || !newCustPhone.trim()}>
+                        Add Customer
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => setShowNewCustomer(false)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -503,7 +625,7 @@ function NewBookingModal({
                   {customerVehicles.map(v => (
                     <button
                       key={v.id}
-                      onClick={() => setVehicleId(v.id)}
+                      onClick={() => { setVehicleId(v.id); setShowNewVehicle(false) }}
                       className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border text-left transition-colors ${
                         vehicleId === v.id
                           ? 'bg-indigo-50 border-indigo-200'
@@ -525,6 +647,65 @@ function NewBookingModal({
                   No vehicles found for this customer
                 </p>
               )}
+
+              {/* New Vehicle inline */}
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                {!showNewVehicle ? (
+                  <button
+                    onClick={() => setShowNewVehicle(true)}
+                    className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-dashed border-slate-300 text-sm text-slate-500 hover:text-slate-700 hover:border-slate-400 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" /> New Vehicle
+                  </button>
+                ) : (
+                  <div className="space-y-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <p className="text-xs font-medium text-slate-700">Add New Vehicle</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <input
+                        value={newVehMake}
+                        onChange={e => setNewVehMake(e.target.value)}
+                        placeholder="Make (e.g. Mahindra)"
+                        className="w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                      <input
+                        value={newVehModel}
+                        onChange={e => setNewVehModel(e.target.value)}
+                        placeholder="Model (e.g. Thar)"
+                        className="w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      <input
+                        value={newVehYear}
+                        onChange={e => setNewVehYear(e.target.value)}
+                        placeholder="Year"
+                        type="number"
+                        className="w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                      <input
+                        value={newVehReg}
+                        onChange={e => setNewVehReg(e.target.value)}
+                        placeholder="Registration"
+                        className="w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                      <input
+                        value={newVehColor}
+                        onChange={e => setNewVehColor(e.target.value)}
+                        placeholder="Color"
+                        className="w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button size="sm" onClick={handleAddVehicle} disabled={!newVehMake.trim() || !newVehModel.trim()}>
+                        Add Vehicle
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => setShowNewVehicle(false)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -694,6 +875,7 @@ function BookingDetailModal({
   getVehicle,
   getService,
   onUpdateStatus,
+  onStartJob,
 }: {
   booking: Booking
   onClose: () => void
@@ -701,6 +883,7 @@ function BookingDetailModal({
   getVehicle: (id: string) => any
   getService: (id: string) => any
   onUpdateStatus: (status: BookingStatus) => void
+  onStartJob: () => void
 }) {
   const cust = getCustomer(booking.customerId)
   const veh = getVehicle(booking.vehicleId)
@@ -723,7 +906,7 @@ function BookingDetailModal({
           <div className="flex-1" />
           <Button variant="secondary" onClick={onClose}>Close</Button>
           {booking.status === 'confirmed' && (
-            <Button onClick={() => onUpdateStatus('in_progress')}>Mark In Progress</Button>
+            <Button onClick={onStartJob}>Start Job</Button>
           )}
           {booking.status === 'in_progress' && (
             <Button onClick={() => onUpdateStatus('completed')}>Mark Completed</Button>

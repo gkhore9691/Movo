@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Zap, Plus, ChevronRight, Clock, Play, Pencil, Trash2, MessageSquare, Bell, Gift, CalendarCheck } from 'lucide-react'
 import { useApp } from '@/contexts/AppContext'
-import { Card, CardHeader, Button, Badge, Stat, Toggle } from '@/components/ui'
+import { Card, CardHeader, Button, Badge, Stat, Toggle, Modal } from '@/components/ui'
 import { formatRelativeDate } from '@/utils/format'
+import { api } from '@/api/client'
+import type { Automation } from '@/types'
 
 const presetTemplates = [
   {
@@ -46,6 +48,7 @@ const actionTypeColors: Record<string, string> = {
 export default function Automations() {
   const { automations, updateAutomationEnabled, addAutomation, deleteAutomation } = useApp()
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [editingAutomation, setEditingAutomation] = useState<Automation | null>(null)
 
   const activeCount = automations.filter(a => a.enabled).length
   const totalRuns = automations.reduce((sum, a) => sum + a.runsCount, 0)
@@ -60,7 +63,7 @@ export default function Automations() {
           <h1 className="text-2xl font-semibold text-slate-900">Automations</h1>
           <p className="text-sm text-slate-500 mt-1">Let Movo handle repetitive tasks automatically</p>
         </div>
-        <Button icon={<Plus className="w-4 h-4" />} onClick={() => alert('Select a template below to create a new automation')}>Create Automation</Button>
+        <Button icon={<Plus className="w-4 h-4" />} onClick={() => document.getElementById('templates')?.scrollIntoView({ behavior: 'smooth' })}>Create Automation</Button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -106,7 +109,7 @@ export default function Automations() {
                       <p className="text-xs text-slate-500 mt-0.5">{automation.description}</p>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => alert('Edit automation: ' + automation.name)} />
+                      <Button variant="ghost" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => setEditingAutomation(automation)} />
                       <Button variant="ghost" size="sm" icon={<Trash2 className="w-3.5 h-3.5" />} onClick={() => { if (confirm('Delete "' + automation.name + '"?')) deleteAutomation(automation.id) }} />
                     </div>
                   </div>
@@ -188,8 +191,14 @@ export default function Automations() {
         ))}
       </div>
 
+      <EditAutomationModal
+        automation={editingAutomation}
+        onClose={() => setEditingAutomation(null)}
+        updateAutomationEnabled={updateAutomationEnabled}
+      />
+
       {/* Preset templates */}
-      <div>
+      <div id="templates">
         <h2 className="text-lg font-semibold text-slate-900 mb-1">Popular Automations</h2>
         <p className="text-sm text-slate-500 mb-4">Start with a template and customize to your needs</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -245,5 +254,89 @@ export default function Automations() {
         </div>
       </div>
     </div>
+  )
+}
+
+function EditAutomationModal({
+  automation,
+  onClose,
+  updateAutomationEnabled,
+}: {
+  automation: Automation | null
+  onClose: () => void
+  updateAutomationEnabled: (id: string, enabled: boolean) => void
+}) {
+  if (!automation) return <Modal open={false} onClose={onClose}><span /></Modal>
+
+  return (
+    <Modal open onClose={onClose} title="Edit Automation" size="md">
+      <EditAutomationForm
+        key={automation.id}
+        automation={automation}
+        onClose={onClose}
+        updateAutomationEnabled={updateAutomationEnabled}
+      />
+    </Modal>
+  )
+}
+
+function EditAutomationForm({
+  automation,
+  onClose,
+  updateAutomationEnabled,
+}: {
+  automation: Automation
+  onClose: () => void
+  updateAutomationEnabled: (id: string, enabled: boolean) => void
+}) {
+  const [name, setName] = useState(automation.name)
+  const [description, setDescription] = useState(automation.description)
+  const [enabled, setEnabled] = useState(automation.enabled)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+
+  return (
+    <>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Name</label>
+          <input value={name} onChange={e => setName(e.target.value)} className={inputClass} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Description</label>
+          <textarea
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            rows={3}
+            className={`${inputClass} resize-none`}
+          />
+        </div>
+        <Toggle checked={enabled} onChange={setEnabled} label="Enabled" description="Turn this automation on or off" />
+      </div>
+      <div className="flex items-center justify-end gap-3 mt-6">
+        <Button variant="secondary" onClick={onClose}>Cancel</Button>
+        <Button
+          disabled={saving || !name.trim()}
+          onClick={async () => {
+            setSaving(true)
+            setSaved(false)
+            try {
+              await api.patch(`/automations/${automation.id}`, { name, description, enabled })
+              updateAutomationEnabled(automation.id, enabled)
+              setSaved(true)
+              setTimeout(() => onClose(), 600)
+            } catch {
+              // stay open on error
+            } finally {
+              setSaving(false)
+            }
+          }}
+        >
+          {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
+        </Button>
+      </div>
+    </>
   )
 }

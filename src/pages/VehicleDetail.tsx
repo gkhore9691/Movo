@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, Car, Wrench, Calendar, Camera, IndianRupee } from 'lucide-react'
+import { ArrowLeft, Car, Wrench, Calendar, Camera, IndianRupee, Pencil } from 'lucide-react'
 import { useApp } from '@/contexts/AppContext'
-import { Card, CardHeader, Button, Avatar, Stat, StatusBadge, Badge, StepProgress, EmptyState, Input } from '@/components/ui'
+import { Card, CardHeader, Button, Avatar, Stat, StatusBadge, Badge, StepProgress, EmptyState, Input, Modal } from '@/components/ui'
 import { formatCurrency, formatDate, formatRelativeDate } from '@/utils/format'
 import type { JobStatus } from '@/types'
 
@@ -11,7 +11,8 @@ const JOB_STAGES: JobStatus[] = ['enquiry', 'booked', 'car_received', 'inspectio
 export default function VehicleDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { vehicles, jobs, services, getCustomer, getStaffMember, getService } = useApp()
+  const { vehicles, jobs, services, getCustomer, getStaffMember, getService, updateVehicle } = useApp()
+  const [showEditModal, setShowEditModal] = useState(false)
 
   const vehicle = vehicles.find(v => v.id === id)
   const customer = vehicle ? getCustomer(vehicle.customerId) : undefined
@@ -98,6 +99,11 @@ export default function VehicleDetail() {
                 </span>
               </Link>
             )}
+            <div className="mt-3">
+              <Button variant="secondary" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => setShowEditModal(true)}>
+                Edit Vehicle
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -238,13 +244,21 @@ export default function VehicleDetail() {
           <VehicleNotes defaultValue={customer?.notes ?? ''} />
         </div>
       </div>
+
+      {vehicle && (
+        <EditVehicleModal
+          vehicle={vehicle}
+          open={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          onSave={async (id, data) => { await updateVehicle(id, data); setShowEditModal(false) }}
+        />
+      )}
     </div>
   )
 }
 
 function VehicleNotes({ defaultValue }: { defaultValue: string }) {
   const [value, setValue] = useState(defaultValue)
-  const [saved, setSaved] = useState(false)
   return (
     <Card>
       <CardHeader title="Vehicle Notes" />
@@ -253,12 +267,71 @@ function VehicleNotes({ defaultValue }: { defaultValue: string }) {
         rows={4}
         placeholder="Add notes about this vehicle..."
         value={value}
-        onChange={(e) => { setValue(e.target.value); setSaved(false) }}
+        onChange={(e) => setValue(e.target.value)}
       />
-      <div className="flex items-center justify-end mt-2">
-        {saved && <span className="text-xs text-emerald-600 mr-auto">Saved</span>}
-        <Button variant="secondary" size="sm" onClick={() => setSaved(true)}>Save</Button>
-      </div>
+      <p className="text-xs text-slate-400 mt-2">Local scratchpad only — not saved to server</p>
     </Card>
+  )
+}
+
+function EditVehicleModal({
+  vehicle,
+  open,
+  onClose,
+  onSave,
+}: {
+  vehicle: { id: string; make: string; model: string; year: number; registrationNumber: string; color: string }
+  open: boolean
+  onClose: () => void
+  onSave: (id: string, data: any) => Promise<void>
+}) {
+  const [make, setMake] = useState(vehicle.make)
+  const [model, setModel] = useState(vehicle.model)
+  const [year, setYear] = useState(String(vehicle.year))
+  const [regNumber, setRegNumber] = useState(vehicle.registrationNumber)
+  const [color, setColor] = useState(vehicle.color)
+
+  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Edit Vehicle"
+      size="md"
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button onClick={() => onSave(vehicle.id, { make, model, year: Number(year), registrationNumber: regNumber, color })}>Save Changes</Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Make</label>
+            <input value={make} onChange={e => setMake(e.target.value)} className={inputClass} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Model</label>
+            <input value={model} onChange={e => setModel(e.target.value)} className={inputClass} />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Year</label>
+            <input type="number" value={year} onChange={e => setYear(e.target.value)} className={inputClass} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Registration No.</label>
+            <input value={regNumber} onChange={e => setRegNumber(e.target.value)} className={inputClass} />
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Color</label>
+          <input value={color} onChange={e => setColor(e.target.value)} className={inputClass} />
+        </div>
+      </div>
+    </Modal>
   )
 }

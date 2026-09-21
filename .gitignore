@@ -1,6 +1,13 @@
 node_modules
 dist
+downloads
 .DS_Store
 *.local
 .env
 .env.*
+scripts/.env
+scripts/wa-auth
+scripts/downloads
+server/dist
+server/.env
+tsconfig.tsbuildinfo

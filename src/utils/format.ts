@@ -8,12 +8,16 @@ export function formatCurrency(amount: number): string {
 }
 
 export function formatDate(date: Date | string): string {
+  if (!date) return '—';
   const d = typeof date === 'string' ? parseISO(date) : date;
+  if (isNaN(d.getTime())) return '—';
   return format(d, 'MMM d, yyyy');
 }
 
 export function formatRelativeDate(date: Date | string): string {
+  if (!date) return '—';
   const d = typeof date === 'string' ? parseISO(date) : date;
+  if (isNaN(d.getTime())) return '—';
   if (isToday(d)) return 'Today';
   if (isYesterday(d)) return 'Yesterday';
   return formatDistanceToNow(d, { addSuffix: true });

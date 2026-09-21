@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Plus, ChevronRight, Phone, MessageSquare, Calendar, Filter,
-  ArrowRight, Users, TrendingUp, Target, DollarSign,
+  ArrowRight, Users, TrendingUp, Target, DollarSign, CheckCircle2, Pencil,
 } from 'lucide-react'
 import { useApp } from '@/contexts/AppContext'
 import {
@@ -40,8 +40,10 @@ const NEXT_STATUS: Partial<Record<LeadStatus, LeadStatus>> = {
 }
 
 function getFollowUpUrgency(followUpDate: string): 'overdue' | 'today' | 'future' {
+  if (!followUpDate) return 'future'
   const now = new Date()
   const fup = new Date(followUpDate)
+  if (isNaN(fup.getTime())) return 'future'
   const todayStr = now.toISOString().slice(0, 10)
   const fupStr = fup.toISOString().slice(0, 10)
   if (fupStr < todayStr) return 'overdue'
@@ -57,8 +59,8 @@ const urgencyColors = {
 
 export default function Leads() {
   const {
-    leads, customers, vehicles, services,
-    updateLeadStatus, addLead, getCustomer, getVehicle, getService, getVehiclesForCustomer,
+    leads, services,
+    updateLeadStatus, addLead, updateLead, getService,
   } = useApp()
   const navigate = useNavigate()
 
@@ -67,6 +69,7 @@ export default function Leads() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [filterStatus, setFilterStatus] = useState<LeadStatus | 'all'>('all')
   const [showNewLead, setShowNewLead] = useState(false)
+  const [editingLead, setEditingLead] = useState<Lead | null>(null)
 
   const filteredLeads = useMemo(() => {
     let result = leads
@@ -76,18 +79,17 @@ export default function Leads() {
     if (search) {
       const q = search.toLowerCase()
       result = result.filter(l => {
-        const cust = getCustomer(l.customerId)
-        const veh = getVehicle(l.vehicleId)
         return (
-          cust?.name.toLowerCase().includes(q) ||
-          veh?.make.toLowerCase().includes(q) ||
-          veh?.model.toLowerCase().includes(q) ||
-          veh?.registrationNumber.toLowerCase().includes(q)
+          l.name.toLowerCase().includes(q) ||
+          l.phone.includes(q) ||
+          l.vehicleMake.toLowerCase().includes(q) ||
+          l.vehicleModel.toLowerCase().includes(q) ||
+          l.vehicleRegistration.toLowerCase().includes(q)
         )
       })
     }
     return result
-  }, [leads, filterStatus, search, getCustomer, getVehicle])
+  }, [leads, filterStatus, search])
 
   const stats = useMemo(() => {
     const total = leads.length
@@ -110,7 +112,15 @@ export default function Leads() {
 
   function advanceStatus(lead: Lead) {
     const next = NEXT_STATUS[lead.status]
-    if (next) updateLeadStatus(lead.id, next)
+    if (!next) return
+    updateLeadStatus(lead.id, next)
+    if (next === 'won') {
+      setTimeout(() => {
+        if (confirm('Lead converted to customer! Create a booking?')) {
+          navigate(`/bookings?leadName=${encodeURIComponent(lead.name)}&leadPhone=${encodeURIComponent(lead.phone)}`)
+        }
+      }, 500)
+    }
   }
 
   return (
@@ -192,8 +202,6 @@ export default function Leads() {
                           <LeadCard
                             key={lead.id}
                             lead={lead}
-                            getCustomer={getCustomer}
-                            getVehicle={getVehicle}
                             getService={getService}
                             onAdvance={() => advanceStatus(lead)}
                             onClick={() => setSelectedLead(lead)}
@@ -222,7 +230,7 @@ export default function Leads() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100">
-                  <th className="text-left font-medium text-slate-500 px-4 py-3">Customer</th>
+                  <th className="text-left font-medium text-slate-500 px-4 py-3">Name</th>
                   <th className="text-left font-medium text-slate-500 px-4 py-3">Vehicle</th>
                   <th className="text-left font-medium text-slate-500 px-4 py-3">Service</th>
                   <th className="text-left font-medium text-slate-500 px-4 py-3">Status</th>
@@ -234,8 +242,6 @@ export default function Leads() {
               </thead>
               <tbody>
                 {filteredLeads.map(lead => {
-                  const cust = getCustomer(lead.customerId)
-                  const veh = getVehicle(lead.vehicleId)
                   const svcs = lead.serviceIds.map(id => getService(id)?.name).filter(Boolean)
                   const urgency = getFollowUpUrgency(lead.followUpDate)
                   return (
@@ -246,12 +252,12 @@ export default function Leads() {
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">
-                          <Avatar name={cust?.name ?? ''} size="sm" />
-                          <span className="font-medium text-slate-900">{cust?.name}</span>
+                          <Avatar name={lead.name} size="sm" />
+                          <span className="font-medium text-slate-900">{lead.name}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-slate-600">
-                        {veh ? `${veh.make} ${veh.model}` : '—'}
+                        {lead.vehicleMake ? `${lead.vehicleMake} ${lead.vehicleModel}` : '—'}
                       </td>
                       <td className="px-4 py-3 text-slate-600">{svcs.join(', ')}</td>
                       <td className="px-4 py-3">
@@ -281,8 +287,6 @@ export default function Leads() {
         <LeadDetailModal
           lead={selectedLead}
           onClose={() => setSelectedLead(null)}
-          getCustomer={getCustomer}
-          getVehicle={getVehicle}
           getService={getService}
           onAdvance={() => {
             advanceStatus(selectedLead)
@@ -297,6 +301,23 @@ export default function Leads() {
             setSelectedLead(null)
             navigate('/bookings')
           }}
+          onEdit={() => {
+            setEditingLead(selectedLead)
+            setSelectedLead(null)
+          }}
+        />
+      )}
+
+      {/* Edit Lead Modal */}
+      {editingLead && (
+        <EditLeadModal
+          lead={editingLead}
+          services={services}
+          onClose={() => setEditingLead(null)}
+          onSave={async (id, data) => {
+            await updateLead(id, data)
+            setEditingLead(null)
+          }}
         />
       )}
 
@@ -304,10 +325,7 @@ export default function Leads() {
       <NewLeadModal
         open={showNewLead}
         onClose={() => setShowNewLead(false)}
-        customers={customers}
-        vehicles={vehicles}
         services={services}
-        getVehiclesForCustomer={getVehiclesForCustomer}
         addLead={addLead}
       />
     </div>
@@ -316,23 +334,17 @@ export default function Leads() {
 
 function LeadCard({
   lead,
-  getCustomer,
-  getVehicle,
   getService,
   onAdvance,
   onClick,
   canAdvance,
 }: {
   lead: Lead
-  getCustomer: (id: string) => any
-  getVehicle: (id: string) => any
   getService: (id: string) => any
   onAdvance: () => void
   onClick: () => void
   canAdvance: boolean
 }) {
-  const cust = getCustomer(lead.customerId)
-  const veh = getVehicle(lead.vehicleId)
   const svcs = lead.serviceIds.map(id => getService(id)?.name).filter(Boolean)
   const urgency = getFollowUpUrgency(lead.followUpDate)
 
@@ -347,11 +359,11 @@ function LeadCard({
     >
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2">
-          <Avatar name={cust?.name ?? ''} size="sm" />
+          <Avatar name={lead.name} size="sm" />
           <div>
-            <p className="text-sm font-medium text-slate-900">{cust?.name}</p>
+            <p className="text-sm font-medium text-slate-900">{lead.name}</p>
             <p className="text-xs text-slate-500">
-              {veh ? `${veh.make} ${veh.model}` : '—'}
+              {lead.vehicleMake ? `${lead.vehicleMake} ${lead.vehicleModel}` : '—'}
             </p>
           </div>
         </div>
@@ -392,26 +404,22 @@ function LeadCard({
 function LeadDetailModal({
   lead,
   onClose,
-  getCustomer,
-  getVehicle,
   getService,
   onAdvance,
   onMarkLost,
   canAdvance,
   onCreateBooking,
+  onEdit,
 }: {
   lead: Lead
   onClose: () => void
-  getCustomer: (id: string) => any
-  getVehicle: (id: string) => any
   getService: (id: string) => any
   onAdvance: () => void
   onMarkLost: () => void
   canAdvance: boolean
   onCreateBooking?: () => void
+  onEdit?: () => void
 }) {
-  const cust = getCustomer(lead.customerId)
-  const veh = getVehicle(lead.vehicleId)
   const svcs = lead.serviceIds.map(id => getService(id)).filter(Boolean)
   const nextStatus = NEXT_STATUS[lead.status]
 
@@ -419,8 +427,8 @@ function LeadDetailModal({
     <Modal
       open
       onClose={onClose}
-      title={cust?.name ?? 'Lead Details'}
-      subtitle={veh ? `${veh.make} ${veh.model} · ${veh.registrationNumber}` : undefined}
+      title={lead.name}
+      subtitle={lead.vehicleMake ? `${lead.vehicleMake} ${lead.vehicleModel}${lead.vehicleRegistration ? ` · ${lead.vehicleRegistration}` : ''}` : undefined}
       size="lg"
       footer={
         <div className="flex items-center gap-2 w-full">
@@ -448,28 +456,42 @@ function LeadDetailModal({
               {formatCurrency(lead.quotedPrice)}
             </span>
           )}
+          {lead.customerId && (
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <CheckCircle2 className="w-3 h-3" />
+              Converted
+            </span>
+          )}
         </div>
 
-        {/* Customer Info */}
+        {/* Contact Info */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-xs font-medium text-slate-500 mb-1">Customer</p>
+            <p className="text-xs font-medium text-slate-500 mb-1">Contact</p>
             <div className="flex items-center gap-2">
-              <Avatar name={cust?.name ?? ''} size="sm" />
+              <Avatar name={lead.name} size="sm" />
               <div>
-                <p className="text-sm font-medium text-slate-900">{cust?.name}</p>
-                <p className="text-xs text-slate-500">{cust?.phone}</p>
+                <p className="text-sm font-medium text-slate-900">{lead.name}</p>
+                <p className="text-xs text-slate-500">{lead.phone}</p>
               </div>
             </div>
           </div>
           <div>
             <p className="text-xs font-medium text-slate-500 mb-1">Vehicle</p>
             <p className="text-sm text-slate-900">
-              {veh ? `${veh.year} ${veh.make} ${veh.model}` : '—'}
+              {lead.vehicleMake ? `${lead.vehicleYear ? lead.vehicleYear + ' ' : ''}${lead.vehicleMake} ${lead.vehicleModel}` : '—'}
             </p>
-            <p className="text-xs text-slate-500">{veh?.registrationNumber}</p>
+            <p className="text-xs text-slate-500">{lead.vehicleRegistration}</p>
           </div>
         </div>
+
+        {/* Email */}
+        {lead.email && (
+          <div>
+            <p className="text-xs font-medium text-slate-500 mb-1">Email</p>
+            <p className="text-sm text-slate-900">{lead.email}</p>
+          </div>
+        )}
 
         {/* Services */}
         <div>
@@ -514,20 +536,26 @@ function LeadDetailModal({
         <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
           <Button
             variant="secondary" size="sm" icon={<Phone className="w-3.5 h-3.5" />}
-            onClick={() => cust?.phone && window.open(`tel:${cust.phone}`)}
+            onClick={() => lead.phone && window.open(`tel:${lead.phone}`)}
           >
             Call
           </Button>
           <Button
             variant="secondary" size="sm" icon={<MessageSquare className="w-3.5 h-3.5" />}
             onClick={() => {
-              if (cust?.phone) {
-                const num = cust.phone.replace(/\D/g, '').slice(-10)
+              if (lead.phone) {
+                const num = lead.phone.replace(/\D/g, '').slice(-10)
                 window.open(`https://wa.me/91${num}`)
               }
             }}
           >
             Message
+          </Button>
+          <Button
+            variant="secondary" size="sm" icon={<Pencil className="w-3.5 h-3.5" />}
+            onClick={onEdit}
+          >
+            Edit
           </Button>
           <Button
             variant="secondary" size="sm" icon={<Calendar className="w-3.5 h-3.5" />}
@@ -541,45 +569,256 @@ function LeadDetailModal({
   )
 }
 
+function EditLeadModal({
+  lead,
+  services,
+  onClose,
+  onSave,
+}: {
+  lead: Lead
+  services: any[]
+  onClose: () => void
+  onSave: (leadId: string, data: Partial<Lead>) => Promise<void>
+}) {
+  const [name, setName] = useState(lead.name)
+  const [phone, setPhone] = useState(lead.phone)
+  const [email, setEmail] = useState(lead.email)
+  const [vehicleMake, setVehicleMake] = useState(lead.vehicleMake)
+  const [vehicleModel, setVehicleModel] = useState(lead.vehicleModel)
+  const [vehicleYear, setVehicleYear] = useState(lead.vehicleYear ? String(lead.vehicleYear) : '')
+  const [vehicleRegistration, setVehicleRegistration] = useState(lead.vehicleRegistration)
+  const [quotedPrice, setQuotedPrice] = useState(lead.quotedPrice ? String(lead.quotedPrice) : '')
+  const [source, setSource] = useState(lead.source || 'Walk-in')
+  const [notes, setNotes] = useState(lead.notes)
+  const [followUpDate, setFollowUpDate] = useState(lead.followUpDate ? lead.followUpDate.slice(0, 10) : '')
+  const [serviceId, setServiceId] = useState(lead.serviceIds[0] || '')
+  const [saving, setSaving] = useState(false)
+
+  async function handleSave() {
+    if (!name || !phone) return
+    setSaving(true)
+    await onSave(lead.id, {
+      name,
+      phone,
+      email,
+      vehicleMake,
+      vehicleModel,
+      vehicleYear: vehicleYear ? parseInt(vehicleYear) : null,
+      vehicleRegistration,
+      quotedPrice: Number(quotedPrice) || 0,
+      source,
+      notes,
+      followUpDate,
+      serviceIds: serviceId ? [serviceId] : [],
+    })
+    setSaving(false)
+  }
+
+  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      title="Edit Lead"
+      subtitle={lead.name}
+      size="md"
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleSave} disabled={!name || !phone || saving}>
+            {saving ? 'Saving...' : 'Save Changes'}
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Name *</label>
+            <input
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Customer name"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Phone *</label>
+            <input
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+              placeholder="Phone number"
+              className={inputClass}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+          <input
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="Email address"
+            className={inputClass}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Vehicle Make</label>
+            <input
+              value={vehicleMake}
+              onChange={e => setVehicleMake(e.target.value)}
+              placeholder="e.g. Mahindra"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Vehicle Model</label>
+            <input
+              value={vehicleModel}
+              onChange={e => setVehicleModel(e.target.value)}
+              placeholder="e.g. Thar"
+              className={inputClass}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Vehicle Year</label>
+            <input
+              value={vehicleYear}
+              onChange={e => setVehicleYear(e.target.value)}
+              placeholder="e.g. 2023"
+              type="number"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Registration No.</label>
+            <input
+              value={vehicleRegistration}
+              onChange={e => setVehicleRegistration(e.target.value)}
+              placeholder="e.g. MP09-AB-1234"
+              className={inputClass}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Service</label>
+          <select
+            value={serviceId}
+            onChange={e => setServiceId(e.target.value)}
+            className={inputClass}
+          >
+            <option value="">Select service...</option>
+            {services.map(s => (
+              <option key={s.id} value={s.id}>{s.name} — {formatCurrency(s.basePrice)}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Quoted Price</label>
+            <input
+              value={quotedPrice}
+              onChange={e => setQuotedPrice(e.target.value)}
+              placeholder="e.g. 15000"
+              type="number"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Follow-up Date</label>
+            <input
+              value={followUpDate}
+              onChange={e => setFollowUpDate(e.target.value)}
+              type="date"
+              className={inputClass}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Source</label>
+          <select
+            value={source}
+            onChange={e => setSource(e.target.value)}
+            className={inputClass}
+          >
+            {['Walk-in', 'Phone', 'WhatsApp', 'Instagram', 'Referral', 'Google'].map(s => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Notes</label>
+          <textarea
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            placeholder="Notes..."
+            rows={3}
+            className={`${inputClass} resize-none`}
+          />
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
 function NewLeadModal({
   open,
   onClose,
-  customers,
-  vehicles,
   services,
-  getVehiclesForCustomer,
   addLead,
 }: {
   open: boolean
   onClose: () => void
-  customers: any[]
-  vehicles: any[]
   services: any[]
-  getVehiclesForCustomer: (id: string) => any[]
   addLead: (lead: Lead) => void
 }) {
-  const [customerId, setCustomerId] = useState('')
-  const [vehicleId, setVehicleId] = useState('')
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
+  const [vehicleMake, setVehicleMake] = useState('')
+  const [vehicleModel, setVehicleModel] = useState('')
+  const [vehicleYear, setVehicleYear] = useState('')
+  const [vehicleRegistration, setVehicleRegistration] = useState('')
   const [serviceId, setServiceId] = useState('')
   const [source, setSource] = useState('Walk-in')
   const [notes, setNotes] = useState('')
 
-  const customerVehicles = customerId ? getVehiclesForCustomer(customerId) : []
-
   function reset() {
-    setCustomerId('')
-    setVehicleId('')
+    setName('')
+    setPhone('')
+    setEmail('')
+    setVehicleMake('')
+    setVehicleModel('')
+    setVehicleYear('')
+    setVehicleRegistration('')
     setServiceId('')
     setSource('Walk-in')
     setNotes('')
   }
 
   function handleCreate() {
-    if (!customerId || !serviceId) return
+    if (!name || !phone || !serviceId) return
     addLead({
       id: `lead-${Date.now()}`,
-      customerId,
-      vehicleId: vehicleId || customerVehicles[0]?.id || '',
+      name,
+      phone,
+      email,
+      vehicleMake,
+      vehicleModel,
+      vehicleYear: vehicleYear ? parseInt(vehicleYear) : null,
+      vehicleRegistration,
+      customerId: '',
+      vehicleId: '',
       serviceIds: [serviceId],
       status: 'new',
       quotedPrice: 0,
@@ -597,6 +836,8 @@ function NewLeadModal({
     onClose()
   }
 
+  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+
   return (
     <Modal
       open={open}
@@ -607,50 +848,91 @@ function NewLeadModal({
       footer={
         <>
           <Button variant="secondary" onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleCreate} disabled={!customerId || !serviceId}>Create Lead</Button>
+          <Button onClick={handleCreate} disabled={!name || !phone || !serviceId}>Create Lead</Button>
         </>
       }
     >
       <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Customer</label>
-          <select
-            value={customerId}
-            onChange={e => {
-              setCustomerId(e.target.value)
-              setVehicleId('')
-            }}
-            className="w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="">Select customer...</option>
-            {customers.map(c => (
-              <option key={c.id} value={c.id}>{c.name} — {c.phone}</option>
-            ))}
-          </select>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Name *</label>
+            <input
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Customer name"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Phone *</label>
+            <input
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+              placeholder="Phone number"
+              className={inputClass}
+            />
+          </div>
         </div>
 
-        {customerId && customerVehicles.length > 0 && (
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+          <input
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="Email address (optional)"
+            className={inputClass}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Vehicle</label>
-            <select
-              value={vehicleId}
-              onChange={e => setVehicleId(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="">Select vehicle...</option>
-              {customerVehicles.map(v => (
-                <option key={v.id} value={v.id}>{v.year} {v.make} {v.model} — {v.registrationNumber}</option>
-              ))}
-            </select>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Vehicle Make</label>
+            <input
+              value={vehicleMake}
+              onChange={e => setVehicleMake(e.target.value)}
+              placeholder="e.g. Mahindra"
+              className={inputClass}
+            />
           </div>
-        )}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Vehicle Model</label>
+            <input
+              value={vehicleModel}
+              onChange={e => setVehicleModel(e.target.value)}
+              placeholder="e.g. Thar"
+              className={inputClass}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Vehicle Year</label>
+            <input
+              value={vehicleYear}
+              onChange={e => setVehicleYear(e.target.value)}
+              placeholder="e.g. 2023"
+              type="number"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Registration No.</label>
+            <input
+              value={vehicleRegistration}
+              onChange={e => setVehicleRegistration(e.target.value)}
+              placeholder="e.g. MP09-AB-1234"
+              className={inputClass}
+            />
+          </div>
+        </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Service</label>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Service *</label>
           <select
             value={serviceId}
             onChange={e => setServiceId(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className={inputClass}
           >
             <option value="">Select service...</option>
             {services.map(s => (
@@ -660,13 +942,13 @@ function NewLeadModal({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Source</label>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Source *</label>
           <select
             value={source}
             onChange={e => setSource(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className={inputClass}
           >
-            {['Walk-in', 'Phone', 'WhatsApp', 'Instagram', 'Referral'].map(s => (
+            {['Walk-in', 'Phone', 'WhatsApp', 'Instagram', 'Referral', 'Google'].map(s => (
               <option key={s} value={s}>{s}</option>
             ))}
           </select>
@@ -679,7 +961,7 @@ function NewLeadModal({
             onChange={e => setNotes(e.target.value)}
             placeholder="Optional notes..."
             rows={3}
-            className="w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+            className={`${inputClass} resize-none`}
           />
         </div>
       </div>

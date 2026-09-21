@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { BarChart3, TrendingUp, Users, Wrench } from 'lucide-react'
 import {
@@ -6,42 +7,71 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
 import { useApp } from '@/contexts/AppContext'
-import { Card, CardHeader, Stat, Tabs, Badge } from '@/components/ui'
+import { Card, CardHeader, Stat, Badge } from '@/components/ui'
 import { formatCurrency } from '@/utils/format'
-
-const revenueData = [
-  { day: 'Mon', revenue: 28500 },
-  { day: 'Tue', revenue: 42800 },
-  { day: 'Wed', revenue: 35200 },
-  { day: 'Thu', revenue: 51000 },
-  { day: 'Fri', revenue: 38600 },
-  { day: 'Sat', revenue: 64200 },
-  { day: 'Sun', revenue: 12000 },
-]
-
-const customerTrend = [
-  { week: 'W1', new: 5, repeat: 8 },
-  { week: 'W2', new: 7, repeat: 6 },
-  { week: 'W3', new: 4, repeat: 10 },
-  { week: 'W4', new: 8, repeat: 7 },
-  { week: 'W5', new: 6, repeat: 11 },
-  { week: 'W6', new: 9, repeat: 9 },
-]
 
 const CHART_COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6', '#06b6d4']
 
-const stageTime = [
-  { stage: 'Enquiry → Booked', avgHours: 18 },
-  { stage: 'Booked → Received', avgHours: 48 },
-  { stage: 'Inspection', avgHours: 4 },
-  { stage: 'Work in Progress', avgHours: 36 },
-  { stage: 'Quality Check', avgHours: 6 },
-  { stage: 'Ready → Delivered', avgHours: 8 },
-]
-
 export default function Analytics() {
   const { invoices, leads, jobs, customers, staff, services } = useApp()
-  const [period, setPeriod] = useState('week')
+  const navigate = useNavigate()
+
+  const revenueData = useMemo(() => {
+    const months: Record<string, number> = {}
+    invoices.filter(i => i.status === 'paid' && i.paidAt).forEach(inv => {
+      const month = new Date(inv.paidAt!).toLocaleString('default', { month: 'short' })
+      months[month] = (months[month] || 0) + inv.amount
+    })
+    const now = new Date()
+    return Array.from({ length: 6 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1)
+      const month = d.toLocaleString('default', { month: 'short' })
+      return { month, revenue: months[month] || 0 }
+    })
+  }, [invoices])
+
+  const customerTrend = useMemo(() => {
+    const months: Record<string, { new: number; repeat: number }> = {}
+    customers.forEach(c => {
+      if (c.customerSince) {
+        const month = new Date(c.customerSince).toLocaleString('default', { month: 'short' })
+        if (!months[month]) months[month] = { new: 0, repeat: 0 }
+        months[month].new += 1
+        if (c.tags.includes('repeat') || c.tags.includes('converted-lead')) {
+          months[month].repeat += 1
+        }
+      }
+    })
+    const now = new Date()
+    return Array.from({ length: 6 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1)
+      const month = d.toLocaleString('default', { month: 'short' })
+      const data = months[month] || { new: 0, repeat: 0 }
+      return { month, ...data }
+    })
+  }, [customers])
+
+  const stageTimeData = useMemo(() => {
+    const stagePairs = [
+      { from: 'car_received' as const, to: 'inspection' as const, label: 'Receiving → Inspection' },
+      { from: 'inspection' as const, to: 'work_in_progress' as const, label: 'Inspection → Work' },
+      { from: 'work_in_progress' as const, to: 'quality_check' as const, label: 'Work → QC' },
+      { from: 'quality_check' as const, to: 'ready' as const, label: 'QC → Ready' },
+    ]
+    return stagePairs.map(({ from, to, label }) => {
+      const durations: number[] = []
+      jobs.forEach(job => {
+        const fromEntry = job.timeline.find(t => t.stage === from)
+        const toEntry = job.timeline.find(t => t.stage === to)
+        if (fromEntry && toEntry) {
+          const hours = (new Date(toEntry.timestamp).getTime() - new Date(fromEntry.timestamp).getTime()) / 3600000
+          if (hours > 0) durations.push(hours)
+        }
+      })
+      const avg = durations.length > 0 ? durations.reduce((a, b) => a + b, 0) / durations.length : 0
+      return { stage: label, hours: Math.round(avg * 10) / 10 }
+    })
+  }, [jobs])
 
   const totalRevenue = useMemo(
     () => invoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.amount, 0),
@@ -102,20 +132,11 @@ export default function Analytics() {
 
   const outstandingTotal = outstandingInvoices.reduce((sum, i) => sum + i.balance, 0)
 
-  const periodTabs = [
-    { id: 'week', label: 'This Week' },
-    { id: 'month', label: 'This Month' },
-    { id: 'quarter', label: 'This Quarter' },
-  ]
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Analytics</h1>
-          <p className="text-sm text-slate-500 mt-1">Business performance at a glance</p>
-        </div>
-        <Tabs tabs={periodTabs} active={period} onChange={setPeriod} />
+      <div>
+        <h1 className="text-2xl font-semibold text-slate-900">Analytics</h1>
+        <p className="text-sm text-slate-500 mt-1">Business performance at a glance</p>
       </div>
 
       <motion.div
@@ -157,7 +178,7 @@ export default function Analytics() {
           transition={{ delay: 0.1 }}
         >
           <Card>
-            <CardHeader title="Revenue Trend" subtitle="Daily revenue this week" />
+            <CardHeader title="Revenue Trend" subtitle="Monthly revenue (last 6 months)" />
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={revenueData}>
@@ -168,7 +189,7 @@ export default function Analytics() {
                     </linearGradient>
                   </defs>
                   <XAxis
-                    dataKey="day"
+                    dataKey="month"
                     axisLine={false}
                     tickLine={false}
                     tick={{ fontSize: 12, fill: '#94a3b8' }}
@@ -305,7 +326,7 @@ export default function Analytics() {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={customerTrend}>
                   <XAxis
-                    dataKey="week"
+                    dataKey="month"
                     axisLine={false}
                     tickLine={false}
                     tick={{ fontSize: 12, fill: '#94a3b8' }}
@@ -361,17 +382,17 @@ export default function Analytics() {
             <div className="mb-6">
               <h4 className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-3">Avg. Time per Stage</h4>
               <div className="space-y-2">
-                {stageTime.map(st => (
+                {stageTimeData.map(st => (
                   <div key={st.stage} className="flex items-center justify-between">
                     <span className="text-xs text-slate-600 w-40 truncate">{st.stage}</span>
                     <div className="flex-1 mx-3 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-indigo-400 rounded-full"
-                        style={{ width: `${Math.min((st.avgHours / 48) * 100, 100)}%` }}
+                        style={{ width: `${Math.min((st.hours / 48) * 100, 100)}%` }}
                       />
                     </div>
                     <span className="text-xs text-slate-500 w-12 text-right">
-                      {st.avgHours >= 24 ? `${Math.round(st.avgHours / 24)}d` : `${st.avgHours}h`}
+                      {st.hours >= 24 ? `${Math.round(st.hours / 24)}d` : `${st.hours}h`}
                     </span>
                   </div>
                 ))}
@@ -417,7 +438,8 @@ export default function Analytics() {
                   return (
                     <div
                       key={inv.id}
-                      className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
+                      className="flex items-center justify-between p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors"
+                      onClick={() => navigate('/payments')}
                     >
                       <div>
                         <p className="text-sm font-medium text-slate-700">

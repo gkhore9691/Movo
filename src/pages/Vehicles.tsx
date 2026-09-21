@@ -1,16 +1,17 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Car, Wrench, Crown, Calendar } from 'lucide-react'
+import { Car, Wrench, Crown, Calendar, Plus } from 'lucide-react'
 import { useApp } from '@/contexts/AppContext'
-import { Card, Stat, SearchInput, Badge, StatusBadge } from '@/components/ui'
+import { Card, Stat, SearchInput, Badge, StatusBadge, Button, Modal } from '@/components/ui'
 import { formatCurrency, formatRelativeDate } from '@/utils/format'
 
 const MAKES = ['All', 'Volkswagen', 'Hyundai', 'BMW', 'Toyota', 'Tata', 'Mahindra', 'Honda', 'Kia', 'Maruti Suzuki', 'Mercedes-Benz']
 
 export default function Vehicles() {
-  const { vehicles, customers, jobs, getCustomer } = useApp()
+  const { vehicles, customers, jobs, getCustomer, addVehicle } = useApp()
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
+  const [showAddVehicle, setShowAddVehicle] = useState(false)
   const [filterMake, setFilterMake] = useState('All')
   const [filterStatus, setFilterStatus] = useState<'all' | 'in_studio'>('all')
 
@@ -55,12 +56,15 @@ export default function Vehicles() {
           <h1 className="text-xl font-semibold text-slate-900">Vehicles</h1>
           <p className="text-sm text-slate-500 mt-0.5">{vehicles.length} registered vehicles</p>
         </div>
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          placeholder="Search vehicles..."
-          className="w-72"
-        />
+        <div className="flex items-center gap-3">
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Search vehicles..."
+            className="w-72"
+          />
+          <Button icon={<Plus className="w-4 h-4" />} onClick={() => setShowAddVehicle(true)}>Add Vehicle</Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -186,6 +190,115 @@ export default function Vehicles() {
           <p className="text-xs text-slate-400 mt-1">Try adjusting your search or filters</p>
         </div>
       )}
+
+      <AddVehicleModal
+        open={showAddVehicle}
+        onClose={() => setShowAddVehicle(false)}
+        customers={customers}
+        addVehicle={addVehicle}
+      />
     </div>
+  )
+}
+
+function AddVehicleModal({
+  open,
+  onClose,
+  customers,
+  addVehicle,
+}: {
+  open: boolean
+  onClose: () => void
+  customers: any[]
+  addVehicle: (vehicle: any) => void
+}) {
+  const [customerId, setCustomerId] = useState('')
+  const [make, setMake] = useState('')
+  const [model, setModel] = useState('')
+  const [year, setYear] = useState('')
+  const [regNumber, setRegNumber] = useState('')
+  const [color, setColor] = useState('')
+
+  function reset() {
+    setCustomerId('')
+    setMake('')
+    setModel('')
+    setYear('')
+    setRegNumber('')
+    setColor('')
+  }
+
+  function handleCreate() {
+    if (!customerId || !make || !model) return
+    addVehicle({
+      id: `veh-${Date.now()}`,
+      customerId,
+      make,
+      model,
+      year: Number(year) || new Date().getFullYear(),
+      registrationNumber: regNumber,
+      color,
+    })
+    reset()
+    onClose()
+  }
+
+  function handleClose() {
+    reset()
+    onClose()
+  }
+
+  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+
+  return (
+    <Modal
+      open={open}
+      onClose={handleClose}
+      title="Add Vehicle"
+      subtitle="Register a new vehicle"
+      size="md"
+      footer={
+        <>
+          <Button variant="secondary" onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleCreate} disabled={!customerId || !make || !model}>Add Vehicle</Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Customer *</label>
+          <select value={customerId} onChange={e => setCustomerId(e.target.value)} className={inputClass}>
+            <option value="">Select customer...</option>
+            {customers.map(c => (
+              <option key={c.id} value={c.id}>{c.name} — {c.phone}</option>
+            ))}
+          </select>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Make *</label>
+            <input value={make} onChange={e => setMake(e.target.value)} placeholder="e.g. Mahindra" className={inputClass} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Model *</label>
+            <input value={model} onChange={e => setModel(e.target.value)} placeholder="e.g. Thar" className={inputClass} />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Year</label>
+            <input type="number" value={year} onChange={e => setYear(e.target.value)} placeholder="e.g. 2023" className={inputClass} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Registration No.</label>
+            <input value={regNumber} onChange={e => setRegNumber(e.target.value)} placeholder="e.g. MP09-AB-1234" className={inputClass} />
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Color</label>
+          <input value={color} onChange={e => setColor(e.target.value)} placeholder="e.g. White" className={inputClass} />
+        </div>
+      </div>
+    </Modal>
   )
 }

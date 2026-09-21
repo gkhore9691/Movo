@@ -10,30 +10,41 @@ import {
   Car,
   Wrench,
   Clock,
-  TrendingUp,
-  Phone,
-  Calendar,
-  BarChart3,
+  Phone as PhoneIcon,
   Send,
+  MessageSquare,
+  Users,
 } from 'lucide-react'
 import { useApp } from '@/contexts/AppContext'
-import { formatCurrency } from '@/utils/format'
+import { formatCurrency, formatPhone } from '@/utils/format'
 import { Avatar } from '@/components/ui'
 
 const SUGGESTIONS = [
   'Who should I call today?',
   'How much revenue is pending?',
-  'Show me today\'s cars',
-  'Which customers haven\'t returned in 6 months?',
+  "Show me today's cars",
+  "Which customers haven't returned in 6 months?",
   'How did we perform this month?',
-  'Send reminders to tomorrow\'s bookings',
+  "Send reminders to tomorrow's bookings",
+  'Show pending invoices',
+  "Today's bookings",
+  'New leads',
+  'Staff workload',
 ]
+
+interface AiAction {
+  label: string
+  route?: string
+  phone?: string
+  whatsapp?: string
+}
 
 interface AiResponse {
   title: string
   description: string
   items?: { label: string; value: string; icon?: string }[]
-  action?: { label: string; route: string }
+  action?: AiAction
+  actions?: AiAction[]
 }
 
 export default function AskMovo() {
@@ -47,6 +58,7 @@ export default function AskMovo() {
     leads,
     invoices,
     bookings,
+    staff,
     retentionCustomers,
     getCustomer,
     getVehicle,
@@ -95,16 +107,178 @@ export default function AskMovo() {
     (q: string): AiResponse => {
       const lower = q.toLowerCase()
 
-      if (lower.match(/call|follow/)) {
+      // ---- Pending invoices / outstanding / who owes ----
+      if (lower.match(/pending invoice|outstanding|who owes|unpaid/)) {
+        const unpaid = invoices.filter(
+          (i) => i.status === 'sent' || i.status === 'overdue',
+        )
+        const totalOwed = unpaid.reduce((s, i) => s + i.balance, 0)
+        const items = unpaid.slice(0, 5).map((inv) => {
+          const c = getCustomer(inv.customerId)
+          return {
+            label: c?.name || 'Customer',
+            value: `${formatCurrency(inv.balance)} — ${inv.status}`,
+            icon: inv.status === 'overdue' ? '🔴' : '🟡',
+          }
+        })
+        const actions: AiAction[] = unpaid.slice(0, 3).map((inv) => {
+          const c = getCustomer(inv.customerId)
+          return c
+            ? { label: `Call ${c.name.split(' ')[0]}`, phone: c.phone }
+            : { label: 'View', route: '/payments' }
+        })
+        return {
+          title: `${unpaid.length} unpaid invoices`,
+          description: `Total outstanding: ${formatCurrency(totalOwed)}`,
+          items,
+          action: { label: 'View Payments', route: '/payments' },
+          actions,
+        }
+      }
+
+      // ---- Today's bookings / schedule today ----
+      if (lower.match(/today.*booking|schedule today|today.*schedule/)) {
+        const todayStr = new Date().toISOString().split('T')[0]
+        const todayBookings = bookings.filter((b) =>
+          b.date.startsWith(todayStr),
+        )
+        if (todayBookings.length === 0) {
+          return {
+            title: "Today's bookings",
+            description:
+              'No bookings for today. Use this time for follow-ups!',
+            action: { label: 'View Bookings', route: '/bookings' },
+          }
+        }
+        return {
+          title: "Today's bookings",
+          description: `${todayBookings.length} booking${todayBookings.length > 1 ? 's' : ''} scheduled today.`,
+          items: todayBookings.map((b) => {
+            const c = getCustomer(b.customerId)
+            const v = getVehicle(b.vehicleId)
+            return {
+              label: c?.name || 'Customer',
+              value: `${b.time} — ${v ? `${v.make} ${v.model}` : 'Vehicle'}`,
+              icon: '📅',
+            }
+          }),
+          action: { label: 'View Bookings', route: '/bookings' },
+        }
+      }
+
+      // ---- New leads / recent leads ----
+      if (lower.match(/new lead|recent lead/)) {
+        const newLeads = leads.filter(
+          (l) => l.status === 'new' || l.status === 'contacted',
+        )
+        const actions: AiAction[] = newLeads.slice(0, 3).map((l) => ({
+          label: `Call ${l.name.split(' ')[0]}`,
+          phone: l.phone,
+        }))
+        return {
+          title: `${newLeads.length} new/contacted leads`,
+          description: `Total potential: ${formatCurrency(newLeads.reduce((s, l) => s + l.quotedPrice, 0))}`,
+          items: newLeads.slice(0, 5).map((l) => ({
+            label: l.name,
+            value: `${l.status} — ${formatCurrency(l.quotedPrice)} — ${l.vehicleMake} ${l.vehicleModel}`,
+            icon: l.status === 'new' ? '🆕' : '📞',
+          })),
+          action: { label: 'View Leads', route: '/leads' },
+          actions,
+        }
+      }
+
+      // ---- Top / best customers ----
+      if (lower.match(/top customer|best customer|vip/)) {
+        const sorted = [...customers].sort(
+          (a, b) => b.lifetimeSpend - a.lifetimeSpend,
+        )
+        return {
+          title: 'Top customers by spend',
+          description: `Your highest-value customers.`,
+          items: sorted.slice(0, 5).map((c) => ({
+            label: c.name,
+            value: formatCurrency(c.lifetimeSpend),
+            icon: '⭐',
+          })),
+          action: { label: 'View Customers', route: '/customers' },
+          actions: sorted.slice(0, 3).map((c) => ({
+            label: `WhatsApp ${c.name.split(' ')[0]}`,
+            whatsapp: c.phone,
+          })),
+        }
+      }
+
+      // ---- Staff workload / who is free ----
+      if (lower.match(/staff workload|who is free|team load|staff busy/)) {
+        const sorted = [...staff].sort(
+          (a, b) => a.activeJobs - b.activeJobs,
+        )
+        return {
+          title: 'Staff workload',
+          description: `${staff.length} team members. Sorted by least busy.`,
+          items: sorted.map((s) => ({
+            label: s.name,
+            value: `${s.activeJobs} active / ${s.completedJobs} completed — ${s.role}`,
+            icon: s.activeJobs === 0 ? '🟢' : s.activeJobs <= 2 ? '🟡' : '🔴',
+          })),
+          action: { label: 'View Staff', route: '/staff' },
+        }
+      }
+
+      // ---- Overdue / follow up ----
+      if (lower.match(/overdue|follow.?up|need.?attention/)) {
+        const now = new Date()
+        const overdueLeads = leads.filter((l) => {
+          if (!l.followUpDate || l.status === 'won' || l.status === 'lost')
+            return false
+          return new Date(l.followUpDate) < now
+        })
+        const overdueInvoices = invoices.filter(
+          (i) => i.status === 'overdue',
+        )
+        const actions: AiAction[] = overdueLeads.slice(0, 3).map((l) => ({
+          label: `Call ${l.name.split(' ')[0]}`,
+          phone: l.phone,
+        }))
+        return {
+          title: 'Items needing attention',
+          description: `${overdueLeads.length} overdue follow-ups, ${overdueInvoices.length} overdue invoices.`,
+          items: [
+            ...overdueLeads.slice(0, 3).map((l) => ({
+              label: `Lead: ${l.name}`,
+              value: `Follow-up was ${new Date(l.followUpDate).toLocaleDateString()} — ${formatCurrency(l.quotedPrice)}`,
+              icon: '📞',
+            })),
+            ...overdueInvoices.slice(0, 3).map((i) => {
+              const c = getCustomer(i.customerId)
+              return {
+                label: `Invoice: ${c?.name || 'Customer'}`,
+                value: `${formatCurrency(i.balance)} overdue`,
+                icon: '🔴',
+              }
+            }),
+          ],
+          action: { label: 'View Leads', route: '/leads' },
+          actions,
+        }
+      }
+
+      // ---- Call / follow (original) ----
+      if (lower.match(/call|who.*call/)) {
         const hotLeads = leads.filter(
-          (l) => l.status === 'quoted' || l.status === 'negotiation'
+          (l) => l.status === 'quoted' || l.status === 'negotiation',
         )
         const dueRetention = retentionCustomers.filter(
-          (r) => r.status === 'due'
+          (r) => r.status === 'due',
         )
         const totalPotential =
           hotLeads.reduce((s, l) => s + l.quotedPrice, 0) +
           dueRetention.reduce((s, r) => s + r.estimatedValue, 0)
+        const actions: AiAction[] = hotLeads.slice(0, 3).map((l) => ({
+          label: `Call ${l.name.split(' ')[0]}`,
+          phone: l.phone,
+        }))
         return {
           title: "Today's priority follow-ups",
           description: `I found ${hotLeads.length + dueRetention.length} people worth following up with.`,
@@ -126,10 +300,12 @@ export default function AskMovo() {
             },
           ],
           action: { label: 'Start Follow-ups', route: '/leads' },
+          actions,
         }
       }
 
-      if (lower.match(/revenue|pending|money|outstanding/)) {
+      // ---- Revenue / pending / money ----
+      if (lower.match(/revenue|pending|money/)) {
         const paid = invoices
           .filter((i) => i.status === 'paid')
           .reduce((s, i) => s + i.amount, 0)
@@ -151,12 +327,13 @@ export default function AskMovo() {
         }
       }
 
+      // ---- Today / cars / studio ----
       if (lower.match(/today|cars|studio/)) {
         const inStudio = jobs.filter(
           (j) =>
             j.status !== 'enquiry' &&
             j.status !== 'booked' &&
-            j.status !== 'delivered'
+            j.status !== 'delivered',
         )
         return {
           title: 'Cars in studio today',
@@ -174,10 +351,17 @@ export default function AskMovo() {
         }
       }
 
+      // ---- Customer / return / inactive ----
       if (lower.match(/customer|return|back|inactive|haven.*come/)) {
         const inactive = retentionCustomers.filter(
-          (r) => r.daysSinceVisit > 180
+          (r) => r.daysSinceVisit > 180,
         )
+        const actions: AiAction[] = inactive.slice(0, 3).map((r) => {
+          const c = getCustomer(r.customerId)
+          return c
+            ? { label: `WhatsApp ${c.name.split(' ')[0]}`, whatsapp: c.phone }
+            : { label: 'View', route: '/revenue-radar' }
+        })
         return {
           title: 'Inactive customers',
           description: `${inactive.length} customers haven't visited in over 6 months.`,
@@ -190,9 +374,11 @@ export default function AskMovo() {
             }
           }),
           action: { label: 'View Retention', route: '/revenue-radar' },
+          actions,
         }
       }
 
+      // ---- Performance / month / week / summary ----
       if (lower.match(/perform|month|week|summary/)) {
         const completedJobs = jobs.filter((j) => j.status === 'delivered')
         const totalRevenue = invoices
@@ -205,7 +391,7 @@ export default function AskMovo() {
         }).length
         return {
           title: 'Performance overview',
-          description: 'Here\'s how the studio is performing.',
+          description: "Here's how the studio is performing.",
           items: [
             {
               label: 'Revenue collected',
@@ -232,12 +418,13 @@ export default function AskMovo() {
         }
       }
 
+      // ---- Remind / booking / tomorrow ----
       if (lower.match(/remind|booking|tomorrow/)) {
         const tomorrow = new Date()
         tomorrow.setDate(tomorrow.getDate() + 1)
         const tomorrowStr = tomorrow.toISOString().split('T')[0]
         const tomorrowBookings = bookings.filter((b) =>
-          b.date.startsWith(tomorrowStr)
+          b.date.startsWith(tomorrowStr),
         )
         if (tomorrowBookings.length === 0) {
           return {
@@ -263,6 +450,7 @@ export default function AskMovo() {
         }
       }
 
+      // ---- Default ----
       return {
         title: "I'm here to help",
         description:
@@ -282,9 +470,10 @@ export default function AskMovo() {
       jobs,
       bookings,
       customers,
+      staff,
       getCustomer,
       getVehicle,
-    ]
+    ],
   )
 
   const doSearch = useCallback(
@@ -296,19 +485,21 @@ export default function AskMovo() {
       const lower = q.toLowerCase()
       const results: typeof searchResults = []
 
+      // Customers
       for (const c of customers) {
         if (c.name.toLowerCase().includes(lower) || c.phone.includes(q)) {
           results.push({
             type: 'customer',
             id: c.id,
             label: c.name,
-            sub: c.phone,
+            sub: formatPhone(c.phone),
             route: `/customers/${c.id}`,
           })
         }
-        if (results.length >= 8) break
+        if (results.length >= 12) break
       }
 
+      // Vehicles
       for (const v of vehicles) {
         if (
           v.registrationNumber.toLowerCase().includes(lower) ||
@@ -323,12 +514,66 @@ export default function AskMovo() {
             route: `/vehicles/${v.id}`,
           })
         }
-        if (results.length >= 8) break
+        if (results.length >= 12) break
       }
 
-      setSearchResults(results.slice(0, 8))
+      // Leads
+      for (const l of leads) {
+        if (
+          l.name.toLowerCase().includes(lower) ||
+          l.phone.includes(q)
+        ) {
+          results.push({
+            type: 'lead',
+            id: l.id,
+            label: l.name,
+            sub: `Lead — ${l.status} — ${l.vehicleMake} ${l.vehicleModel}`,
+            route: '/leads',
+          })
+        }
+        if (results.length >= 12) break
+      }
+
+      // Jobs
+      for (const j of jobs) {
+        const c = getCustomer(j.customerId)
+        const v = getVehicle(j.vehicleId)
+        const searchStr = [
+          c?.name || '',
+          v ? `${v.make} ${v.model}` : '',
+          v?.registrationNumber || '',
+        ]
+          .join(' ')
+          .toLowerCase()
+        if (searchStr.includes(lower)) {
+          results.push({
+            type: 'job',
+            id: j.id,
+            label: v ? `${v.make} ${v.model}` : 'Job',
+            sub: `${c?.name || 'Customer'} — ${j.status.replace(/_/g, ' ')}`,
+            route: '/jobs',
+          })
+        }
+        if (results.length >= 12) break
+      }
+
+      // Staff
+      for (const s of staff) {
+        if (s.name.toLowerCase().includes(lower)) {
+          results.push({
+            type: 'staff',
+            id: s.id,
+            label: s.name,
+            sub: `${s.role} — ${s.activeJobs} active jobs`,
+            route: '/staff',
+          })
+        }
+        if (results.length >= 12) break
+      }
+
+      setSearchResults(results.slice(0, 10))
     },
-    [customers, vehicles]
+    [customers, vehicles, leads, jobs, staff, getCustomer, getVehicle],
   )
 
   const handleSubmit = useCallback(
@@ -336,7 +581,9 @@ export default function AskMovo() {
       const q = text || query
       if (!q.trim()) return
 
-      setRecentQueries((prev) => [q, ...prev.filter((p) => p !== q)].slice(0, 3))
+      setRecentQueries((prev) =>
+        [q, ...prev.filter((p) => p !== q)].slice(0, 3),
+      )
       setSearchResults([])
       setIsThinking(true)
       setResponse(null)
@@ -344,9 +591,9 @@ export default function AskMovo() {
       setTimeout(() => {
         setIsThinking(false)
         setResponse(generateResponse(q))
-      }, 1200)
+      }, 600)
     },
-    [query, generateResponse]
+    [query, generateResponse],
   )
 
   const handleInputChange = useCallback(
@@ -356,15 +603,28 @@ export default function AskMovo() {
       setIsThinking(false)
       doSearch(val)
     },
-    [doSearch]
+    [doSearch],
   )
 
   const handleAction = useCallback(
-    (route: string) => {
-      closeAskMovo()
-      navigate(route)
+    (action: AiAction) => {
+      if (action.phone) {
+        const digits = action.phone.replace(/\D/g, '')
+        window.open(`tel:${digits}`, '_self')
+        return
+      }
+      if (action.whatsapp) {
+        const digits = action.whatsapp.replace(/\D/g, '')
+        const number = digits.startsWith('91') ? digits : `91${digits}`
+        window.open(`https://wa.me/${number}`, '_blank')
+        return
+      }
+      if (action.route) {
+        closeAskMovo()
+        navigate(action.route)
+      }
     },
-    [closeAskMovo, navigate]
+    [closeAskMovo, navigate],
   )
 
   const handleSearchResultClick = useCallback(
@@ -372,7 +632,7 @@ export default function AskMovo() {
       closeAskMovo()
       navigate(route)
     },
-    [closeAskMovo, navigate]
+    [closeAskMovo, navigate],
   )
 
   const searchIconMap: Record<string, React.ReactNode> = useMemo(
@@ -380,8 +640,10 @@ export default function AskMovo() {
       customer: <User className="w-4 h-4 text-indigo-500" />,
       vehicle: <Car className="w-4 h-4 text-emerald-500" />,
       job: <Wrench className="w-4 h-4 text-amber-500" />,
+      lead: <PhoneIcon className="w-4 h-4 text-rose-500" />,
+      staff: <Users className="w-4 h-4 text-violet-500" />,
     }),
-    []
+    [],
   )
 
   const showSuggestions =
@@ -513,9 +775,7 @@ export default function AskMovo() {
                           className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 text-left transition-colors w-full"
                         >
                           <Clock className="w-4 h-4 text-slate-300" />
-                          <span className="text-sm text-slate-500">
-                            {rq}
-                          </span>
+                          <span className="text-sm text-slate-500">{rq}</span>
                         </button>
                       ))}
                     </div>
@@ -592,17 +852,36 @@ export default function AskMovo() {
                     </div>
                   )}
 
-                  {response.action && (
-                    <div className="ml-11">
+                  {/* Action buttons: Call / WhatsApp / Navigate */}
+                  <div className="ml-11 flex flex-wrap items-center gap-2">
+                    {response.action && (
                       <button
-                        onClick={() => handleAction(response.action!.route)}
+                        onClick={() => handleAction(response.action!)}
                         className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
                       >
                         {response.action.label}
                         <ArrowRight className="w-4 h-4" />
                       </button>
-                    </div>
-                  )}
+                    )}
+                    {response.actions &&
+                      response.actions.map((act, i) => (
+                        <button
+                          key={i}
+                          onClick={() => handleAction(act)}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
+                            act.phone
+                              ? 'border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100'
+                              : act.whatsapp
+                              ? 'border-green-200 text-green-700 bg-green-50 hover:bg-green-100'
+                              : 'border-slate-200 text-slate-700 bg-slate-50 hover:bg-slate-100'
+                          }`}
+                        >
+                          {act.phone && <PhoneIcon className="w-3 h-3" />}
+                          {act.whatsapp && <MessageSquare className="w-3 h-3" />}
+                          {act.label}
+                        </button>
+                      ))}
+                  </div>
                 </motion.div>
               )}
             </div>

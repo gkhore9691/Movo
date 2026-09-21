@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Phone, Mail, Wrench, ChevronDown, Users } from 'lucide-react'
+import { Plus, Phone, Mail, Wrench, ChevronDown, Users, Pencil } from 'lucide-react'
 import { useApp } from '@/contexts/AppContext'
 import { Card, Button, Badge, Stat, Avatar, Modal, Input, Select } from '@/components/ui'
 import { formatPhone } from '@/utils/format'
@@ -20,9 +20,10 @@ const roleLabels: Record<string, string> = {
 }
 
 export default function Staff() {
-  const { staff, jobs, getVehicle, getService, addStaffMember } = useApp()
+  const { staff, jobs, getVehicle, getService, addStaffMember, updateStaff } = useApp()
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [editingStaff, setEditingStaff] = useState<any>(null)
   const [newName, setNewName] = useState('')
   const [newRole, setNewRole] = useState('technician')
   const [newPhone, setNewPhone] = useState('')
@@ -212,6 +213,9 @@ export default function Staff() {
 
                 {/* Contact actions */}
                 <div className="mt-4 flex items-center gap-2">
+                  <Button variant="secondary" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} className="flex-1" onClick={() => setEditingStaff(member)}>
+                    Edit
+                  </Button>
                   <Button variant="secondary" size="sm" icon={<Phone className="w-3.5 h-3.5" />} className="flex-1" onClick={() => window.open('tel:' + member.phone)}>
                     Call
                   </Button>
@@ -253,6 +257,60 @@ export default function Staff() {
           <Input label="Email" placeholder="email@example.com" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
         </div>
       </Modal>
+
+      {editingStaff && (
+        <EditStaffModal
+          member={editingStaff}
+          onClose={() => setEditingStaff(null)}
+          onSave={async (id: string, data: any) => { await updateStaff(id, data); setEditingStaff(null) }}
+        />
+      )}
     </div>
+  )
+}
+
+function EditStaffModal({
+  member,
+  onClose,
+  onSave,
+}: {
+  member: { id: string; name: string; role: string; phone: string; email: string }
+  onClose: () => void
+  onSave: (id: string, data: any) => Promise<void>
+}) {
+  const [name, setName] = useState(member.name)
+  const [role, setRole] = useState(member.role)
+  const [phone, setPhone] = useState(member.phone)
+  const [email, setEmail] = useState(member.email)
+
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      title="Edit Staff Member"
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button onClick={() => onSave(member.id, { name, role, phone, email })}>Save Changes</Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} />
+        <Select
+          label="Role"
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          options={[
+            { value: 'technician', label: 'Technician' },
+            { value: 'sales', label: 'Sales' },
+            { value: 'manager', label: 'Manager' },
+            { value: 'owner', label: 'Owner' },
+          ]}
+        />
+        <Input label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <Input label="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      </div>
+    </Modal>
   )
 }

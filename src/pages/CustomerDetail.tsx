@@ -5,7 +5,7 @@ import { Card, CardHeader, Badge, Avatar, Button, Stat, StatusBadge, Modal, Togg
 import { formatCurrency, formatDate, formatRelativeDate, formatPhone } from '@/utils/format'
 import {
   ArrowLeft, Phone, MessageSquare, CalendarPlus, Car, FileText, CreditCard,
-  Clock, Star, Send, ChevronRight, Sparkles, ShieldCheck, History, Receipt
+  Clock, Star, Send, ChevronRight, Sparkles, ShieldCheck, History, Receipt, Pencil, Plus
 } from 'lucide-react'
 
 export default function CustomerDetail() {
@@ -14,7 +14,8 @@ export default function CustomerDetail() {
   const {
     customers, vehicles, jobs, leads, bookings, invoices, reviews, services,
     retentionCustomers, getCustomer, getVehiclesForCustomer, getJobsForCustomer,
-    getLeadsForCustomer, getService, getStaffMember, updateCustomerNotes,
+    getLeadsForCustomer, getService, getStaffMember, updateCustomerNotes, updateCustomer,
+    addVehicle,
   } = useApp()
 
   const customer = getCustomer(id || '')
@@ -41,6 +42,8 @@ export default function CustomerDetail() {
   const [aiHandling, setAiHandling] = useState(true)
   const [notes, setNotes] = useState(customer?.notes || '')
   const [notesSaved, setNotesSaved] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [showAddVehicle, setShowAddVehicle] = useState(false)
 
   if (!customer) {
     return (
@@ -137,6 +140,20 @@ export default function CustomerDetail() {
 
   return (
     <div className="space-y-6">
+      <EditCustomerModal
+        customer={customer}
+        open={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSave={async (id, data) => { await updateCustomer(id, data); setShowEditModal(false) }}
+      />
+
+      <AddVehicleModal
+        customerId={customer.id}
+        open={showAddVehicle}
+        onClose={() => setShowAddVehicle(false)}
+        onSave={async (vehicle) => { await addVehicle(vehicle); setShowAddVehicle(false) }}
+      />
+
       <button
         onClick={() => navigate('/customers')}
         className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 transition-colors"
@@ -178,6 +195,9 @@ export default function CustomerDetail() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button variant="secondary" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => setShowEditModal(true)}>
+                Edit
+              </Button>
               <Button variant="secondary" size="sm" icon={<Phone className="w-3.5 h-3.5" />} onClick={() => window.open('tel:' + customer.phone)}>
                 Call
               </Button>
@@ -209,6 +229,7 @@ export default function CustomerDetail() {
             <CardHeader
               title="Vehicles"
               subtitle={`${customerVehicles.length} vehicle${customerVehicles.length !== 1 ? 's' : ''}`}
+              actions={<Button variant="secondary" size="sm" icon={<Plus className="w-3.5 h-3.5" />} onClick={() => setShowAddVehicle(true)}>Add Vehicle</Button>}
             />
             {customerVehicles.length === 0 ? (
               <p className="text-sm text-slate-400">No vehicles on record</p>
@@ -256,7 +277,8 @@ export default function CustomerDetail() {
                   return (
                     <div
                       key={job.id}
-                      className="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:bg-slate-50 transition-all"
+                      className="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:bg-slate-50 hover:border-slate-200 transition-all cursor-pointer"
+                      onClick={() => navigate('/jobs')}
                     >
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-slate-900">{serviceNames}</p>
@@ -409,5 +431,150 @@ export default function CustomerDetail() {
         </div>
       </div>
     </div>
+  )
+}
+
+function EditCustomerModal({
+  customer,
+  open,
+  onClose,
+  onSave,
+}: {
+  customer: { id: string; name: string; phone: string; email: string; address: string; tags: string[] }
+  open: boolean
+  onClose: () => void
+  onSave: (id: string, data: any) => Promise<void>
+}) {
+  const [name, setName] = useState(customer.name)
+  const [phone, setPhone] = useState(customer.phone)
+  const [email, setEmail] = useState(customer.email)
+  const [address, setAddress] = useState(customer.address)
+  const [tags, setTags] = useState(customer.tags.join(', '))
+
+  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Edit Customer"
+      size="md"
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button onClick={() => {
+            const parsedTags = tags.split(',').map(t => t.trim()).filter(Boolean)
+            onSave(customer.id, { name, phone, email, address, tags: parsedTags })
+          }}>Save Changes</Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Name</label>
+          <input value={name} onChange={e => setName(e.target.value)} className={inputClass} />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Phone</label>
+            <input value={phone} onChange={e => setPhone(e.target.value)} className={inputClass} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+            <input value={email} onChange={e => setEmail(e.target.value)} className={inputClass} />
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Address</label>
+          <input value={address} onChange={e => setAddress(e.target.value)} className={inputClass} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Tags (comma-separated)</label>
+          <input value={tags} onChange={e => setTags(e.target.value)} placeholder="vip, premium, repeat" className={inputClass} />
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
+function AddVehicleModal({
+  customerId,
+  open,
+  onClose,
+  onSave,
+}: {
+  customerId: string
+  open: boolean
+  onClose: () => void
+  onSave: (vehicle: any) => Promise<void>
+}) {
+  const [make, setMake] = useState('')
+  const [model, setModel] = useState('')
+  const [year, setYear] = useState(String(new Date().getFullYear()))
+  const [regNumber, setRegNumber] = useState('')
+  const [color, setColor] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Add Vehicle"
+      size="md"
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button
+            disabled={!make || !model || !regNumber || saving}
+            onClick={async () => {
+              setSaving(true)
+              try {
+                await onSave({
+                  customerId,
+                  make,
+                  model,
+                  year: Number(year),
+                  registrationNumber: regNumber,
+                  color,
+                })
+              } finally {
+                setSaving(false)
+              }
+            }}
+          >
+            {saving ? 'Adding...' : 'Add Vehicle'}
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Make *</label>
+            <input value={make} onChange={e => setMake(e.target.value)} placeholder="e.g. Hyundai" className={inputClass} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Model *</label>
+            <input value={model} onChange={e => setModel(e.target.value)} placeholder="e.g. Creta" className={inputClass} />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Year</label>
+            <input type="number" value={year} onChange={e => setYear(e.target.value)} className={inputClass} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Registration No. *</label>
+            <input value={regNumber} onChange={e => setRegNumber(e.target.value)} placeholder="e.g. MH01AB1234" className={inputClass} />
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Color</label>
+          <input value={color} onChange={e => setColor(e.target.value)} placeholder="e.g. White" className={inputClass} />
+        </div>
+      </div>
+    </Modal>
   )
 }

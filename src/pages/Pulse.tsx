@@ -9,14 +9,16 @@ import { formatCurrency, formatTime, formatRelativeDate, getGreeting } from '@/u
 export default function Pulse() {
   const {
     jobs, leads, bookings, invoices, notifications, retentionCustomers, conversations,
-    getCustomer, getVehicle, getService, getStaffMember,
+    getCustomer, getVehicle, getService, getStaffMember, currentUser,
   } = useApp()
   const navigate = useNavigate()
 
-  const todaysRevenue = useMemo(() =>
-    invoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.amount, 0),
-    [invoices],
-  )
+  const todaysRevenue = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10)
+    return invoices
+      .filter(i => i.status === 'paid' && i.paidAt && i.paidAt.slice(0, 10) === today)
+      .reduce((sum, i) => sum + i.amount, 0)
+  }, [invoices])
 
   const todaysBookings = useMemo(() =>
     bookings.filter(b => b.status === 'confirmed' || b.status === 'in_progress'),
@@ -122,7 +124,7 @@ export default function Pulse() {
     >
       {/* Greeting — just text */}
       <div>
-        <h1 className="text-2xl font-semibold text-neutral-900">{getGreeting()}, Shivesh</h1>
+        <h1 className="text-2xl font-semibold text-neutral-900">{getGreeting()}, {currentUser?.name?.split(' ')[0] ?? 'there'}</h1>
         <p className="text-sm text-neutral-500 mt-1">
           Your studio has {carsInStudio.length} cars in progress and {followUpsDue} follow-ups due.
         </p>
@@ -131,10 +133,10 @@ export default function Pulse() {
       {/* Stats — clean white cards, no icons */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Today's Revenue", value: formatCurrency(todaysRevenue), trend: '+12%', up: true },
-          { label: "Today's Bookings", value: String(todaysBookings.length), trend: '+8%', up: true },
+          { label: "Today's Revenue", value: formatCurrency(todaysRevenue), trend: null, up: true },
+          { label: "Today's Bookings", value: String(todaysBookings.length), trend: null, up: true },
           { label: 'Cars in Studio', value: String(carsInStudio.length), trend: null, up: true },
-          { label: 'Open Enquiries', value: String(openEnquiries.length), trend: '-5%', up: false },
+          { label: 'Open Enquiries', value: String(openEnquiries.length), trend: null, up: false },
         ].map(s => (
           <div key={s.label} className="bg-white border border-neutral-200 rounded-xl p-5">
             <p className="text-xs text-neutral-500 font-medium">{s.label}</p>
@@ -269,7 +271,8 @@ export default function Pulse() {
                   key={notif.id}
                   className={`flex gap-3 px-5 py-3 ${
                     i < recentNotifications.length - 1 ? 'border-b border-neutral-100' : ''
-                  }`}
+                  } ${notif.actionUrl ? 'cursor-pointer hover:bg-neutral-50 transition-colors' : ''}`}
+                  onClick={() => notif.actionUrl && navigate(notif.actionUrl)}
                 >
                   <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
                     notif.read ? 'bg-neutral-300' : 'bg-indigo-600'

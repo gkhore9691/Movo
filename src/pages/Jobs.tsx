@@ -1,10 +1,12 @@
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import {
   ChevronRight, Phone, MessageSquare,
-  List, LayoutGrid,
+  List, LayoutGrid, Plus,
 } from 'lucide-react'
 import { useApp } from '@/contexts/AppContext'
+import { api } from '@/api/client'
 import { Button, Modal, Avatar, StatusBadge } from '@/components/ui'
 import { formatCurrency, formatRelativeDate, formatDate, getInitials } from '@/utils/format'
 import type { Job, JobStatus } from '@/types'
@@ -40,10 +42,11 @@ type FilterMode = 'all' | 'active' | 'completed'
 type ViewMode = 'pipeline' | 'list'
 
 export default function Jobs() {
-  const { jobs, updateJobStatus, getCustomer, getVehicle, getService, getStaffMember } = useApp()
+  const { jobs, customers, vehicles, services, staff, addJob, updateJobStatus, getCustomer, getVehicle, getService, getStaffMember } = useApp()
   const [selectedJob, setSelectedJob] = useState<Job | null>(null)
   const [filterMode, setFilterMode] = useState<FilterMode>('all')
   const [viewMode, setViewMode] = useState<ViewMode>('pipeline')
+  const [showNewJob, setShowNewJob] = useState(false)
 
   const filteredJobs = useMemo(() => {
     switch (filterMode) {
@@ -82,6 +85,7 @@ export default function Jobs() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button icon={<Plus className="w-4 h-4" />} onClick={() => setShowNewJob(true)}>New Job</Button>
           {/* Filter */}
           <div className="flex text-sm">
             {(['all', 'active', 'completed'] as FilterMode[]).map(mode => (
@@ -149,6 +153,16 @@ export default function Jobs() {
         getService={getService}
         getStaffMember={getStaffMember}
         onAdvance={handleAdvance}
+      />
+
+      <NewJobModal
+        open={showNewJob}
+        onClose={() => setShowNewJob(false)}
+        customers={customers}
+        vehicles={vehicles}
+        services={services}
+        staff={staff}
+        addJob={addJob}
       />
     </div>
   )
@@ -324,11 +338,21 @@ interface JobDetailModalProps {
 
 function JobDetailModal({ job, onClose, getCustomer, getVehicle, getService, getStaffMember, onAdvance }: JobDetailModalProps) {
   const { jobs } = useApp()
+  const navigate = useNavigate()
   const currentJob = job ? jobs.find(j => j.id === job.id) ?? job : null
   const vehicle = currentJob ? getVehicle(currentJob.vehicleId) : null
   const customer = currentJob ? getCustomer(currentJob.customerId) : null
   const staffMember = currentJob ? getStaffMember(currentJob.assignedTo) : null
   const nextStage = currentJob ? getNextStage(currentJob.status) : null
+  const [showNoteInput, setShowNoteInput] = useState(false)
+  const [noteText, setNoteText] = useState('')
+
+  function handleSaveNote() {
+    if (!currentJob || !noteText.trim()) return
+    api.post(`/jobs/${currentJob.id}/timeline`, { stage: currentJob.status, notes: noteText.trim() }).catch(console.error)
+    setShowNoteInput(false)
+    setNoteText('')
+  }
 
   return (
     <Modal
@@ -347,10 +371,7 @@ function JobDetailModal({ job, onClose, getCustomer, getVehicle, getService, get
             >Contact</Button>
             <Button
               variant="secondary" size="sm" icon={<MessageSquare className="w-3.5 h-3.5" />}
-              onClick={() => {
-                const note = prompt('Add a note:')
-                if (note) alert('Note saved: ' + note)
-              }}
+              onClick={() => setShowNoteInput(true)}
             >Note</Button>
             {nextStage && (
               <Button size="sm" icon={<ChevronRight className="w-3.5 h-3.5" />} onClick={() => onAdvance(currentJob)}>
@@ -368,6 +389,28 @@ function JobDetailModal({ job, onClose, getCustomer, getVehicle, getService, get
 
           {/* Details */}
           <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+            <div>
+              <p className="text-xs text-neutral-500 mb-1">Customer</p>
+              {customer && (
+                <button
+                  className="text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline cursor-pointer"
+                  onClick={() => { navigate(`/customers/${currentJob.customerId}`); onClose() }}
+                >
+                  {customer.name}
+                </button>
+              )}
+            </div>
+            <div>
+              <p className="text-xs text-neutral-500 mb-1">Vehicle</p>
+              {vehicle && (
+                <button
+                  className="text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline cursor-pointer"
+                  onClick={() => { navigate(`/vehicles/${currentJob.vehicleId}`); onClose() }}
+                >
+                  {vehicle.make} {vehicle.model} ({vehicle.registrationNumber})
+                </button>
+              )}
+            </div>
             <div>
               <p className="text-xs text-neutral-500 mb-1">Services</p>
               <p className="text-sm text-neutral-900">
@@ -430,6 +473,25 @@ function JobDetailModal({ job, onClose, getCustomer, getVehicle, getService, get
               })}
             </div>
           </div>
+
+          {/* Add Note Input */}
+          {showNoteInput && (
+            <div className="border border-neutral-200 rounded-lg p-3 space-y-2">
+              <p className="text-xs font-medium text-neutral-500">Add a note</p>
+              <textarea
+                value={noteText}
+                onChange={e => setNoteText(e.target.value)}
+                placeholder="Type your note..."
+                rows={3}
+                className="w-full rounded-lg border border-neutral-200 text-sm px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 text-neutral-900"
+                autoFocus
+              />
+              <div className="flex items-center justify-end gap-2">
+                <Button variant="secondary" size="sm" onClick={() => { setShowNoteInput(false); setNoteText('') }}>Cancel</Button>
+                <Button size="sm" onClick={handleSaveNote} disabled={!noteText.trim()}>Save Note</Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </Modal>
@@ -467,5 +529,211 @@ function JourneyStepper({ currentStatus }: { currentStatus: JobStatus }) {
         )
       })}
     </div>
+  )
+}
+
+/* ---- New Job Modal ---- */
+
+function NewJobModal({
+  open,
+  onClose,
+  customers,
+  vehicles,
+  services,
+  staff,
+  addJob,
+}: {
+  open: boolean
+  onClose: () => void
+  customers: any[]
+  vehicles: any[]
+  services: any[]
+  staff: any[]
+  addJob: (job: Job) => void
+}) {
+  const [customerId, setCustomerId] = useState('')
+  const [vehicleId, setVehicleId] = useState('')
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([])
+  const [assignedTo, setAssignedTo] = useState('')
+  const [estimatedPrice, setEstimatedPrice] = useState('')
+  const [deposit, setDeposit] = useState('')
+  const [notes, setNotes] = useState('')
+
+  const customerVehicles = customerId
+    ? vehicles.filter((v: any) => v.customerId === customerId)
+    : []
+
+  function toggleService(id: string) {
+    setSelectedServiceIds(prev =>
+      prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
+    )
+  }
+
+  function reset() {
+    setCustomerId('')
+    setVehicleId('')
+    setSelectedServiceIds([])
+    setAssignedTo('')
+    setEstimatedPrice('')
+    setDeposit('')
+    setNotes('')
+  }
+
+  function handleClose() {
+    reset()
+    onClose()
+  }
+
+  function handleCreate() {
+    if (!customerId || !vehicleId || selectedServiceIds.length === 0) return
+    addJob({
+      id: `job-${Date.now()}`,
+      customerId,
+      vehicleId,
+      serviceIds: selectedServiceIds,
+      status: 'car_received',
+      assignedTo,
+      estimatedPrice: Number(estimatedPrice) || 0,
+      deposit: Number(deposit) || 0,
+      notes,
+      photos: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      timeline: [],
+    })
+    handleClose()
+  }
+
+  const inputClass = 'w-full rounded-lg border border-neutral-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-neutral-900'
+
+  return (
+    <Modal
+      open={open}
+      onClose={handleClose}
+      title="New Job"
+      subtitle="Create a new job card"
+      size="lg"
+      footer={
+        <>
+          <Button variant="secondary" onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleCreate} disabled={!customerId || !vehicleId || selectedServiceIds.length === 0}>
+            Create Job
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        {/* Customer */}
+        <div>
+          <label className="block text-sm font-medium text-neutral-700 mb-1.5">Customer *</label>
+          <select
+            value={customerId}
+            onChange={e => { setCustomerId(e.target.value); setVehicleId('') }}
+            className={inputClass}
+          >
+            <option value="">Select customer...</option>
+            {customers.map((c: any) => (
+              <option key={c.id} value={c.id}>{c.name} — {c.phone}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Vehicle */}
+        <div>
+          <label className="block text-sm font-medium text-neutral-700 mb-1.5">Vehicle *</label>
+          {customerVehicles.length > 0 ? (
+            <select
+              value={vehicleId}
+              onChange={e => setVehicleId(e.target.value)}
+              className={inputClass}
+            >
+              <option value="">Select vehicle...</option>
+              {customerVehicles.map((v: any) => (
+                <option key={v.id} value={v.id}>
+                  {v.year} {v.make} {v.model} — {v.registrationNumber}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <p className="text-sm text-neutral-400 py-2">
+              {customerId ? 'No vehicles for this customer' : 'Select a customer first'}
+            </p>
+          )}
+        </div>
+
+        {/* Services */}
+        <div>
+          <label className="block text-sm font-medium text-neutral-700 mb-1.5">Services *</label>
+          <div className="space-y-1.5 max-h-40 overflow-y-auto border border-neutral-200 rounded-lg p-2">
+            {services.map((svc: any) => (
+              <label
+                key={svc.id}
+                className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-neutral-50 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedServiceIds.includes(svc.id)}
+                  onChange={() => toggleService(svc.id)}
+                  className="rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                <span className="text-sm text-neutral-900 flex-1">{svc.name}</span>
+                <span className="text-xs text-neutral-400">{formatCurrency(svc.basePrice)}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Assigned To */}
+        <div>
+          <label className="block text-sm font-medium text-neutral-700 mb-1.5">Assigned To</label>
+          <select
+            value={assignedTo}
+            onChange={e => setAssignedTo(e.target.value)}
+            className={inputClass}
+          >
+            <option value="">Unassigned</option>
+            {staff.map((s: any) => (
+              <option key={s.id} value={s.id}>{s.name} — {s.role}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Price & Deposit */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-1.5">Estimated Price</label>
+            <input
+              type="number"
+              value={estimatedPrice}
+              onChange={e => setEstimatedPrice(e.target.value)}
+              placeholder="0"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-1.5">Deposit</label>
+            <input
+              type="number"
+              value={deposit}
+              onChange={e => setDeposit(e.target.value)}
+              placeholder="0"
+              className={inputClass}
+            />
+          </div>
+        </div>
+
+        {/* Notes */}
+        <div>
+          <label className="block text-sm font-medium text-neutral-700 mb-1.5">Notes</label>
+          <textarea
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            placeholder="Optional notes..."
+            rows={3}
+            className={`${inputClass} resize-none`}
+          />
+        </div>
+      </div>
+    </Modal>
   )
 }

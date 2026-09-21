@@ -93,6 +93,13 @@ export interface Job {
 
 export interface Lead {
   id: string;
+  name: string;
+  phone: string;
+  email: string;
+  vehicleMake: string;
+  vehicleModel: string;
+  vehicleYear: number | null;
+  vehicleRegistration: string;
   customerId: string;
   vehicleId: string;
   serviceIds: string[];
@@ -214,4 +221,27 @@ export interface RetentionCustomer {
   recommendedService: string;
   estimatedValue: number;
   status: RetentionStatus;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: 'admin' | 'owner' | 'manager' | 'staff';
+  tenantId: string | null;
+}
+
+export interface Tenant {
+  id: string;
+  name: string;
+  slug: string;
+  industry: string;
+  phone: string;
+  email: string;
+  address: string;
+  city: string;
+  state: string;
+  gstNumber: string;
+  logo: string | null;
+  isActive: boolean;
 }

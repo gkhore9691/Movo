@@ -3,25 +3,111 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Bot, User, Send, ArrowLeft, Phone, Car, ChevronRight,
-  MessageSquare, Search, CheckCheck, Check,
+  MessageSquare, Search, CheckCheck, Check, Plus, Archive, X,
 } from 'lucide-react'
 import { useApp } from '@/contexts/AppContext'
-import { Avatar, Badge, Button, EmptyState } from '@/components/ui'
+import { Avatar, Badge, Button, Modal, EmptyState } from '@/components/ui'
 import { formatRelativeDate, formatPhone } from '@/utils/format'
-import type { Message, Conversation } from '@/types'
+import { format, parseISO, isToday, isYesterday } from 'date-fns'
+import type { Message, Service } from '@/types'
 
+// ---------------------------------------------------------------------------
+// Contextual quick-reply suggestions
+// ---------------------------------------------------------------------------
 const QUICK_REPLIES = [
-  "I'll check and get back to you",
-  'Let me connect you with our team',
-  'Your car is ready for pickup!',
+  'View our pricing',
+  'Book an appointment',
+  'Ceramic coating details',
+  'PPF packages',
+  'Check availability',
 ]
 
-const AI_MOCK_REPLIES = [
-  'Ji bilkul! Main aapke liye check karta hoon aur detail bhejta hoon.',
-  'Aapka booking confirm ho gaya hai. Studio visit ke time pe documents le aana. 🙏',
-  'Thank you! Humari team jaldi se aapse connect karegi.',
-  'Aapki car ka kaam progress mein hai — quality check ke baad update dunga.',
-]
+// ---------------------------------------------------------------------------
+// AI response generator -- keyword-based, uses real service catalogue data
+// ---------------------------------------------------------------------------
+function generateAIResponse(message: string, services: Service[]): string {
+  const lower = message.toLowerCase()
+
+  // Pricing queries
+  if (
+    lower.includes('price') || lower.includes('cost') || lower.includes('rate') ||
+    lower.includes('kitna') || lower.includes('charge') || lower.includes('quote') ||
+    lower.includes('pricing')
+  ) {
+    const svcList = services
+      .map(s => `• ${s.name}: ₹${s.basePrice.toLocaleString()} – ₹${s.maxPrice.toLocaleString()}`)
+      .join('\n')
+    return `Here are our current prices:\n\n${svcList}\n\nFinal pricing depends on the vehicle size and condition. Would you like to schedule a visit for an exact quote?`
+  }
+
+  // Ceramic coating specific
+  if (lower.includes('ceramic')) {
+    const ceramic = services.find(s => s.name.toLowerCase().includes('ceramic'))
+    if (ceramic)
+      return `Our Ceramic Coating packages start from ₹${ceramic.basePrice.toLocaleString()} and go up to ₹${ceramic.maxPrice.toLocaleString()} depending on the coating layers and vehicle size.\n\nThe process takes ${ceramic.duration}. Would you like to book a slot?`
+  }
+
+  // PPF specific
+  if (lower.includes('ppf') || lower.includes('paint protection')) {
+    const ppf = services.find(s => s.name.toLowerCase().includes('ppf'))
+    if (ppf)
+      return `Our PPF (Paint Protection Film) packages range from ₹${ppf.basePrice.toLocaleString()} for partial coverage to ₹${ppf.maxPrice.toLocaleString()} for full body.\n\nWe use premium XPEL and SunTek films. The process takes ${ppf.duration}. Shall I check availability?`
+  }
+
+  // Detailing / cleaning specific
+  if (lower.includes('detail') || lower.includes('clean') || lower.includes('wash') || lower.includes('interior')) {
+    const detailing = services.find(
+      s => s.name.toLowerCase().includes('detailing') || s.name.toLowerCase().includes('wash'),
+    )
+    if (detailing)
+      return `Our ${detailing.name} service starts at ₹${detailing.basePrice.toLocaleString()}. Duration: ${detailing.duration}.\n\nWould you like to book an appointment?`
+  }
+
+  // Booking / appointment queries
+  if (
+    lower.includes('book') || lower.includes('appointment') || lower.includes('slot') ||
+    lower.includes('available') || lower.includes('schedule') || lower.includes('availability')
+  ) {
+    return `I'd be happy to help you schedule an appointment! We're generally available Monday to Saturday, 9 AM to 6 PM.\n\nCould you share:\n1. Your vehicle make & model\n2. The service you're interested in\n3. Your preferred date`
+  }
+
+  // Greeting
+  if (lower.includes('hi') || lower.includes('hello') || lower.includes('hey') || lower.includes('namaste')) {
+    return `Namaste! Welcome to our studio. How can I help you today?\n\nI can assist with:\n• Service pricing & details\n• Booking appointments\n• Service recommendations for your vehicle`
+  }
+
+  // Thank you
+  if (lower.includes('thank') || lower.includes('thanks') || lower.includes('shukriya') || lower.includes('dhanyavaad')) {
+    return `You're welcome! Feel free to reach out anytime. We're here to help!`
+  }
+
+  // Time / duration queries
+  if (lower.includes('how long') || lower.includes('time') || lower.includes('duration') || lower.includes('kitna time')) {
+    return `Service durations vary:\n\n${services.map(s => `• ${s.name}: ${s.duration}`).join('\n')}\n\nWhich service are you interested in?`
+  }
+
+  // Default
+  return `Thank you for reaching out! I can help you with:\n\n• Service pricing & packages\n• Booking appointments\n• Service recommendations\n\nWhat would you like to know?`
+}
+
+// ---------------------------------------------------------------------------
+// Date header helper -- groups messages by date
+// ---------------------------------------------------------------------------
+function formatDateHeader(timestamp: string): string {
+  const d = parseISO(timestamp)
+  if (isToday(d)) return 'Today'
+  if (isYesterday(d)) return 'Yesterday'
+  return format(d, 'EEEE, MMM d, yyyy')
+}
+
+function formatMessageTime(timestamp: string): string {
+  const d = parseISO(timestamp)
+  return format(d, 'h:mm a')
+}
+
+// ---------------------------------------------------------------------------
+// Components
+// ---------------------------------------------------------------------------
 
 function TypingIndicator() {
   return (
@@ -45,7 +131,7 @@ function TypingIndicator() {
   )
 }
 
-function ChatBubble({ message }: { message: Message }) {
+function ChatBubble({ message, showTime }: { message: Message; showTime: boolean }) {
   const isCustomer = message.sender === 'customer'
   const isAi = message.sender === 'ai'
 
@@ -63,7 +149,7 @@ function ChatBubble({ message }: { message: Message }) {
       <div className={`max-w-[75%] space-y-1 ${isCustomer ? '' : 'flex flex-col items-end'}`}>
         {!isCustomer && (
           <span className="text-[10px] font-medium text-slate-400 px-1">
-            {isAi ? '🤖 Movo AI' : '👤 You'}
+            {isAi ? 'Movo AI' : 'You'}
           </span>
         )}
         <div
@@ -78,9 +164,11 @@ function ChatBubble({ message }: { message: Message }) {
           {message.content}
         </div>
         <div className={`flex items-center gap-1 px-1 ${isCustomer ? '' : 'flex-row-reverse'}`}>
-          <span className="text-[10px] text-slate-400">
-            {formatRelativeDate(message.timestamp)}
-          </span>
+          {showTime && (
+            <span className="text-[10px] text-slate-400">
+              {formatMessageTime(message.timestamp)}
+            </span>
+          )}
           {!isCustomer && (
             message.read
               ? <CheckCheck size={12} className="text-indigo-500" />
@@ -105,14 +193,23 @@ function ChatBubble({ message }: { message: Message }) {
   )
 }
 
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
 export default function AIReceptionist() {
-  const { conversations, customers, vehicles, toggleAiHandling, addMessage, getCustomer, getVehiclesForCustomer } = useApp()
+  const {
+    conversations, customers, services, toggleAiHandling, addMessage,
+    addConversation, archiveConversation, getCustomer, getVehiclesForCustomer,
+  } = useApp()
   const navigate = useNavigate()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [inputValue, setInputValue] = useState('')
   const [typing, setTyping] = useState(false)
   const [mobileShowChat, setMobileShowChat] = useState(false)
+  const [showNewModal, setShowNewModal] = useState(false)
+  const [newConvoCustomerId, setNewConvoCustomerId] = useState('')
+  const [newConvoSearch, setNewConvoSearch] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const selected = conversations.find(c => c.id === selectedId)
@@ -129,10 +226,34 @@ export default function AIReceptionist() {
   const aiHandlingCount = conversations.filter(c => c.aiHandling).length
   const needAttentionCount = conversations.filter(c => !c.aiHandling && c.unreadCount > 0).length
 
+  // Customers who don't already have a conversation (for the "new" modal)
+  const availableCustomers = useMemo(() => {
+    const existingIds = new Set(conversations.map(c => c.customerId))
+    const all = customers.filter(c => !existingIds.has(c.id))
+    if (!newConvoSearch.trim()) return all
+    const q = newConvoSearch.toLowerCase()
+    return all.filter(c => c.name.toLowerCase().includes(q) || c.phone.includes(newConvoSearch))
+  }, [customers, conversations, newConvoSearch])
+
   const allMessages = useMemo(() => {
     if (!selected) return []
     return selected.messages
   }, [selected])
+
+  // Group messages by date for date headers
+  const messageGroups = useMemo(() => {
+    const groups: { date: string; messages: Message[] }[] = []
+    for (const msg of allMessages) {
+      const dateKey = formatDateHeader(msg.timestamp)
+      const last = groups[groups.length - 1]
+      if (last && last.date === dateKey) {
+        last.messages.push(msg)
+      } else {
+        groups.push({ date: dateKey, messages: [msg] })
+      }
+    }
+    return groups
+  }, [allMessages])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -148,10 +269,11 @@ export default function AIReceptionist() {
     const content = text || inputValue.trim()
     if (!content || !selected) return
 
+    // Staff always sends as 'human'
     const newMsg: Message = {
       id: `msg-local-${Date.now()}`,
       content,
-      sender: selected.aiHandling ? 'ai' : 'human',
+      sender: 'human',
       timestamp: new Date().toISOString(),
       read: false,
     }
@@ -159,20 +281,38 @@ export default function AIReceptionist() {
     addMessage(selected.id, newMsg)
     setInputValue('')
 
+    // If AI handling is on, generate an AI response for the customer (short delay)
     if (selected.aiHandling) {
       setTyping(true)
       setTimeout(() => {
-        const reply: Message = {
+        const aiReply: Message = {
           id: `msg-ai-${Date.now()}`,
-          content: AI_MOCK_REPLIES[Math.floor(Math.random() * AI_MOCK_REPLIES.length)],
-          sender: 'customer',
+          content: generateAIResponse(content, services),
+          sender: 'ai',
           timestamp: new Date().toISOString(),
           read: true,
         }
-        addMessage(selected.id, reply)
+        addMessage(selected.id, aiReply)
         setTyping(false)
-      }, 1500)
+      }, 300)
     }
+  }
+
+  async function handleCreateConversation() {
+    if (!newConvoCustomerId) return
+    const convo = await addConversation(newConvoCustomerId)
+    setShowNewModal(false)
+    setNewConvoCustomerId('')
+    setNewConvoSearch('')
+    setSelectedId(convo.id)
+    setMobileShowChat(true)
+  }
+
+  async function handleArchive() {
+    if (!selected) return
+    await archiveConversation(selected.id)
+    setSelectedId(null)
+    setMobileShowChat(false)
   }
 
   function getCustomerVehicle(customerId: string) {
@@ -181,6 +321,7 @@ export default function AIReceptionist() {
     return vehs[0]
   }
 
+  // ----- Conversation List -----
   function ConversationList() {
     return (
       <div className="flex flex-col h-full">
@@ -188,9 +329,18 @@ export default function AIReceptionist() {
         <div className="p-4 border-b border-slate-200">
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-lg font-semibold text-slate-900">AI Receptionist</h1>
-            <Badge variant="primary" dot>
-              <Bot size={12} /> Active
-            </Badge>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowNewModal(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                <Plus size={14} />
+                New
+              </button>
+              <Badge variant="primary" dot>
+                <Bot size={12} /> Active
+              </Badge>
+            </div>
           </div>
           <div className="relative">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -267,6 +417,7 @@ export default function AIReceptionist() {
     )
   }
 
+  // ----- Chat View -----
   function ChatView() {
     if (!selected) {
       return (
@@ -286,6 +437,26 @@ export default function AIReceptionist() {
 
     return (
       <div className="flex-1 flex flex-col h-full">
+        {/* AI / Human handling banner at top of chat */}
+        <div
+          className={`px-4 py-2 flex items-center justify-between text-xs font-medium border-b ${
+            selected.aiHandling
+              ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+              : 'bg-amber-50 text-amber-700 border-amber-100'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {selected.aiHandling ? <Bot size={14} /> : <User size={14} />}
+            <span>{selected.aiHandling ? 'AI is handling this conversation' : 'You are handling this conversation manually'}</span>
+          </div>
+          <button
+            onClick={() => toggleAiHandling(selected.id)}
+            className="underline hover:no-underline"
+          >
+            {selected.aiHandling ? 'Switch to human' : 'Switch to AI'}
+          </button>
+        </div>
+
         {/* Chat header */}
         <div className="px-4 py-3 border-b border-slate-200 bg-white">
           <div className="flex items-center justify-between">
@@ -312,30 +483,37 @@ export default function AIReceptionist() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {/* AI/Human toggle */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => toggleAiHandling(selected.id)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                    selected.aiHandling
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                      : 'bg-amber-50 text-amber-700 border border-amber-200'
-                  }`}
-                >
-                  {selected.aiHandling ? (
-                    <>
-                      <Bot size={14} />
-                      AI Handling
-                    </>
-                  ) : (
-                    <>
-                      <User size={14} />
-                      Human Mode
-                    </>
-                  )}
-                </button>
-              </div>
+              <button
+                onClick={() => toggleAiHandling(selected.id)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                  selected.aiHandling
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'bg-amber-50 text-amber-700 border border-amber-200'
+                }`}
+              >
+                {selected.aiHandling ? (
+                  <>
+                    <Bot size={14} />
+                    AI Handling
+                  </>
+                ) : (
+                  <>
+                    <User size={14} />
+                    Human Mode
+                  </>
+                )}
+              </button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleArchive}
+                icon={<Archive size={14} />}
+                className="text-slate-400 hover:text-red-500"
+              >
+                Close
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -348,32 +526,29 @@ export default function AIReceptionist() {
           </div>
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto py-4 space-y-3 bg-slate-50/30">
+        {/* Messages grouped by date */}
+        <div className="flex-1 overflow-y-auto py-4 space-y-1 bg-slate-50/30">
           <AnimatePresence mode="popLayout">
-            {allMessages.map(msg => (
-              <ChatBubble key={msg.id} message={msg} />
+            {messageGroups.map(group => (
+              <div key={group.date}>
+                {/* Date header */}
+                <div className="flex items-center justify-center my-3">
+                  <span className="px-3 py-1 text-[10px] font-medium text-slate-500 bg-slate-100 rounded-full">
+                    {group.date}
+                  </span>
+                </div>
+                {/* Messages in this date group */}
+                <div className="space-y-3">
+                  {group.messages.map(msg => (
+                    <ChatBubble key={msg.id} message={msg} showTime />
+                  ))}
+                </div>
+              </div>
             ))}
           </AnimatePresence>
           {typing && <TypingIndicator />}
           <div ref={messagesEndRef} />
         </div>
-
-        {/* AI handling banner */}
-        {selected.aiHandling && (
-          <div className="px-4 py-2 bg-emerald-50 border-t border-emerald-100 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-emerald-700">
-              <Bot size={14} />
-              <span>AI is handling this conversation</span>
-            </div>
-            <button
-              onClick={() => toggleAiHandling(selected.id)}
-              className="text-xs font-medium text-emerald-700 hover:text-emerald-800 underline"
-            >
-              Switch to human mode
-            </button>
-          </div>
-        )}
 
         {/* Quick replies */}
         <div className="px-4 py-2 border-t border-slate-100 bg-white">
@@ -395,7 +570,7 @@ export default function AIReceptionist() {
           <div className="flex items-center gap-2">
             <input
               type="text"
-              placeholder="Type a message..."
+              placeholder={selected.aiHandling ? 'Type to override AI response...' : 'Type a message...'}
               value={inputValue}
               onChange={e => setInputValue(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
@@ -416,17 +591,82 @@ export default function AIReceptionist() {
     )
   }
 
+  // ----- New Conversation Modal -----
+  function NewConversationModal() {
+    return (
+      <Modal
+        open={showNewModal}
+        onClose={() => { setShowNewModal(false); setNewConvoCustomerId(''); setNewConvoSearch('') }}
+        title="New Conversation"
+        subtitle="Select a customer to start a conversation"
+        size="sm"
+        footer={
+          <>
+            <Button variant="ghost" size="sm" onClick={() => setShowNewModal(false)}>
+              Cancel
+            </Button>
+            <Button size="sm" onClick={handleCreateConversation} disabled={!newConvoCustomerId}>
+              Start Conversation
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-3">
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search customers..."
+              value={newConvoSearch}
+              onChange={e => setNewConvoSearch(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
+          </div>
+          <div className="max-h-60 overflow-y-auto space-y-1">
+            {availableCustomers.length === 0 && (
+              <p className="text-sm text-slate-400 text-center py-4">No customers available</p>
+            )}
+            {availableCustomers.map(c => (
+              <button
+                key={c.id}
+                onClick={() => setNewConvoCustomerId(c.id)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                  newConvoCustomerId === c.id
+                    ? 'bg-indigo-50 border border-indigo-200'
+                    : 'hover:bg-slate-50 border border-transparent'
+                }`}
+              >
+                <Avatar name={c.name} size="sm" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-900 truncate">{c.name}</p>
+                  <p className="text-xs text-slate-500">{formatPhone(c.phone)}</p>
+                </div>
+                {newConvoCustomerId === c.id && (
+                  <Check size={16} className="text-indigo-600 shrink-0" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </Modal>
+    )
+  }
+
   return (
-    <div className="h-[calc(100vh-4rem)] flex bg-white rounded-xl border border-slate-200 overflow-hidden">
-      {/* Conversation list — hidden on mobile when chat is open */}
-      <div className={`w-80 border-r border-slate-200 shrink-0 ${mobileShowChat ? 'hidden lg:flex lg:flex-col' : 'flex flex-col w-full lg:w-80'}`}>
-        <ConversationList />
+    <>
+      <div className="h-[calc(100vh-4rem)] flex bg-white rounded-xl border border-slate-200 overflow-hidden">
+        {/* Conversation list -- hidden on mobile when chat is open */}
+        <div className={`w-80 border-r border-slate-200 shrink-0 ${mobileShowChat ? 'hidden lg:flex lg:flex-col' : 'flex flex-col w-full lg:w-80'}`}>
+          <ConversationList />
+        </div>
+
+        {/* Chat panel -- hidden on mobile when list is showing */}
+        <div className={`flex-1 flex flex-col ${mobileShowChat ? 'flex' : 'hidden lg:flex'}`}>
+          <ChatView />
+        </div>
       </div>
 
-      {/* Chat panel — hidden on mobile when list is showing */}
-      <div className={`flex-1 flex flex-col ${mobileShowChat ? 'flex' : 'hidden lg:flex'}`}>
-        <ChatView />
-      </div>
-    </div>
+      <NewConversationModal />
+    </>
   )
 }

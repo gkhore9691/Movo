@@ -1,7 +1,9 @@
 import { useState, useMemo } from 'react'
-import { CreditCard, IndianRupee, AlertCircle, TrendingUp, Smartphone, Banknote, FileText, Send, Download, CheckCircle2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { CreditCard, IndianRupee, AlertCircle, TrendingUp, Smartphone, Banknote, FileText, Send, Download, CheckCircle2, Plus } from 'lucide-react'
 import { useApp } from '@/contexts/AppContext'
-import { Card, Stat, Tabs, StatusBadge, Badge, Button, Modal } from '@/components/ui'
+import { Card, Stat, Tabs, StatusBadge, Badge, Button, Modal, Select } from '@/components/ui'
+import { api } from '@/api/client'
 import { formatCurrency, formatDate } from '@/utils/format'
 import type { Invoice, InvoiceStatus } from '@/types'
 
@@ -13,9 +15,11 @@ const TABS = [
 ]
 
 export default function Payments() {
-  const { invoices, jobs, services, getCustomer, getService, updateInvoiceStatus } = useApp()
+  const { invoices, jobs, customers, services, getCustomer, getService, updateInvoiceStatus } = useApp()
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('all')
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
+  const [showCreateInvoice, setShowCreateInvoice] = useState(false)
 
   const totalRevenue = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + i.amount, 0)
   const outstanding = invoices.filter(i => i.status === 'sent').reduce((s, i) => s + i.balance, 0)
@@ -59,9 +63,12 @@ export default function Payments() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-slate-900">Payments</h1>
-        <p className="text-sm text-slate-500 mt-0.5">Invoices and payment tracking</p>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-xl font-semibold text-slate-900">Payments</h1>
+          <p className="text-sm text-slate-500 mt-0.5">Invoices and payment tracking</p>
+        </div>
+        <Button icon={<Plus className="w-4 h-4" />} onClick={() => setShowCreateInvoice(true)}>Create Invoice</Button>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -111,7 +118,10 @@ export default function Payments() {
                 </span>
                 <p className="text-xs text-slate-400 md:hidden mt-0.5">{customer?.name}</p>
               </div>
-              <span className="text-sm text-slate-700 hidden md:block truncate">{customer?.name ?? 'Unknown'}</span>
+              <button
+                className="text-sm text-indigo-600 hover:text-indigo-700 hover:underline hidden md:block truncate cursor-pointer"
+                onClick={(e) => { e.stopPropagation(); navigate(`/customers/${invoice.customerId}`) }}
+              >{customer?.name ?? 'Unknown'}</button>
               <span className="text-sm text-slate-600 hidden md:block truncate">{svcText}</span>
               <span className="text-sm font-semibold text-slate-900">{formatCurrency(invoice.amount)}</span>
               <span className="text-sm text-slate-500 hidden md:block">{formatCurrency(invoice.deposit)}</span>
@@ -136,6 +146,14 @@ export default function Payments() {
           </div>
         )}
       </div>
+
+      <CreateInvoiceModal
+        open={showCreateInvoice}
+        onClose={() => setShowCreateInvoice(false)}
+        customers={customers}
+        jobs={jobs}
+        getService={getService}
+      />
 
       <InvoiceModal
         invoice={selectedInvoice}
@@ -171,6 +189,10 @@ function InvoiceModal({
   updateInvoiceStatus: (id: string, status: InvoiceStatus, method?: string) => void
 }) {
   const [sentConfirm, setSentConfirm] = useState(false)
+  const [showPaymentMethod, setShowPaymentMethod] = useState(false)
+  const [selectedMethod, setSelectedMethod] = useState<string>('upi')
+  const { currentTenant } = useApp()
+  const navigate = useNavigate()
   if (!invoice) return null
 
   const customer = getCustomer(invoice.customerId)
@@ -194,14 +216,14 @@ function InvoiceModal({
       footer={
         <>
           {invoice.status !== 'paid' && (
-            <Button variant="primary" icon={<CheckCircle2 className="w-4 h-4" />} onClick={() => { updateInvoiceStatus(invoice.id, 'paid'); onClose() }}>
+            <Button variant="primary" icon={<CheckCircle2 className="w-4 h-4" />} onClick={() => setShowPaymentMethod(true)}>
               Mark Paid
             </Button>
           )}
           <Button variant="secondary" icon={<Send className="w-4 h-4" />} onClick={() => { updateInvoiceStatus(invoice.id, 'sent'); setSentConfirm(true); setTimeout(() => setSentConfirm(false), 2000) }}>
             {sentConfirm ? 'Sent ✓' : 'Send to Customer'}
           </Button>
-          <Button variant="ghost" icon={<Download className="w-4 h-4" />} onClick={() => alert('Invoice PDF downloaded')}>
+          <Button variant="ghost" icon={<Download className="w-4 h-4" />} onClick={() => window.print()}>
             Download
           </Button>
         </>
@@ -210,10 +232,16 @@ function InvoiceModal({
       <div className="space-y-6">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Detailing Street</h3>
-            <p className="text-sm text-slate-500">Vijay Nagar, Indore, MP 452010</p>
-            <p className="text-sm text-slate-500">GSTIN: 23AABCT1234E1Z5</p>
-            <p className="text-sm text-slate-500">Phone: +91 98260 11111</p>
+            <h3 className="text-lg font-bold text-slate-900">{currentTenant?.name ?? 'Business Name'}</h3>
+            {currentTenant?.address && (
+              <p className="text-sm text-slate-500">{currentTenant.address}, {currentTenant.city}, {currentTenant.state}</p>
+            )}
+            {currentTenant?.gstNumber && (
+              <p className="text-sm text-slate-500">GSTIN: {currentTenant.gstNumber}</p>
+            )}
+            {currentTenant?.phone && (
+              <p className="text-sm text-slate-500">Phone: {currentTenant.phone}</p>
+            )}
           </div>
           <div className="text-right">
             <p className="text-sm font-mono font-bold text-slate-900">{getInvoiceNumber(invoice.id)}</p>
@@ -226,7 +254,10 @@ function InvoiceModal({
 
         <div className="border-t border-slate-100 pt-4">
           <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Bill To</p>
-          <p className="text-sm font-semibold text-slate-900">{customer?.name}</p>
+          <button
+            className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 hover:underline cursor-pointer"
+            onClick={() => { navigate(`/customers/${invoice.customerId}`); onClose() }}
+          >{customer?.name}</button>
           <p className="text-sm text-slate-500">{customer?.address}</p>
           <p className="text-sm text-slate-500">{customer?.phone}</p>
         </div>
@@ -287,6 +318,178 @@ function InvoiceModal({
               <span className="text-slate-700">{formatDate(invoice.paidAt)}</span>
             </div>
           )}
+        </div>
+      </div>
+      {showPaymentMethod && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm mx-4">
+            <h3 className="text-base font-semibold text-slate-900 mb-4">Select Payment Method</h3>
+            <div className="space-y-2 mb-6">
+              {([
+                { value: 'upi', label: 'UPI', icon: <Smartphone className="w-4 h-4 text-indigo-500" /> },
+                { value: 'cash', label: 'Cash', icon: <Banknote className="w-4 h-4 text-emerald-500" /> },
+                { value: 'card', label: 'Card', icon: <CreditCard className="w-4 h-4 text-blue-500" /> },
+              ] as const).map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => setSelectedMethod(opt.value)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-colors ${
+                    selectedMethod === opt.value
+                      ? 'bg-indigo-50 border-indigo-200'
+                      : 'border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  {opt.icon}
+                  <span className="text-sm font-medium text-slate-900">{opt.label}</span>
+                  {selectedMethod === opt.value && (
+                    <CheckCircle2 className="w-4 h-4 text-indigo-600 ml-auto" />
+                  )}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="secondary" className="flex-1" onClick={() => setShowPaymentMethod(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={() => {
+                  updateInvoiceStatus(invoice.id, 'paid', selectedMethod)
+                  setShowPaymentMethod(false)
+                  onClose()
+                }}
+              >
+                Confirm Payment
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </Modal>
+  )
+}
+
+function CreateInvoiceModal({
+  open,
+  onClose,
+  customers,
+  jobs,
+  getService,
+}: {
+  open: boolean
+  onClose: () => void
+  customers: any[]
+  jobs: any[]
+  getService: (id: string) => any
+}) {
+  const [customerId, setCustomerId] = useState('')
+  const [jobId, setJobId] = useState('')
+  const [amount, setAmount] = useState('')
+  const [deposit, setDeposit] = useState('')
+  const [notes, setNotes] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const customerJobs = customerId
+    ? jobs.filter(j => j.customerId === customerId)
+    : []
+
+  const inputClass = "w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+
+  async function handleCreate() {
+    if (!customerId || !amount) return
+    setSaving(true)
+    try {
+      await api.post('/invoices', {
+        customerId,
+        jobId: jobId || undefined,
+        amount: Number(amount),
+        deposit: Number(deposit) || 0,
+        notes,
+        status: 'draft',
+      })
+      setCustomerId('')
+      setJobId('')
+      setAmount('')
+      setDeposit('')
+      setNotes('')
+      onClose()
+      window.location.reload()
+    } catch (err) {
+      console.error('Failed to create invoice', err)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Create Invoice"
+      size="md"
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button disabled={!customerId || !amount || saving} onClick={handleCreate}>
+            {saving ? 'Creating...' : 'Create Invoice'}
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <Select
+          label="Customer *"
+          placeholder="Select a customer"
+          value={customerId}
+          onChange={e => { setCustomerId(e.target.value); setJobId('') }}
+          options={customers.map(c => ({ value: c.id, label: c.name }))}
+        />
+
+        {customerId && customerJobs.length > 0 && (
+          <Select
+            label="Job (optional)"
+            placeholder="Select a job"
+            value={jobId}
+            onChange={e => setJobId(e.target.value)}
+            options={customerJobs.map(j => ({
+              value: j.id,
+              label: `${j.serviceIds.map((sid: string) => getService(sid)?.name || 'Service').join(', ')} — ${j.status}`,
+            }))}
+          />
+        )}
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Amount *</label>
+            <input
+              type="number"
+              value={amount}
+              onChange={e => setAmount(e.target.value)}
+              placeholder="0"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Deposit</label>
+            <input
+              type="number"
+              value={deposit}
+              onChange={e => setDeposit(e.target.value)}
+              placeholder="0"
+              className={inputClass}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Notes</label>
+          <textarea
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            rows={3}
+            placeholder="Optional notes..."
+            className={`${inputClass} resize-none`}
+          />
         </div>
       </div>
     </Modal>
