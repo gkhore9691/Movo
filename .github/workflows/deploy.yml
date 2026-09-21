@@ -1,0 +1,85 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  SERVER_HOST: 3.110.122.148
+  SERVER_USER: ubuntu
+  DEPLOY_PATH: /home/ubuntu/movo
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Install backend dependencies
+        working-directory: ./server
+        run: npm ci
+
+      - name: Build backend
+        working-directory: ./server
+        run: npm run build
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ env.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to server
+        run: |
+          rsync -avz --delete \
+            --exclude 'node_modules' \
+            --exclude 'server/node_modules' \
+            --exclude '.git' \
+            --exclude '*.pem' \
+            --exclude '.env' \
+            --exclude 'server/.env' \
+            --exclude 'scripts/downloads' \
+            --exclude 'scripts/.env' \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            ./ ${{ env.SERVER_USER }}@${{ env.SERVER_HOST }}:${{ env.DEPLOY_PATH }}/
+
+      - name: Install dependencies and restart on server
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ env.SERVER_USER }}@${{ env.SERVER_HOST }} << 'EOF'
+            cd /home/ubuntu/movo
+
+            # Install frontend dependencies
+            npm ci --production=false
+
+            # Install backend dependencies
+            cd server
+            npm ci --production=false
+
+            # Restart the API
+            pm2 restart movo-api
+
+            echo "Deployment complete!"
+          EOF
+
+      - name: Health check
+        run: |
+          sleep 5
+          curl -f https://movo.suprminds.in/api/services || exit 1
+          echo "Health check passed!"

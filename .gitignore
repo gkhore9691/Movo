@@ -11,3 +11,5 @@ scripts/downloads
 server/dist
 server/.env
 tsconfig.tsbuildinfo
+server/tsconfig.build.tsbuildinfo
+*.pem
