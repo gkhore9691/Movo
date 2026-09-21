@@ -46,6 +46,14 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ env.SERVER_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Backup server .env files
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ env.SERVER_USER }}@${{ env.SERVER_HOST }} << 'EOF'
+            # Backup .env files before deployment
+            cp /home/ubuntu/movo/server/.env /tmp/movo-server-env.bak 2>/dev/null || true
+            cp /home/ubuntu/movo/scripts/.env /tmp/movo-scripts-env.bak 2>/dev/null || true
+          EOF
+
       - name: Deploy to server
         run: |
           rsync -avz --delete \
@@ -53,17 +61,18 @@ jobs:
             --exclude 'server/node_modules' \
             --exclude '.git' \
             --exclude '*.pem' \
-            --exclude '.env' \
-            --exclude 'server/.env' \
             --exclude 'scripts/downloads' \
-            --exclude 'scripts/.env' \
             -e "ssh -i ~/.ssh/deploy_key" \
             ./ ${{ env.SERVER_USER }}@${{ env.SERVER_HOST }}:${{ env.DEPLOY_PATH }}/
 
-      - name: Install dependencies and restart on server
+      - name: Restore .env files and restart
         run: |
           ssh -i ~/.ssh/deploy_key ${{ env.SERVER_USER }}@${{ env.SERVER_HOST }} << 'EOF'
             cd /home/ubuntu/movo
+
+            # Restore .env files
+            cp /tmp/movo-server-env.bak /home/ubuntu/movo/server/.env 2>/dev/null || true
+            cp /tmp/movo-scripts-env.bak /home/ubuntu/movo/scripts/.env 2>/dev/null || true
 
             # Install frontend dependencies
             npm ci --production=false
@@ -80,6 +89,12 @@ jobs:
 
       - name: Health check
         run: |
-          sleep 5
-          curl -f https://movo.suprminds.in/api/services || exit 1
-          echo "Health check passed!"
+          sleep 8
+          # Check if API is responding (401 is OK - means API is running but needs auth)
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://movo.suprminds.in/api/auth/me)
+          if [ "$HTTP_CODE" = "401" ] || [ "$HTTP_CODE" = "200" ]; then
+            echo "Health check passed! API returned $HTTP_CODE"
+          else
+            echo "Health check failed! API returned $HTTP_CODE"
+            exit 1
+          fi
