@@ -175,16 +175,40 @@ export class SeedService {
     } as Partial<Tenant>);
   }
 
-  // ── services ─────────────────────────────────────────────────────────
+  // ── services (Detailing Street catalog) ──────────────────────────────
   private async seedServices(): Promise<void> {
     this.logger.log('  Services...');
     const rows: Array<[string, string, string, number, number | null, string, string]> = [
-      ['svc-1', 'Ceramic Coating', 'Premium ceramic coating for long-lasting paint protection', 15000, 35000, '2-3 days', 'Protection'],
-      ['svc-2', 'PPF — Paint Protection Film', 'Self-healing paint protection film installation', 40000, 120000, '3-5 days', 'Protection'],
-      ['svc-3', 'Paint Correction', 'Machine polishing to remove swirls, scratches and oxidation', 8000, 18000, '1-2 days', 'Correction'],
-      ['svc-4', 'Interior Detailing', 'Deep cleaning and conditioning of all interior surfaces', 5000, 12000, '4-6 hours', 'Detailing'],
-      ['svc-5', 'Full Detailing', 'Complete interior and exterior detailing package', 10000, 25000, '1-2 days', 'Detailing'],
-      ['svc-6', 'Maintenance Wash', 'Gentle maintenance wash for coated vehicles', 1500, 3500, '1-2 hours', 'Maintenance'],
+      // Ceramic Coating
+      ['svc-1',  '9H Ceramic Silver (1 Year)',           '1-year 9H ceramic coating protection',            10999, 24999, '1-2 days', 'Ceramic Coating'],
+      ['svc-2',  '9H Ceramic Gold (3 Years)',            '3-year 9H ceramic coating protection',            15999, 34999, '1-2 days', 'Ceramic Coating'],
+      ['svc-3',  '9H Ceramic Platinum (5 Years)',        '5-year 9H ceramic coating protection',            20999, 42999, '2-3 days', 'Ceramic Coating'],
+      ['svc-4',  '9H Ceramic Platinum Plus (Lifetime)',  'Lifetime 9H ceramic coating protection',          36999, 79999, '2-3 days', 'Ceramic Coating'],
+      // PPF (Paint Protection Film)
+      ['svc-5',  'Pro Shield PPF C (5 Years)',           '5-year paint protection film — Pro Shield C',     44999, 74999, '3-5 days', 'PPF'],
+      ['svc-6',  'Pro Shield PPF S (10 Years)',          '10-year paint protection film — Pro Shield S',    89999, 134999, '3-5 days', 'PPF'],
+      // Graphene Coating
+      ['svc-7',  'Graphene (5 Years)',                   '5-year graphene coating protection',              28999, 56999, '2-3 days', 'Graphene Coating'],
+      ['svc-8',  'Graphene (10 Years)',                  '10-year graphene coating protection',             37999, 80999, '2-3 days', 'Graphene Coating'],
+      // Protection
+      ['svc-9',  'Ultra 9H Armour',                     '9H armour protection for painted surfaces',       0, 0, '1-2 days', 'Protection'],
+      ['svc-10', 'Ultra 10H Armour',                    '10H armour protection for painted surfaces',      0, 0, '1-2 days', 'Protection'],
+      ['svc-11', 'Leather Armour',                      'Leather surface protection treatment',            0, 0, '4-6 hours', 'Protection'],
+      ['svc-12', 'Vision Armour (Windshield)',           'Windshield hydrophobic protection coating',       0, 0, '2-3 hours', 'Protection'],
+      ['svc-13', 'Wheel Armour',                        'Wheel protection coating',                        0, 0, '2-3 hours', 'Protection'],
+      ['svc-14', 'Plastic Armour',                      'Plastic trim protection coating',                 0, 0, '2-3 hours', 'Protection'],
+      // Restoration
+      ['svc-15', 'Paint Restoration / Paint Correction', 'Machine polishing to remove swirls, scratches and oxidation', 0, 0, '1-2 days', 'Restoration'],
+      ['svc-16', 'Headlight Restoration',               'Headlight lens restoration and clarity treatment', 0, 0, '2-3 hours', 'Restoration'],
+      ['svc-17', 'Wheel Restoration',                   'Wheel refurbishment and restoration',             0, 0, '4-6 hours', 'Restoration'],
+      ['svc-18', 'Trim Restoration',                    'Exterior trim restoration treatment',             0, 0, '2-3 hours', 'Restoration'],
+      ['svc-19', 'Interior Restoration',                'Full interior restoration and deep cleaning',     0, 0, '1-2 days', 'Restoration'],
+      ['svc-20', 'Chrome Restoration',                  'Chrome surface polishing and restoration',        0, 0, '2-3 hours', 'Restoration'],
+      // Detailing
+      ['svc-21', 'Full Car Detailing',                  'Complete interior and exterior detailing package', 0, 0, '1-2 days', 'Detailing'],
+      ['svc-22', 'Interior Detailing',                  'Deep cleaning and conditioning of all interior surfaces', 0, 0, '4-6 hours', 'Detailing'],
+      ['svc-23', 'Exterior Detailing',                  'Thorough exterior wash, clay bar, and polish',    0, 0, '4-6 hours', 'Detailing'],
+      ['svc-24', 'Maintenance Wash',                    'Gentle maintenance wash for coated vehicles',     0, 0, '1-2 hours', 'Detailing'],
     ];
     for (const [key, name, description, basePrice, maxPrice, duration, category] of rows) {
       await this.save(this.services, key, { name, description, basePrice, maxPrice, duration, category, tenantId: this.map('tenant') } as Partial<Service>);

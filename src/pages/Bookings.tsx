@@ -360,10 +360,10 @@ function NewBookingModal({
   const [step, setStep] = useState(1)
   const [customerId, setCustomerId] = useState('')
   const [vehicleId, setVehicleId] = useState('')
-  const [serviceId, setServiceId] = useState('')
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([])
+  const [servicePrices, setServicePrices] = useState<Record<string, number>>({})
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'))
   const [time, setTime] = useState('')
-  const [price, setPrice] = useState('')
   const [deposit, setDeposit] = useState('')
   const [notes, setNotes] = useState('')
   const [customerSearch, setCustomerSearch] = useState('')
@@ -377,7 +377,6 @@ function NewBookingModal({
   const [showNewVehicle, setShowNewVehicle] = useState(false)
   const [newVehMake, setNewVehMake] = useState('')
   const [newVehModel, setNewVehModel] = useState('')
-  const [newVehYear, setNewVehYear] = useState('')
   const [newVehReg, setNewVehReg] = useState('')
   const [newVehColor, setNewVehColor] = useState('')
 
@@ -389,12 +388,36 @@ function NewBookingModal({
     ? vehicles.filter(v => v.customerId === customerId)
     : []
 
-  const selectedService = services.find(s => s.id === serviceId)
+  const servicesByCategory = useMemo(() => {
+    const groups: Record<string, typeof services> = {}
+    for (const svc of services) {
+      const cat = svc.category || 'Other'
+      if (!groups[cat]) groups[cat] = []
+      groups[cat].push(svc)
+    }
+    return groups
+  }, [services])
 
-  function handleSelectService(svcId: string) {
-    setServiceId(svcId)
-    const svc = services.find(s => s.id === svcId)
-    if (svc) setPrice(String(svc.basePrice))
+  const totalPrice = useMemo(() => {
+    return selectedServiceIds.reduce((sum, id) => sum + (servicePrices[id] || 0), 0)
+  }, [selectedServiceIds, servicePrices])
+
+  function toggleService(svcId: string) {
+    setSelectedServiceIds(prev => {
+      if (prev.includes(svcId)) {
+        const next = prev.filter(id => id !== svcId)
+        setServicePrices(p => { const { [svcId]: _, ...rest } = p; return rest })
+        return next
+      } else {
+        const svc = services.find(s => s.id === svcId)
+        if (svc) setServicePrices(p => ({ ...p, [svcId]: svc.basePrice }))
+        return [...prev, svcId]
+      }
+    })
+  }
+
+  function updateServicePrice(svcId: string, val: number) {
+    setServicePrices(p => ({ ...p, [svcId]: val }))
   }
 
   function handleAddCustomer() {
@@ -424,7 +447,7 @@ function NewBookingModal({
       customerId,
       make: newVehMake.trim(),
       model: newVehModel.trim(),
-      year: Number(newVehYear) || new Date().getFullYear(),
+      year: new Date().getFullYear(),
       registrationNumber: newVehReg.trim(),
       color: newVehColor.trim(),
     })
@@ -436,10 +459,10 @@ function NewBookingModal({
     setStep(1)
     setCustomerId('')
     setVehicleId('')
-    setServiceId('')
+    setSelectedServiceIds([])
+    setServicePrices({})
     setDate(format(new Date(), 'yyyy-MM-dd'))
     setTime('')
-    setPrice('')
     setDeposit('')
     setNotes('')
     setCustomerSearch('')
@@ -449,7 +472,6 @@ function NewBookingModal({
     setShowNewVehicle(false)
     setNewVehMake('')
     setNewVehModel('')
-    setNewVehYear('')
     setNewVehReg('')
     setNewVehColor('')
   }
@@ -464,10 +486,10 @@ function NewBookingModal({
       id: `bk-${Date.now()}`,
       customerId,
       vehicleId,
-      serviceIds: serviceId ? [serviceId] : [],
+      serviceIds: selectedServiceIds,
       date,
       time,
-      estimatedPrice: Number(price) || 0,
+      estimatedPrice: totalPrice,
       deposit: Number(deposit) || 0,
       notes,
       status: 'confirmed',
@@ -479,7 +501,7 @@ function NewBookingModal({
   const canProceed = [
     customerId !== '',
     vehicleId !== '',
-    serviceId !== '',
+    selectedServiceIds.length > 0,
     date !== '' && time !== '',
   ]
 
@@ -634,7 +656,7 @@ function NewBookingModal({
                     >
                       <div>
                         <p className="text-sm font-medium text-slate-900">
-                          {v.year} {v.make} {v.model}
+                          {v.make} {v.model}
                         </p>
                         <p className="text-xs text-slate-500">{v.registrationNumber} · {v.color}</p>
                       </div>
@@ -674,14 +696,7 @@ function NewBookingModal({
                         className="w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
-                    <div className="grid grid-cols-3 gap-3">
-                      <input
-                        value={newVehYear}
-                        onChange={e => setNewVehYear(e.target.value)}
-                        placeholder="Year"
-                        type="number"
-                        className="w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      />
+                    <div className="grid grid-cols-2 gap-3">
                       <input
                         value={newVehReg}
                         onChange={e => setNewVehReg(e.target.value)}
@@ -709,39 +724,92 @@ function NewBookingModal({
             </div>
           )}
 
-          {/* Step 3: Service */}
+          {/* Step 3: Services (multi-select grouped by category) */}
           {step === 3 && (
             <div>
-              <p className="text-sm text-slate-600 mb-4">Select a service</p>
-              <div className="space-y-2">
-                {services.map(svc => (
-                  <button
-                    key={svc.id}
-                    onClick={() => handleSelectService(svc.id)}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border text-left transition-colors ${
-                      serviceId === svc.id
-                        ? 'bg-indigo-50 border-indigo-200'
-                        : 'border-slate-200 hover:bg-slate-50'
-                    }`}
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-slate-900">{svc.name}</p>
-                      <p className="text-xs text-slate-500">{svc.duration}</p>
+              <p className="text-sm text-slate-600 mb-4">Select services</p>
+              <div className="space-y-4 max-h-[400px] overflow-y-auto">
+                {Object.entries(servicesByCategory).map(([category, catServices]) => (
+                  <div key={category}>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">{category}</p>
+                    <div className="space-y-1.5">
+                      {catServices.map(svc => (
+                        <label
+                          key={svc.id}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-colors cursor-pointer ${
+                            selectedServiceIds.includes(svc.id)
+                              ? 'bg-indigo-50 border-indigo-200'
+                              : 'border-slate-200 hover:bg-slate-50'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedServiceIds.includes(svc.id)}
+                            onChange={() => toggleService(svc.id)}
+                            className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-slate-900">{svc.name}</p>
+                            <p className="text-xs text-slate-500">{svc.duration}</p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-sm font-semibold text-slate-900">{formatCurrency(svc.basePrice)}</p>
+                            {svc.maxPrice > 0 && <p className="text-xs text-slate-400">up to {formatCurrency(svc.maxPrice)}</p>}
+                          </div>
+                        </label>
+                      ))}
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-slate-900">{formatCurrency(svc.basePrice)}</p>
-                      <p className="text-xs text-slate-400">up to {formatCurrency(svc.maxPrice)}</p>
-                    </div>
-                  </button>
+                  </div>
                 ))}
               </div>
+              {selectedServiceIds.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+                  <span className="text-sm text-slate-500">{selectedServiceIds.length} service{selectedServiceIds.length !== 1 ? 's' : ''} selected</span>
+                  <span className="text-sm font-semibold text-slate-900">{formatCurrency(totalPrice)}</span>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Step 4: Date & Time */}
+          {/* Step 4: Date, Time & Pricing */}
           {step === 4 && (
             <div>
-              <p className="text-sm text-slate-600 mb-4">Choose date and time</p>
+              <p className="text-sm text-slate-600 mb-4">Choose date, time and pricing</p>
+
+              {/* Service Pricing */}
+              {selectedServiceIds.length > 0 && (
+                <div className="mb-4">
+                  <label className="block text-xs font-medium text-slate-700 mb-2">Service Pricing</label>
+                  <div className="space-y-2 border border-slate-200 rounded-lg p-3">
+                    {selectedServiceIds.map(svcId => {
+                      const svc = services.find(s => s.id === svcId)
+                      if (!svc) return null
+                      return (
+                        <div key={svcId} className="flex items-center justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-slate-900 truncate">{svc.name}</p>
+                            <p className="text-xs text-slate-400">Base: {formatCurrency(svc.basePrice)}{svc.maxPrice > 0 ? ` — Max: ${formatCurrency(svc.maxPrice)}` : ''}</p>
+                          </div>
+                          <div className="w-32 shrink-0">
+                            <input
+                              type="number"
+                              value={servicePrices[svcId] ?? ''}
+                              onChange={e => updateServicePrice(svcId, Number(e.target.value) || 0)}
+                              placeholder="Price"
+                              className="w-full rounded-lg border border-slate-200 text-sm px-3 py-1.5 text-right focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+                        </div>
+                      )
+                    })}
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                      <span className="text-sm font-medium text-slate-700">Total</span>
+                      <span className="text-sm font-semibold text-slate-900">{formatCurrency(totalPrice)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-700 mb-1.5">Date</label>
@@ -753,12 +821,12 @@ function NewBookingModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Estimated Price</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Deposit</label>
                   <input
                     type="number"
-                    value={price}
-                    onChange={e => setPrice(e.target.value)}
-                    placeholder="₹"
+                    value={deposit}
+                    onChange={e => setDeposit(e.target.value)}
+                    placeholder="₹ (optional)"
                     className="w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
@@ -781,27 +849,15 @@ function NewBookingModal({
                   ))}
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Deposit</label>
-                  <input
-                    type="number"
-                    value={deposit}
-                    onChange={e => setDeposit(e.target.value)}
-                    placeholder="₹ (optional)"
-                    className="w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Notes</label>
-                  <input
-                    type="text"
-                    value={notes}
-                    onChange={e => setNotes(e.target.value)}
-                    placeholder="Optional notes"
-                    className="w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
+              <div className="mt-4">
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">Notes</label>
+                <input
+                  type="text"
+                  value={notes}
+                  onChange={e => setNotes(e.target.value)}
+                  placeholder="Optional notes"
+                  className="w-full rounded-lg border border-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
               </div>
             </div>
           )}
@@ -814,6 +870,7 @@ function NewBookingModal({
                 {(() => {
                   const cust = customers.find(c => c.id === customerId)
                   const veh = vehicles.find(v => v.id === vehicleId)
+                  const selectedSvcs = selectedServiceIds.map(id => services.find(s => s.id === id)).filter(Boolean)
                   return (
                     <>
                       <div className="flex items-center justify-between py-2.5 border-b border-slate-100">
@@ -826,9 +883,16 @@ function NewBookingModal({
                           {veh ? `${veh.make} ${veh.model}` : '—'}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between py-2.5 border-b border-slate-100">
-                        <span className="text-sm text-slate-500">Service</span>
-                        <span className="text-sm font-medium text-slate-900">{selectedService?.name}</span>
+                      <div className="py-2.5 border-b border-slate-100">
+                        <span className="text-sm text-slate-500">Services</span>
+                        <div className="mt-1.5 space-y-1">
+                          {selectedSvcs.map((svc: any) => (
+                            <div key={svc.id} className="flex items-center justify-between">
+                              <span className="text-sm text-slate-900">{svc.name}</span>
+                              <span className="text-sm font-medium text-slate-700">{formatCurrency(servicePrices[svc.id] || svc.basePrice)}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                       <div className="flex items-center justify-between py-2.5 border-b border-slate-100">
                         <span className="text-sm text-slate-500">Date & Time</span>
@@ -839,7 +903,7 @@ function NewBookingModal({
                       <div className="flex items-center justify-between py-2.5 border-b border-slate-100">
                         <span className="text-sm text-slate-500">Estimated Price</span>
                         <span className="text-sm font-semibold text-slate-900">
-                          {formatCurrency(Number(price) || 0)}
+                          {formatCurrency(totalPrice)}
                         </span>
                       </div>
                       {Number(deposit) > 0 && (
@@ -936,7 +1000,7 @@ function BookingDetailModal({
           <div>
             <p className="text-xs font-medium text-slate-500 mb-1">Vehicle</p>
             <p className="text-sm text-slate-900">
-              {veh ? `${veh.year} ${veh.make} ${veh.model}` : '—'}
+              {veh ? `${veh.make} ${veh.model}` : '—'}
             </p>
             <p className="text-xs text-slate-500">{veh?.registrationNumber}</p>
           </div>

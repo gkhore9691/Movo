@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { Building2, Clock, Palette, Bell, Bot, Users, Pencil, Plus, RefreshCw, ExternalLink, Check, AlertCircle } from 'lucide-react'
@@ -27,6 +27,16 @@ const defaultWorkingHours = [
 export default function Settings() {
   const { services, staff, currentTenant } = useApp()
   const navigate = useNavigate()
+
+  const servicesByCategory = useMemo(() => {
+    const groups: Record<string, typeof services> = {}
+    for (const svc of services) {
+      const cat = svc.category || 'Other'
+      if (!groups[cat]) groups[cat] = []
+      groups[cat].push(svc)
+    }
+    return groups
+  }, [services])
 
   // Local tenant state for optimistic updates
   const [tenant, setTenantLocal] = useState(currentTenant)
@@ -124,18 +134,25 @@ export default function Settings() {
             title="Services & Pricing"
             actions={<Button variant="secondary" size="sm" icon={<Plus className="w-3.5 h-3.5" />} onClick={() => setShowAddService(true)}>Add Service</Button>}
           />
-          <div className="divide-y divide-slate-100">
-            {services.map(svc => (
-              <div key={svc.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-                <div>
-                  <p className="text-sm font-medium text-slate-900">{svc.name}</p>
-                  <p className="text-xs text-slate-500">{svc.duration} · {svc.category}</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-slate-700">
-                    {formatCurrency(svc.basePrice)} – {formatCurrency(svc.maxPrice)}
-                  </span>
-                  <Button variant="ghost" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => setEditingService(svc)} />
+          <div className="space-y-4">
+            {Object.entries(servicesByCategory).map(([category, catServices]) => (
+              <div key={category}>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">{category}</p>
+                <div className="divide-y divide-slate-100">
+                  {catServices.map(svc => (
+                    <div key={svc.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+                      <div>
+                        <p className="text-sm font-medium text-slate-900">{svc.name}</p>
+                        <p className="text-xs text-slate-500">{svc.duration}</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-slate-700">
+                          {formatCurrency(svc.basePrice)} – {formatCurrency(svc.maxPrice)}
+                        </span>
+                        <Button variant="ghost" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => setEditingService(svc)} />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}

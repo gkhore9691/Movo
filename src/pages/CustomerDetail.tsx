@@ -250,7 +250,7 @@ export default function CustomerDetail() {
                           {v.make} {v.model}
                         </p>
                         <p className="text-xs text-slate-500">
-                          {v.registrationNumber} · {v.year} · {v.color}
+                          {v.registrationNumber} · {v.color}
                         </p>
                       </div>
                     </div>
@@ -510,7 +510,6 @@ function AddVehicleModal({
 }) {
   const [make, setMake] = useState('')
   const [model, setModel] = useState('')
-  const [year, setYear] = useState(String(new Date().getFullYear()))
   const [regNumber, setRegNumber] = useState('')
   const [color, setColor] = useState('')
   const [saving, setSaving] = useState(false)
@@ -535,7 +534,7 @@ function AddVehicleModal({
                   customerId,
                   make,
                   model,
-                  year: Number(year),
+                  year: new Date().getFullYear(),
                   registrationNumber: regNumber,
                   color,
                 })
@@ -560,15 +559,9 @@ function AddVehicleModal({
             <input value={model} onChange={e => setModel(e.target.value)} placeholder="e.g. Creta" className={inputClass} />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Year</label>
-            <input type="number" value={year} onChange={e => setYear(e.target.value)} className={inputClass} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Registration No. *</label>
-            <input value={regNumber} onChange={e => setRegNumber(e.target.value)} placeholder="e.g. MH01AB1234" className={inputClass} />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Registration No. *</label>
+          <input value={regNumber} onChange={e => setRegNumber(e.target.value)} placeholder="e.g. MH01AB1234" className={inputClass} />
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1.5">Color</label>

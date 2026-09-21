@@ -75,7 +75,6 @@ export default function VehicleDetail() {
               <h1 className="text-xl font-semibold text-slate-900">
                 {vehicle.make} {vehicle.model}
               </h1>
-              <Badge variant="default">{vehicle.year}</Badge>
               {activeJob && <StatusBadge status={activeJob.status} />}
             </div>
             <p className="text-lg font-mono font-semibold text-slate-600 mt-1 tracking-wider">
@@ -287,7 +286,6 @@ function EditVehicleModal({
 }) {
   const [make, setMake] = useState(vehicle.make)
   const [model, setModel] = useState(vehicle.model)
-  const [year, setYear] = useState(String(vehicle.year))
   const [regNumber, setRegNumber] = useState(vehicle.registrationNumber)
   const [color, setColor] = useState(vehicle.color)
 
@@ -302,7 +300,7 @@ function EditVehicleModal({
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>Cancel</Button>
-          <Button onClick={() => onSave(vehicle.id, { make, model, year: Number(year), registrationNumber: regNumber, color })}>Save Changes</Button>
+          <Button onClick={() => onSave(vehicle.id, { make, model, registrationNumber: regNumber, color })}>Save Changes</Button>
         </>
       }
     >
@@ -317,15 +315,9 @@ function EditVehicleModal({
             <input value={model} onChange={e => setModel(e.target.value)} className={inputClass} />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Year</label>
-            <input type="number" value={year} onChange={e => setYear(e.target.value)} className={inputClass} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Registration No.</label>
-            <input value={regNumber} onChange={e => setRegNumber(e.target.value)} className={inputClass} />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Registration No.</label>
+          <input value={regNumber} onChange={e => setRegNumber(e.target.value)} className={inputClass} />
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1.5">Color</label>

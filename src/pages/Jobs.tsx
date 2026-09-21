@@ -554,8 +554,8 @@ function NewJobModal({
   const [customerId, setCustomerId] = useState('')
   const [vehicleId, setVehicleId] = useState('')
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([])
+  const [servicePrices, setServicePrices] = useState<Record<string, number>>({})
   const [assignedTo, setAssignedTo] = useState('')
-  const [estimatedPrice, setEstimatedPrice] = useState('')
   const [deposit, setDeposit] = useState('')
   const [notes, setNotes] = useState('')
 
@@ -563,18 +563,44 @@ function NewJobModal({
     ? vehicles.filter((v: any) => v.customerId === customerId)
     : []
 
+  const servicesByCategory = useMemo(() => {
+    const groups: Record<string, typeof services> = {}
+    for (const svc of services) {
+      const cat = (svc as any).category || 'Other'
+      if (!groups[cat]) groups[cat] = []
+      groups[cat].push(svc)
+    }
+    return groups
+  }, [services])
+
+  const totalPrice = useMemo(() => {
+    return selectedServiceIds.reduce((sum, id) => sum + (servicePrices[id] || 0), 0)
+  }, [selectedServiceIds, servicePrices])
+
   function toggleService(id: string) {
-    setSelectedServiceIds(prev =>
-      prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
-    )
+    setSelectedServiceIds(prev => {
+      if (prev.includes(id)) {
+        const next = prev.filter(s => s !== id)
+        setServicePrices(p => { const { [id]: _, ...rest } = p; return rest })
+        return next
+      } else {
+        const svc = services.find((s: any) => s.id === id)
+        if (svc) setServicePrices(p => ({ ...p, [id]: (svc as any).basePrice || 0 }))
+        return [...prev, id]
+      }
+    })
+  }
+
+  function updateServicePrice(svcId: string, val: number) {
+    setServicePrices(p => ({ ...p, [svcId]: val }))
   }
 
   function reset() {
     setCustomerId('')
     setVehicleId('')
     setSelectedServiceIds([])
+    setServicePrices({})
     setAssignedTo('')
-    setEstimatedPrice('')
     setDeposit('')
     setNotes('')
   }
@@ -593,7 +619,7 @@ function NewJobModal({
       serviceIds: selectedServiceIds,
       status: 'car_received',
       assignedTo,
-      estimatedPrice: Number(estimatedPrice) || 0,
+      estimatedPrice: totalPrice,
       deposit: Number(deposit) || 0,
       notes,
       photos: [],
@@ -650,7 +676,7 @@ function NewJobModal({
               <option value="">Select vehicle...</option>
               {customerVehicles.map((v: any) => (
                 <option key={v.id} value={v.id}>
-                  {v.year} {v.make} {v.model} — {v.registrationNumber}
+                  {v.make} {v.model} — {v.registrationNumber}
                 </option>
               ))}
             </select>
@@ -664,24 +690,67 @@ function NewJobModal({
         {/* Services */}
         <div>
           <label className="block text-sm font-medium text-neutral-700 mb-1.5">Services *</label>
-          <div className="space-y-1.5 max-h-40 overflow-y-auto border border-neutral-200 rounded-lg p-2">
-            {services.map((svc: any) => (
-              <label
-                key={svc.id}
-                className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-neutral-50 cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedServiceIds.includes(svc.id)}
-                  onChange={() => toggleService(svc.id)}
-                  className="rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500"
-                />
-                <span className="text-sm text-neutral-900 flex-1">{svc.name}</span>
-                <span className="text-xs text-neutral-400">{formatCurrency(svc.basePrice)}</span>
-              </label>
+          <div className="space-y-3 max-h-52 overflow-y-auto border border-neutral-200 rounded-lg p-2">
+            {Object.entries(servicesByCategory).map(([category, catServices]) => (
+              <div key={category}>
+                <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1 px-2">{category}</p>
+                <div className="space-y-1">
+                  {catServices.map((svc: any) => (
+                    <label
+                      key={svc.id}
+                      className={`flex items-center gap-2.5 px-2 py-1.5 rounded-md cursor-pointer transition-colors ${
+                        selectedServiceIds.includes(svc.id) ? 'bg-indigo-50' : 'hover:bg-neutral-50'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedServiceIds.includes(svc.id)}
+                        onChange={() => toggleService(svc.id)}
+                        className="rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span className="text-sm text-neutral-900 flex-1">{svc.name}</span>
+                      <span className="text-xs text-neutral-400">{formatCurrency(svc.basePrice)}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>
+
+        {/* Per-service pricing */}
+        {selectedServiceIds.length > 0 && (
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-1.5">Service Pricing</label>
+            <div className="space-y-2 border border-neutral-200 rounded-lg p-3">
+              {selectedServiceIds.map(svcId => {
+                const svc = services.find((s: any) => s.id === svcId) as any
+                if (!svc) return null
+                return (
+                  <div key={svcId} className="flex items-center justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-neutral-900 truncate">{svc.name}</p>
+                      <p className="text-xs text-neutral-400">Base: {formatCurrency(svc.basePrice)}{svc.maxPrice > 0 ? ` — Max: ${formatCurrency(svc.maxPrice)}` : ''}</p>
+                    </div>
+                    <div className="w-32 shrink-0">
+                      <input
+                        type="number"
+                        value={servicePrices[svcId] ?? ''}
+                        onChange={e => updateServicePrice(svcId, Number(e.target.value) || 0)}
+                        placeholder="Price"
+                        className="w-full rounded-lg border border-neutral-200 text-sm px-3 py-1.5 text-right focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+              <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
+                <span className="text-sm font-medium text-neutral-700">Total</span>
+                <span className="text-sm font-semibold text-neutral-900">{formatCurrency(totalPrice)}</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Assigned To */}
         <div>
@@ -698,28 +767,16 @@ function NewJobModal({
           </select>
         </div>
 
-        {/* Price & Deposit */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1.5">Estimated Price</label>
-            <input
-              type="number"
-              value={estimatedPrice}
-              onChange={e => setEstimatedPrice(e.target.value)}
-              placeholder="0"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1.5">Deposit</label>
-            <input
-              type="number"
-              value={deposit}
-              onChange={e => setDeposit(e.target.value)}
-              placeholder="0"
-              className={inputClass}
-            />
-          </div>
+        {/* Deposit */}
+        <div>
+          <label className="block text-sm font-medium text-neutral-700 mb-1.5">Deposit</label>
+          <input
+            type="number"
+            value={deposit}
+            onChange={e => setDeposit(e.target.value)}
+            placeholder="0"
+            className={inputClass}
+          />
         </div>
 
         {/* Notes */}
