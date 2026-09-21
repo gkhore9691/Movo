@@ -479,7 +479,7 @@ function LeadDetailModal({
           <div>
             <p className="text-xs font-medium text-slate-500 mb-1">Vehicle</p>
             <p className="text-sm text-slate-900">
-              {lead.vehicleMake ? `${lead.vehicleYear ? lead.vehicleYear + ' ' : ''}${lead.vehicleMake} ${lead.vehicleModel}` : '—'}
+              {lead.vehicleMake ? `${lead.vehicleMake} ${lead.vehicleModel}` : '—'}
             </p>
             <p className="text-xs text-slate-500">{lead.vehicleRegistration}</p>
           </div>
@@ -585,14 +585,27 @@ function EditLeadModal({
   const [email, setEmail] = useState(lead.email)
   const [vehicleMake, setVehicleMake] = useState(lead.vehicleMake)
   const [vehicleModel, setVehicleModel] = useState(lead.vehicleModel)
-  const [vehicleYear, setVehicleYear] = useState(lead.vehicleYear ? String(lead.vehicleYear) : '')
   const [vehicleRegistration, setVehicleRegistration] = useState(lead.vehicleRegistration)
   const [quotedPrice, setQuotedPrice] = useState(lead.quotedPrice ? String(lead.quotedPrice) : '')
   const [source, setSource] = useState(lead.source || 'Walk-in')
   const [notes, setNotes] = useState(lead.notes)
   const [followUpDate, setFollowUpDate] = useState(lead.followUpDate ? lead.followUpDate.slice(0, 10) : '')
-  const [serviceId, setServiceId] = useState(lead.serviceIds[0] || '')
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>(lead.serviceIds || [])
   const [saving, setSaving] = useState(false)
+
+  const servicesByCategory = useMemo(() => {
+    const groups: Record<string, typeof services> = {}
+    for (const svc of services) {
+      const cat = svc.category || 'Other'
+      if (!groups[cat]) groups[cat] = []
+      groups[cat].push(svc)
+    }
+    return groups
+  }, [services])
+
+  function toggleService(id: string) {
+    setSelectedServiceIds(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id])
+  }
 
   async function handleSave() {
     if (!name || !phone) return
@@ -603,13 +616,12 @@ function EditLeadModal({
       email,
       vehicleMake,
       vehicleModel,
-      vehicleYear: vehicleYear ? parseInt(vehicleYear) : null,
       vehicleRegistration,
       quotedPrice: Number(quotedPrice) || 0,
       source,
       notes,
       followUpDate,
-      serviceIds: serviceId ? [serviceId] : [],
+      serviceIds: selectedServiceIds,
     })
     setSaving(false)
   }
@@ -685,40 +697,37 @@ function EditLeadModal({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Vehicle Year</label>
-            <input
-              value={vehicleYear}
-              onChange={e => setVehicleYear(e.target.value)}
-              placeholder="e.g. 2023"
-              type="number"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Registration No.</label>
-            <input
-              value={vehicleRegistration}
-              onChange={e => setVehicleRegistration(e.target.value)}
-              placeholder="e.g. MP09-AB-1234"
-              className={inputClass}
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Registration No.</label>
+          <input
+            value={vehicleRegistration}
+            onChange={e => setVehicleRegistration(e.target.value)}
+            placeholder="e.g. MP09-AB-1234"
+            className={inputClass}
+          />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Service</label>
-          <select
-            value={serviceId}
-            onChange={e => setServiceId(e.target.value)}
-            className={inputClass}
-          >
-            <option value="">Select service...</option>
-            {services.map(s => (
-              <option key={s.id} value={s.id}>{s.name} — {formatCurrency(s.basePrice)}</option>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Services ({selectedServiceIds.length} selected)</label>
+          <div className="max-h-48 overflow-y-auto border border-slate-200 rounded-lg p-2 space-y-3">
+            {Object.entries(servicesByCategory).map(([cat, catServices]) => (
+              <div key={cat}>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-1">{cat}</p>
+                {catServices.map(svc => (
+                  <label key={svc.id} className="flex items-center gap-2 py-1 cursor-pointer hover:bg-slate-50 rounded px-1">
+                    <input
+                      type="checkbox"
+                      checked={selectedServiceIds.includes(svc.id)}
+                      onChange={() => toggleService(svc.id)}
+                      className="rounded border-slate-300"
+                    />
+                    <span className="text-sm text-slate-700 flex-1">{svc.name}</span>
+                    <span className="text-xs text-slate-400">{formatCurrency(svc.basePrice)}+</span>
+                  </label>
+                ))}
+              </div>
             ))}
-          </select>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -787,11 +796,24 @@ function NewLeadModal({
   const [email, setEmail] = useState('')
   const [vehicleMake, setVehicleMake] = useState('')
   const [vehicleModel, setVehicleModel] = useState('')
-  const [vehicleYear, setVehicleYear] = useState('')
   const [vehicleRegistration, setVehicleRegistration] = useState('')
-  const [serviceId, setServiceId] = useState('')
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([])
   const [source, setSource] = useState('Walk-in')
   const [notes, setNotes] = useState('')
+
+  const servicesByCategory = useMemo(() => {
+    const groups: Record<string, typeof services> = {}
+    for (const svc of services) {
+      const cat = svc.category || 'Other'
+      if (!groups[cat]) groups[cat] = []
+      groups[cat].push(svc)
+    }
+    return groups
+  }, [services])
+
+  function toggleService(id: string) {
+    setSelectedServiceIds(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id])
+  }
 
   function reset() {
     setName('')
@@ -799,15 +821,14 @@ function NewLeadModal({
     setEmail('')
     setVehicleMake('')
     setVehicleModel('')
-    setVehicleYear('')
     setVehicleRegistration('')
-    setServiceId('')
+    setSelectedServiceIds([])
     setSource('Walk-in')
     setNotes('')
   }
 
   function handleCreate() {
-    if (!name || !phone || !serviceId) return
+    if (!name || !phone || selectedServiceIds.length === 0) return
     addLead({
       id: `lead-${Date.now()}`,
       name,
@@ -815,11 +836,11 @@ function NewLeadModal({
       email,
       vehicleMake,
       vehicleModel,
-      vehicleYear: vehicleYear ? parseInt(vehicleYear) : null,
+      vehicleYear: null,
       vehicleRegistration,
       customerId: '',
       vehicleId: '',
-      serviceIds: [serviceId],
+      serviceIds: selectedServiceIds,
       status: 'new',
       quotedPrice: 0,
       source,
@@ -848,7 +869,7 @@ function NewLeadModal({
       footer={
         <>
           <Button variant="secondary" onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleCreate} disabled={!name || !phone || !serviceId}>Create Lead</Button>
+          <Button onClick={handleCreate} disabled={!name || !phone || selectedServiceIds.length === 0}>Create Lead</Button>
         </>
       }
     >
@@ -905,40 +926,37 @@ function NewLeadModal({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Vehicle Year</label>
-            <input
-              value={vehicleYear}
-              onChange={e => setVehicleYear(e.target.value)}
-              placeholder="e.g. 2023"
-              type="number"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Registration No.</label>
-            <input
-              value={vehicleRegistration}
-              onChange={e => setVehicleRegistration(e.target.value)}
-              placeholder="e.g. MP09-AB-1234"
-              className={inputClass}
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Registration No.</label>
+          <input
+            value={vehicleRegistration}
+            onChange={e => setVehicleRegistration(e.target.value)}
+            placeholder="e.g. MP09-AB-1234"
+            className={inputClass}
+          />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Service *</label>
-          <select
-            value={serviceId}
-            onChange={e => setServiceId(e.target.value)}
-            className={inputClass}
-          >
-            <option value="">Select service...</option>
-            {services.map(s => (
-              <option key={s.id} value={s.id}>{s.name} — {formatCurrency(s.basePrice)}</option>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Services * ({selectedServiceIds.length} selected)</label>
+          <div className="max-h-48 overflow-y-auto border border-slate-200 rounded-lg p-2 space-y-3">
+            {Object.entries(servicesByCategory).map(([cat, catServices]) => (
+              <div key={cat}>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-1">{cat}</p>
+                {catServices.map(svc => (
+                  <label key={svc.id} className="flex items-center gap-2 py-1 cursor-pointer hover:bg-slate-50 rounded px-1">
+                    <input
+                      type="checkbox"
+                      checked={selectedServiceIds.includes(svc.id)}
+                      onChange={() => toggleService(svc.id)}
+                      className="rounded border-slate-300"
+                    />
+                    <span className="text-sm text-slate-700 flex-1">{svc.name}</span>
+                    <span className="text-xs text-slate-400">{formatCurrency(svc.basePrice)}+</span>
+                  </label>
+                ))}
+              </div>
             ))}
-          </select>
+          </div>
         </div>
 
         <div>
