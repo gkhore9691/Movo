@@ -25,7 +25,8 @@ const QUICK_REPLIES = [
 // ---------------------------------------------------------------------------
 // AI response generator -- keyword-based, uses real service catalogue data
 // ---------------------------------------------------------------------------
-function generateAIResponse(message: string, services: Service[]): string {
+function generateAIResponse(message: string, services: Service[], studioName?: string): string {
+  const studio = studioName || 'our studio';
   const lower = message.toLowerCase()
 
   // Pricing queries
@@ -73,7 +74,7 @@ function generateAIResponse(message: string, services: Service[]): string {
 
   // Greeting
   if (lower.includes('hi') || lower.includes('hello') || lower.includes('hey') || lower.includes('namaste')) {
-    return `Namaste! Welcome to our studio. How can I help you today?\n\nI can assist with:\n• Service pricing & details\n• Booking appointments\n• Service recommendations for your vehicle`
+    return `Namaste! Welcome to ${studio}. How can I help you today?\n\nI can assist with:\n• Service pricing & details\n• Booking appointments\n• Service recommendations for your vehicle`
   }
 
   // Thank you
@@ -199,7 +200,7 @@ function ChatBubble({ message, showTime }: { message: Message; showTime: boolean
 export default function AIReceptionist() {
   const {
     conversations, customers, services, toggleAiHandling, addMessage,
-    addConversation, archiveConversation, getCustomer, getVehiclesForCustomer,
+    addConversation, archiveConversation, getCustomer, getVehiclesForCustomer, currentTenant,
   } = useApp()
   const navigate = useNavigate()
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -287,7 +288,7 @@ export default function AIReceptionist() {
       setTimeout(() => {
         const aiReply: Message = {
           id: `msg-ai-${Date.now()}`,
-          content: generateAIResponse(content, services),
+          content: generateAIResponse(content, services, currentTenant?.name),
           sender: 'ai',
           timestamp: new Date().toISOString(),
           read: true,

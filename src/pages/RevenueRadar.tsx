@@ -31,7 +31,7 @@ interface OpportunityItem {
 }
 
 export default function RevenueRadar() {
-  const { leads, invoices, retentionCustomers, updateLeadStatus, updateRetentionStatus, getCustomer, getService } = useApp()
+  const { leads, invoices, retentionCustomers, updateLeadStatus, updateRetentionStatus, getCustomer, getService, currentTenant } = useApp()
   const navigate = useNavigate()
   const [movoModalOpen, setMovoModalOpen] = useState(false)
   const [selectedOpportunity, setSelectedOpportunity] = useState<OpportunityItem | null>(null)
@@ -398,7 +398,7 @@ export default function RevenueRadar() {
             </div>
             <div className="bg-neutral-50 rounded-lg p-4 text-sm text-neutral-700 leading-relaxed border border-neutral-100">
               <p>Hi {selectedOpportunity.customerName.split(' ')[0]},</p>
-              <p className="mt-2">Hope you're doing well! This is from Detailing Street, Indore.</p>
+              <p className="mt-2">Hope you're doing well! This is from {currentTenant?.name || 'our studio'}{currentTenant?.city ? `, ${currentTenant.city}` : ''}.</p>
               <p className="mt-2">
                 {selectedOpportunity.category === 'dormant' ? (
                   <>It's been a while since your last visit. We'd love to have your car back for a {selectedOpportunity.serviceInfo}. We have some great offers running this month!</>

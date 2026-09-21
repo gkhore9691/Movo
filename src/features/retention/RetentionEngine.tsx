@@ -30,7 +30,7 @@ interface RetentionRow {
 }
 
 export default function RetentionEngine() {
-  const { retentionCustomers, customers, vehicles, getCustomer, updateRetentionStatus } = useApp()
+  const { retentionCustomers, customers, vehicles, getCustomer, updateRetentionStatus, currentTenant } = useApp()
   const navigate = useNavigate()
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     due: true,
@@ -274,7 +274,7 @@ export default function RetentionEngine() {
               </div>
               <div className="bg-slate-50 rounded-lg p-3">
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Hi {row.customerName.split(' ')[0]}, it's been {row.daysSinceVisit} days since your last visit to Detailing Street.
+                  Hi {row.customerName.split(' ')[0]}, it's been {row.daysSinceVisit} days since your last visit to {currentTenant?.name || 'our studio'}.
                   Your {row.vehicle} is due for a <strong>{row.recommendedService}</strong>. Book now and keep your car in top condition!
                   Reply to schedule an appointment.
                 </p>

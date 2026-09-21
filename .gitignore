@@ -13,3 +13,4 @@ server/.env
 tsconfig.tsbuildinfo
 server/tsconfig.build.tsbuildinfo
 *.pem
+server/public/invoices/

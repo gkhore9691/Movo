@@ -61,7 +61,7 @@ export default function Staff() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900">Staff</h1>
-          <p className="text-sm text-slate-500 mt-1">Your team at Detailing Street</p>
+          <p className="text-sm text-slate-500 mt-1">Manage your team</p>
         </div>
         <Button icon={<Plus className="w-4 h-4" />} onClick={() => setShowAddModal(true)}>Add Member</Button>
       </div>
